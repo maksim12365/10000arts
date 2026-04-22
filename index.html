@@ -38,58 +38,58 @@
     <p>Заполнено: <span id="counter">0</span> / 10000</p>
   </header>
 
-  <!-- Полотно с зумом и паном -->
+  <!-- Полотно (без видимой сетки!) -->
   <div id="viewport">
     <div id="grid"></div>
   </div>
 
   <!-- Панель инструментов (появляется при выборе клетки) -->
   <div id="toolbar" class="hidden">
-    <div class="toolbar-info">
-      <span id="cellInfo">Клетка: 0, 0</span>
-      <button id="btnCloseToolbar" class="btn-small">✕</button>
+    <div class="toolbar-top">
+      <span id="cellInfo">📍 Выбрана область</span>
+      <button id="btnCloseToolbar" class="btn-icon">✕</button>
     </div>
     
-    <div class="toolbar-tools">
-      <!-- Кисть -->
-      <div class="tool-group">
-        <label>Кисть:</label>
-        <button class="tool-btn active" data-tool="brush">🖌️</button>
-        <button class="tool-btn" data-tool="eraser">🧽</button>
+    <div class="toolbar-middle">
+      <div class="tool-section">
+        <label>Инструмент:</label>
+        <div class="tool-buttons">
+          <button class="tool-btn active" data-tool="brush" title="Кисть">🖌️</button>
+          <button class="tool-btn" data-tool="eraser" title="Ластик">🧽</button>
+        </div>
       </div>
       
-      <!-- Размер -->
-      <div class="tool-group">
+      <div class="tool-section">
         <label>Размер:</label>
-        <button class="size-btn" data-size="1">1</button>
-        <button class="size-btn active" data-size="2">2</button>
-        <button class="size-btn" data-size="3">3</button>
-        <button class="size-btn" data-size="4">4</button>
+        <div class="size-buttons">
+          <button class="size-btn" data-size="1">1</button>
+          <button class="size-btn active" data-size="2">2</button>
+          <button class="size-btn" data-size="3">3</button>
+          <button class="size-btn" data-size="4">4</button>
+        </div>
       </div>
       
-      <!-- Цвета -->
-      <div class="tool-group">
+      <div class="tool-section">
         <label>Цвет:</label>
         <div id="colorPalette"></div>
       </div>
-      
-      <!-- Действия -->
-      <div class="tool-group">
-        <button id="btnClear" class="btn-secondary">Очистить</button>
-        <button id="btnSave" class="btn-primary">💾 Сохранить</button>
-      </div>
     </div>
     
-    <!-- Холст для рисования -->
-    <canvas id="drawCanvas" width="32" height="32"></canvas>
+    <div class="toolbar-bottom">
+      <button id="btnClear" class="btn-secondary">🗑 Очистить</button>
+      <button id="btnSave" class="btn-primary">💾 Сохранить</button>
+    </div>
+    
+    <!-- Холст для рисования (высокое качество) -->
+    <canvas id="drawCanvas" width="128" height="128"></canvas>
   </div>
 
   <!-- Модальное окно жалобы -->
   <div id="reportModal" class="hidden">
     <div class="modal-content">
-      <h2>⚠️ Этот участок занят</h2>
-      <p>Вы можете пожаловаться, если рисунок нарушает правила.</p>
-      <button id="btnReport" class="btn-danger">Пожаловаться</button>
+      <h2>⚠️ Это место занято</h2>
+      <p>Здесь уже есть чужой рисунок. Вы можете пожаловаться, если он нарушает правила.</p>
+      <button id="btnReport" class="btn-danger">🚩 Пожаловаться</button>
       <button id="btnReportClose" class="btn-secondary">Закрыть</button>
     </div>
   </div>
