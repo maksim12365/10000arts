@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎨 Коллективное Полотно 10000</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Подключаем Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Верхняя панель -->
+  <header>
+    <h1>🎨 Полотно 10000</h1>
+    <p>Заполнено: <span id="counter">0</span> / 10000</p>
+  </header>
+
+  <!-- Контейнер для сетки (здесь будет зум и пан) -->
+  <div id="viewport">
+    <div id="grid"></div>
+  </div>
+
+  <!-- Модальное окно для рисования -->
+  <div id="modal" class="hidden">
+    <div class="modal-content">
+      <h2>Рисуй здесь</h2>
+      <p id="cell-coords"></p>
+      <canvas id="drawCanvas" width="32" height="32"></canvas>
+      
+      <!-- Инструменты -->
+      <div class="tools">
+        <div class="brush-sizes">
+          <button class="brush-btn active" data-size="1">1px</button>
+          <button class="brush-btn" data-size="2">2px</button>
+          <button class="brush-btn" data-size="3">3px</button>
+        </div>
+        <div class="colors" id="colors"></div>
+        <div class="actions">
+          <button id="btnClear">Очистить</button>
+          <button id="btnSave" class="btn-save">Сохранить</button>
+          <button id="btnClose" class="btn-close">Отмена</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Кнопка жалобы (появляется при клике на занятую клетку) -->
+  <div id="reportModal" class="hidden">
+    <div class="modal-content">
+      <h2>Этот участок занят</h2>
+      <p>Вы можете пожаловаться на этот рисунок, если он нарушает правила.</p>
+      <button id="btnReport">Пожаловаться</button>
+      <button id="btnReportClose" class="btn-close">Закрыть</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
