@@ -4,12 +4,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Константы
 const GRID_SIZE = 100;
-const CELL_SIZE = 32; // Логический размер 32x32
-const CANVAS_SIZE = 256; // УВЕЛИЧЕНО для качества (было 128)
+const CELL_SIZE = 32;
+const CANVAS_SIZE = 256;
 
-// Состояние
 let scale = 1;
 let panX = 0;
 let panY = 0;
@@ -21,7 +19,6 @@ let brushSize = 2;
 let currentColor = '#000000';
 let currentTool = 'brush';
 
-// DOM элементы
 const welcomeScreen = document.getElementById('welcomeScreen');
 const grid = document.getElementById('grid');
 const viewport = document.getElementById('viewport');
@@ -32,7 +29,6 @@ const ctx = canvas.getContext('2d');
 const cellInfo = document.getElementById('cellInfo');
 const colorPalette = document.getElementById('colorPalette');
 
-// Цвета палитры
 const colors = [
   '#000000', '#ffffff', '#dc2626', '#ea580c', '#d97706',
   '#65a30d', '#16a34a', '#059669', '#0891b2', '#0284c7',
@@ -40,7 +36,6 @@ const colors = [
   '#db2777', '#e11d48', '#991b1b', '#78350f', '#57534e'
 ];
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
 function init() {
   setupWelcomeScreen();
   createGrid();
@@ -53,7 +48,6 @@ function init() {
   updateCounter();
 }
 
-// Приветственный экран
 function setupWelcomeScreen() {
   const btnAgree = document.getElementById('btnAgree');
   
@@ -73,7 +67,6 @@ function setupWelcomeScreen() {
   } catch(e) {}
 }
 
-// Создание сетки (НЕВИДИМОЙ!)
 function createGrid() {
   grid.style.width = `${GRID_SIZE * CELL_SIZE}px`;
   grid.style.height = `${GRID_SIZE * CELL_SIZE}px`;
@@ -94,7 +87,6 @@ function createGrid() {
   }
 }
 
-// Палитра цветов
 function createColorPalette() {
   colors.forEach((color, index) => {
     const btn = document.createElement('div');
@@ -112,7 +104,6 @@ function createColorPalette() {
   });
 }
 
-// Панель инструментов
 function setupToolbar() {
   document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -130,6 +121,7 @@ function setupToolbar() {
     });
   });
   
+  // 🔧 ЗАКРЫТИЕ ТОЛЬКО ПО КНОПКЕ ✕
   document.getElementById('btnCloseToolbar').addEventListener('click', closeToolbar);
   document.getElementById('btnClear').addEventListener('click', clearCanvas);
   document.getElementById('btnSave').addEventListener('click', saveDrawing);
@@ -145,7 +137,6 @@ function updateToolButtons() {
   });
 }
 
-// Рисование на холсте (ВЫСОКОЕ КАЧЕСТВО 256x256)
 function setupCanvasDrawing() {
   clearCanvas();
   
@@ -205,7 +196,6 @@ function setupCanvasDrawing() {
   canvas.addEventListener('touchend', stopDrawing);
 }
 
-// Управление вьюпортом (зум + панорамирование)
 function setupViewportControls() {
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
@@ -292,8 +282,12 @@ function updateTransform() {
   grid.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
 }
 
-// Обработка клика по клетке
 function handleCellClick(x, y) {
+  // 🔧 Если панель уже открыта - клик по полотну НЕ закрывает её
+  if (!toolbar.classList.contains('hidden')) {
+    return; // Игнорируем клики пока панель открыта
+  }
+  
   const cell = grid.children[y * GRID_SIZE + x];
   
   if (cell.classList.contains('occupied')) {
@@ -317,6 +311,7 @@ function openToolbar(x, y) {
   toolbar.classList.remove('hidden');
 }
 
+// 🔧 Закрывает ТОЛЬКО по кнопке ✕
 function closeToolbar() {
   toolbar.classList.add('hidden');
   currentCell = null;
@@ -327,7 +322,6 @@ function clearCanvas() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-// Сохранение рисунка
 async function saveDrawing() {
   if (!currentCell) return;
 
@@ -345,7 +339,7 @@ async function saveDrawing() {
       .insert({
         x: x,
         y: y,
-        image_data: imageData,
+        image_ imageData,
         status: 'active',
         report_count: 0
       });
@@ -364,7 +358,7 @@ async function saveDrawing() {
     cell.style.background = `url(${imageData}) center/cover no-repeat`;
     cell.classList.add('occupied');
     
-    closeToolbar();
+    closeToolbar(); // 🔧 Закрывается ПОСЛЕ сохранения
     updateCounter();
     
     alert('🎨 Рисунок сохранён! Теперь он часть общего полотна.');
@@ -374,7 +368,6 @@ async function saveDrawing() {
   }
 }
 
-// Жалоба
 async function handleReport() {
   if (!currentCell) return;
   const { x, y } = currentCell;
@@ -407,7 +400,6 @@ async function handleReport() {
   }
 }
 
-// Загрузка данных
 async function loadGridData() {
   try {
     const { data, error } = await supabaseClient
@@ -428,11 +420,10 @@ async function loadGridData() {
 
     counter.textContent = data.length;
   } catch (err) {
-    console.error('Error loading data:', err);
+    console.error('Error loading ', err);
   }
 }
 
-// Realtime подписка
 function subscribeToUpdates() {
   supabaseClient
     .channel('cells_changes')
@@ -457,7 +448,6 @@ function subscribeToUpdates() {
     .subscribe();
 }
 
-// Счётчик
 async function updateCounter() {
   try {
     const { count, error } = await supabaseClient
@@ -472,5 +462,4 @@ async function updateCounter() {
   }
 }
 
-// Запуск
 init();
