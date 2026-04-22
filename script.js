@@ -370,7 +370,7 @@ async function saveDrawing() {
       .insert({
         x: x,
         y: y,
-        image_ imageData,
+        image_data: imageData,
         status: 'active',
         report_count: 0
       });
