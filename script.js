@@ -2,7 +2,8 @@
 const SUPABASE_URL = 'https://dshyrsxhqevvqbbqbnto.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHlyc3hocWV2dnFiYnFibnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDAyMzEsImV4cCI6MjA5MjM3NjIzMX0.Owrda92DRalj6uNzoMDUEkOEThfdNLtCn9m-5xM03q8';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Создаём клиент (имя переменной изменено на supabaseClient)
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const GRID_SIZE = 100;
 const CELL_SIZE = 32;
@@ -270,7 +271,7 @@ async function saveDrawing() {
   const imageData = canvas.toDataURL('image/png');
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('cells')
       .insert({
         x: x,
@@ -309,7 +310,7 @@ async function handleReport() {
   const { x, y } = currentCell;
 
   try {
-    const { data, error: fetchError } = await supabase
+    const { data, error: fetchError } = await supabaseClient
       .from('cells')
       .select('report_count')
       .eq('x', x)
@@ -320,7 +321,7 @@ async function handleReport() {
 
     const newCount = (data.report_count || 0) + 1;
     
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseClient
       .from('cells')
       .update({ report_count: newCount })
       .eq('x', x)
@@ -343,7 +344,7 @@ function closeModal() {
 
 async function loadGridData() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('cells')
       .select('x, y, image_data, status')
       .eq('status', 'active');
@@ -366,7 +367,7 @@ async function loadGridData() {
 }
 
 function subscribeToUpdates() {
-  supabase
+  supabaseClient
     .channel('cells_changes')
     .on('postgres_changes', 
       { 
@@ -391,7 +392,7 @@ function subscribeToUpdates() {
 
 async function updateCounter() {
   try {
-    const { count, error } = await supabase
+    const { count, error } = await supabaseClient
       .from('cells')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active');
