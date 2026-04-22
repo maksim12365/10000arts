@@ -38,12 +38,12 @@
     <p>Заполнено: <span id="counter">0</span> / 10000</p>
   </header>
 
-  <!-- Полотно (без видимой сетки!) -->
+  <!-- Полотно -->
   <div id="viewport">
     <div id="grid"></div>
   </div>
 
-  <!-- Панель инструментов (появляется при выборе клетки) -->
+  <!-- Панель инструментов (закрывается ТОЛЬКО по кнопке) -->
   <div id="toolbar" class="hidden">
     <div class="toolbar-top">
       <span id="cellInfo">📍 Выбрана область</span>
@@ -80,7 +80,6 @@
       <button id="btnSave" class="btn-primary">💾 Сохранить</button>
     </div>
     
-    <!-- Холст для рисования (высокое качество) -->
     <canvas id="drawCanvas" width="256" height="256"></canvas>
   </div>
 
