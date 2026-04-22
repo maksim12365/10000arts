@@ -53,18 +53,30 @@ function init() {
 }
 
 // Приветственный экран
+// Приветственный экран
 function setupWelcomeScreen() {
   const btnAgree = document.getElementById('btnAgree');
   
-  // Если уже соглашался - скрываем
-  if (localStorage.getItem('agreedToRules') === 'true') {
-    welcomeScreen.classList.add('hidden');
+  // Проверяем, существует ли кнопка
+  if (btnAgree) {
+    btnAgree.addEventListener('click', () => {
+      try {
+        localStorage.setItem('agreedToRules', 'true');
+      } catch(e) {
+        // Если localStorage не работает - не страшно
+      }
+      welcomeScreen.classList.add('hidden');
+    });
   }
   
-  btnAgree.addEventListener('click', () => {
-    localStorage.setItem('agreedToRules', 'true');
-    welcomeScreen.classList.add('hidden');
-  });
+  // Если уже соглашался - скрываем сразу
+  try {
+    if (localStorage.getItem('agreedToRules') === 'true') {
+      welcomeScreen.classList.add('hidden');
+    }
+  } catch(e) {
+    // Игнорируем ошибки
+  }
 }
 
 // Создание сетки
