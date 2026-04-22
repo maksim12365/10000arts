@@ -6,7 +6,8 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 // Константы
 const GRID_SIZE = 100;
-const CELL_SIZE = 32; // 32x32 пикселя на пользователя
+const CELL_SIZE = 32; // Логический размер 32x32
+const CANVAS_SIZE = 128; // Внутреннее разрешение холста (для качества)
 
 // Состояние
 let scale = 1;
@@ -33,10 +34,10 @@ const colorPalette = document.getElementById('colorPalette');
 
 // Цвета палитры
 const colors = [
-  '#000000', '#ffffff', '#ef4444', '#f97316', '#f59e0b',
-  '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4',
-  '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7',
-  '#d946ef', '#ec4899', '#f43f5e', '#78350f', '#57534e'
+  '#000000', '#ffffff', '#dc2626', '#ea580c', '#d97706',
+  '#65a30d', '#16a34a', '#059669', '#0891b2', '#0284c7',
+  '#2563eb', '#4f46e5', '#7c3aed', '#a855f7', '#c026d3',
+  '#db2777', '#e11d48', '#991b1b', '#78350f', '#57534e'
 ];
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
@@ -53,33 +54,26 @@ function init() {
 }
 
 // Приветственный экран
-// Приветственный экран
 function setupWelcomeScreen() {
   const btnAgree = document.getElementById('btnAgree');
   
-  // Проверяем, существует ли кнопка
   if (btnAgree) {
     btnAgree.addEventListener('click', () => {
       try {
         localStorage.setItem('agreedToRules', 'true');
-      } catch(e) {
-        // Если localStorage не работает - не страшно
-      }
+      } catch(e) {}
       welcomeScreen.classList.add('hidden');
     });
   }
   
-  // Если уже соглашался - скрываем сразу
   try {
     if (localStorage.getItem('agreedToRules') === 'true') {
       welcomeScreen.classList.add('hidden');
     }
-  } catch(e) {
-    // Игнорируем ошибки
-  }
+  } catch(e) {}
 }
 
-// Создание сетки
+// Создание сетки (НЕВИДИМОЙ!)
 function createGrid() {
   grid.style.width = `${GRID_SIZE * CELL_SIZE}px`;
   grid.style.height = `${GRID_SIZE * CELL_SIZE}px`;
@@ -120,7 +114,6 @@ function createColorPalette() {
 
 // Панель инструментов
 function setupToolbar() {
-  // Кисть/Ластик
   document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
@@ -129,7 +122,6 @@ function setupToolbar() {
     });
   });
   
-  // Размер кисти
   document.querySelectorAll('.size-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
@@ -138,7 +130,6 @@ function setupToolbar() {
     });
   });
   
-  // Кнопки действий
   document.getElementById('btnCloseToolbar').addEventListener('click', closeToolbar);
   document.getElementById('btnClear').addEventListener('click', clearCanvas);
   document.getElementById('btnSave').addEventListener('click', saveDrawing);
@@ -154,8 +145,11 @@ function updateToolButtons() {
   });
 }
 
-// Рисование на холсте
+// Рисование на холсте (ВЫСОКОЕ КАЧЕСТВО)
 function setupCanvasDrawing() {
+  // Белый фон по умолчанию
+  clearCanvas();
+  
   let lastX = 0;
   let lastY = 0;
 
@@ -189,7 +183,7 @@ function setupCanvasDrawing() {
     const pos = getPos(e);
     
     ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : currentColor;
-    ctx.lineWidth = brushSize;
+    ctx.lineWidth = brushSize * (canvas.width / 32); // Масштабируем размер кисти
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     
@@ -212,9 +206,8 @@ function setupCanvasDrawing() {
   canvas.addEventListener('touchend', stopDrawing);
 }
 
-// Управление вьюпортом (зум + пан)
+// Управление вьюпортом (зум + панорамирование)
 function setupViewportControls() {
-  // Мышь
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -242,7 +235,6 @@ function setupViewportControls() {
     viewport.style.cursor = 'grab';
   });
 
-  // Тач (телефон)
   let initialPinchDistance = null;
 
   viewport.addEventListener('touchstart', (e) => {
@@ -289,7 +281,7 @@ function zoom(centerX, centerY, delta) {
   const x = centerX - rect.left;
   const y = centerY - rect.top;
   
-  const newScale = Math.min(Math.max(scale * delta, 0.3), 4);
+  const newScale = Math.min(Math.max(scale * delta, 0.3), 5);
   panX = x - (x - panX) * (newScale / scale);
   panY = y - (y - panY) * (newScale / scale);
   scale = newScale;
@@ -306,45 +298,29 @@ function handleCellClick(x, y) {
   const cell = grid.children[y * GRID_SIZE + x];
   
   if (cell.classList.contains('occupied')) {
-    // Клетка занята - показываем жалобу
     currentCell = { x, y };
     document.getElementById('reportModal').classList.remove('hidden');
     return;
   }
 
-  // Проверка: рисовал ли уже
   if (localStorage.getItem('hasDrawn') === 'true') {
     alert('Вы уже нарисовали свой рисунок. Можно только один раз!');
     return;
   }
 
-  // Открываем панель инструментов
   openToolbar(x, y);
 }
 
 function openToolbar(x, y) {
   currentCell = { x, y };
-  cellInfo.textContent = `Клетка: ${x}, ${y}`;
+  cellInfo.textContent = `📍 Область: ${x}, ${y}`;
   clearCanvas();
   toolbar.classList.remove('hidden');
-  
-  // Центрируем вьюпорт на этой клетке
-  centerOnCell(x, y);
 }
 
 function closeToolbar() {
   toolbar.classList.add('hidden');
   currentCell = null;
-}
-
-function centerOnCell(x, y) {
-  const viewportRect = viewport.getBoundingClientRect();
-  const cellX = x * CELL_SIZE;
-  const cellY = y * CELL_SIZE;
-  
-  panX = viewportRect.width / 2 - cellX * scale - (CELL_SIZE * scale) / 2;
-  panY = viewportRect.height / 2 - cellY * scale - (CELL_SIZE * scale) / 2;
-  updateTransform();
 }
 
 function clearCanvas() {
@@ -453,7 +429,7 @@ async function loadGridData() {
 
     counter.textContent = data.length;
   } catch (err) {
-    console.error('Error loading data:', err);
+    console.error('Error loading ', err);
   }
 }
 
