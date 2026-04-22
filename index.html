@@ -5,52 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🎨 Коллективное Полотно 10000</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Подключаем Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+  <!-- Приветственный экран -->
+  <div id="welcomeScreen">
+    <div class="welcome-content">
+      <h1>🎨 Добро пожаловать!</h1>
+      <p>Это коллективное полотно из <strong>10 000 рисунков</strong></p>
+      
+      <div class="rules">
+        <h3>📋 Правила:</h3>
+        <ul>
+          <li>✅ Каждый может нарисовать <strong>только один раз</strong></li>
+          <li>✅ Размер твоего рисунка: <strong>32×32 пикселя</strong></li>
+          <li>✅ Рисуй что угодно (в рамках закона)</li>
+          <li>❌ Запрещены: насилие, 18+, оскорбления, реклама</li>
+          <li>❌ Нельзя стирать чужие рисунки</li>
+        </ul>
+      </div>
+      
+      <p class="warning">⚠️ После сохранения рисунок нельзя изменить!</p>
+      
+      <button id="btnAgree" class="btn-primary">✅ Я согласен с правилами</button>
+    </div>
+  </div>
+
   <!-- Верхняя панель -->
   <header>
     <h1>🎨 Полотно 10000</h1>
     <p>Заполнено: <span id="counter">0</span> / 10000</p>
   </header>
 
-  <!-- Контейнер для сетки (здесь будет зум и пан) -->
+  <!-- Полотно с зумом и паном -->
   <div id="viewport">
     <div id="grid"></div>
   </div>
 
-  <!-- Модальное окно для рисования -->
-  <div id="modal" class="hidden">
-    <div class="modal-content">
-      <h2>Рисуй здесь</h2>
-      <p id="cell-coords"></p>
-      <canvas id="drawCanvas" width="32" height="32"></canvas>
+  <!-- Панель инструментов (появляется при выборе клетки) -->
+  <div id="toolbar" class="hidden">
+    <div class="toolbar-info">
+      <span id="cellInfo">Клетка: 0, 0</span>
+      <button id="btnCloseToolbar" class="btn-small">✕</button>
+    </div>
+    
+    <div class="toolbar-tools">
+      <!-- Кисть -->
+      <div class="tool-group">
+        <label>Кисть:</label>
+        <button class="tool-btn active" data-tool="brush">🖌️</button>
+        <button class="tool-btn" data-tool="eraser">🧽</button>
+      </div>
       
-      <!-- Инструменты -->
-      <div class="tools">
-        <div class="brush-sizes">
-          <button class="brush-btn active" data-size="1">1px</button>
-          <button class="brush-btn" data-size="2">2px</button>
-          <button class="brush-btn" data-size="3">3px</button>
-        </div>
-        <div class="colors" id="colors"></div>
-        <div class="actions">
-          <button id="btnClear">Очистить</button>
-          <button id="btnSave" class="btn-save">Сохранить</button>
-          <button id="btnClose" class="btn-close">Отмена</button>
-        </div>
+      <!-- Размер -->
+      <div class="tool-group">
+        <label>Размер:</label>
+        <button class="size-btn" data-size="1">1</button>
+        <button class="size-btn active" data-size="2">2</button>
+        <button class="size-btn" data-size="3">3</button>
+        <button class="size-btn" data-size="4">4</button>
+      </div>
+      
+      <!-- Цвета -->
+      <div class="tool-group">
+        <label>Цвет:</label>
+        <div id="colorPalette"></div>
+      </div>
+      
+      <!-- Действия -->
+      <div class="tool-group">
+        <button id="btnClear" class="btn-secondary">Очистить</button>
+        <button id="btnSave" class="btn-primary">💾 Сохранить</button>
       </div>
     </div>
+    
+    <!-- Холст для рисования -->
+    <canvas id="drawCanvas" width="32" height="32"></canvas>
   </div>
 
-  <!-- Кнопка жалобы (появляется при клике на занятую клетку) -->
+  <!-- Модальное окно жалобы -->
   <div id="reportModal" class="hidden">
     <div class="modal-content">
-      <h2>Этот участок занят</h2>
-      <p>Вы можете пожаловаться на этот рисунок, если он нарушает правила.</p>
-      <button id="btnReport">Пожаловаться</button>
-      <button id="btnReportClose" class="btn-close">Закрыть</button>
+      <h2>⚠️ Этот участок занят</h2>
+      <p>Вы можете пожаловаться, если рисунок нарушает правила.</p>
+      <button id="btnReport" class="btn-danger">Пожаловаться</button>
+      <button id="btnReportClose" class="btn-secondary">Закрыть</button>
     </div>
   </div>
 
