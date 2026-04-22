@@ -188,6 +188,10 @@ header h1 {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .cell.occupied:hover {
@@ -313,7 +317,7 @@ header h1 {
   font-weight: 600;
 }
 
-/* Холст для рисования - ВЫСОКОЕ КАЧЕСТВО */
+/* Холст для рисования - ВЫСОКОЕ КАЧЕСТВО 256x256 */
 #drawCanvas {
   display: block;
   margin: 0 auto;
@@ -322,11 +326,11 @@ header h1 {
   border-radius: 8px;
   image-rendering: -webkit-crisp-edges;
   image-rendering: -moz-crisp-edges;
+  image-rendering: pixelated;
   image-rendering: crisp-edges;
   touch-action: none;
-  max-width: 256px;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 256px;
+  height: 256px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
@@ -399,5 +403,10 @@ header h1 {
     max-width: 120px;
     padding: 12px;
     font-size: 0.9rem;
+  }
+  
+  #drawCanvas {
+    width: 200px;
+    height: 200px;
   }
 }
