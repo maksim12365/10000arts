@@ -37,7 +37,6 @@ const colors = [
 ];
 
 function init() {
-  // Ждём загрузки DOM
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
   } else {
@@ -46,7 +45,6 @@ function init() {
 }
 
 function initializeApp() {
-  console.log('Инициализация приложения...');
   setupWelcomeScreen();
   createGrid();
   createColorPalette();
@@ -59,48 +57,26 @@ function initializeApp() {
 }
 
 function setupWelcomeScreen() {
-  console.log('Настройка приветственного экрана...');
   const btnAgree = document.getElementById('btnAgree');
   
   if (btnAgree) {
-    // Удаляем старые обработчики
-    btnAgree.replaceWith(btnAgree.cloneNode(true));
-    const newBtnAgree = document.getElementById('btnAgree');
-    
-    newBtnAgree.addEventListener('click', function() {
-      console.log('Кнопка "Согласен" нажата!');
+    btnAgree.addEventListener('click', function(e) {
+      e.preventDefault();
       try {
         localStorage.setItem('agreedToRules', 'true');
-      } catch(e) {
-        console.log('localStorage не доступен:', e);
-      }
+      } catch(err) {}
       
+      // Принудительно скрываем
       const screen = document.getElementById('welcomeScreen');
       if (screen) {
-        screen.classList.add('hidden');
         screen.style.display = 'none';
-        console.log('Приветственный экран скрыт');
-      } else {
-        console.error('Элемент welcomeScreen не найден!');
+        screen.classList.add('hidden');
       }
     });
-  } else {
-    console.error('Кнопка btnAgree не найдена!');
   }
   
-  // Проверяем, соглашался ли уже
-  try {
-    if (localStorage.getItem('agreedToRules') === 'true') {
-      const screen = document.getElementById('welcomeScreen');
-      if (screen) {
-        screen.classList.add('hidden');
-        screen.style.display = 'none';
-        console.log('Пользователь уже соглашался, скрываем экран');
-      }
-    }
-  } catch(e) {
-    console.log('localStorage не доступен:', e);
-  }
+  // ❌ УБРАНО автоматическое скрытие!
+  // Теперь экран НЕ будет скрываться сам при загрузке
 }
 
 function createGrid() {
