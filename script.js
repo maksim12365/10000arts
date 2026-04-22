@@ -37,6 +37,16 @@ const colors = [
 ];
 
 function init() {
+  // Ждём загрузки DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+  } else {
+    initializeApp();
+  }
+}
+
+function initializeApp() {
+  console.log('Инициализация приложения...');
   setupWelcomeScreen();
   createGrid();
   createColorPalette();
@@ -49,22 +59,48 @@ function init() {
 }
 
 function setupWelcomeScreen() {
+  console.log('Настройка приветственного экрана...');
   const btnAgree = document.getElementById('btnAgree');
   
   if (btnAgree) {
-    btnAgree.addEventListener('click', () => {
+    // Удаляем старые обработчики
+    btnAgree.replaceWith(btnAgree.cloneNode(true));
+    const newBtnAgree = document.getElementById('btnAgree');
+    
+    newBtnAgree.addEventListener('click', function() {
+      console.log('Кнопка "Согласен" нажата!');
       try {
         localStorage.setItem('agreedToRules', 'true');
-      } catch(e) {}
-      welcomeScreen.classList.add('hidden');
+      } catch(e) {
+        console.log('localStorage не доступен:', e);
+      }
+      
+      const screen = document.getElementById('welcomeScreen');
+      if (screen) {
+        screen.classList.add('hidden');
+        screen.style.display = 'none';
+        console.log('Приветственный экран скрыт');
+      } else {
+        console.error('Элемент welcomeScreen не найден!');
+      }
     });
+  } else {
+    console.error('Кнопка btnAgree не найдена!');
   }
   
+  // Проверяем, соглашался ли уже
   try {
     if (localStorage.getItem('agreedToRules') === 'true') {
-      welcomeScreen.classList.add('hidden');
+      const screen = document.getElementById('welcomeScreen');
+      if (screen) {
+        screen.classList.add('hidden');
+        screen.style.display = 'none';
+        console.log('Пользователь уже соглашался, скрываем экран');
+      }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.log('localStorage не доступен:', e);
+  }
 }
 
 function createGrid() {
@@ -121,7 +157,6 @@ function setupToolbar() {
     });
   });
   
-  // 🔧 ЗАКРЫТИЕ ТОЛЬКО ПО КНОПКЕ ✕
   document.getElementById('btnCloseToolbar').addEventListener('click', closeToolbar);
   document.getElementById('btnClear').addEventListener('click', clearCanvas);
   document.getElementById('btnSave').addEventListener('click', saveDrawing);
@@ -283,9 +318,8 @@ function updateTransform() {
 }
 
 function handleCellClick(x, y) {
-  // 🔧 Если панель уже открыта - клик по полотну НЕ закрывает её
   if (!toolbar.classList.contains('hidden')) {
-    return; // Игнорируем клики пока панель открыта
+    return;
   }
   
   const cell = grid.children[y * GRID_SIZE + x];
@@ -311,7 +345,6 @@ function openToolbar(x, y) {
   toolbar.classList.remove('hidden');
 }
 
-// 🔧 Закрывает ТОЛЬКО по кнопке ✕
 function closeToolbar() {
   toolbar.classList.add('hidden');
   currentCell = null;
@@ -339,7 +372,7 @@ async function saveDrawing() {
       .insert({
         x: x,
         y: y,
-        image_ imageData,
+        image_data: imageData,
         status: 'active',
         report_count: 0
       });
@@ -358,7 +391,7 @@ async function saveDrawing() {
     cell.style.background = `url(${imageData}) center/cover no-repeat`;
     cell.classList.add('occupied');
     
-    closeToolbar(); // 🔧 Закрывается ПОСЛЕ сохранения
+    closeToolbar();
     updateCounter();
     
     alert('🎨 Рисунок сохранён! Теперь он часть общего полотна.');
@@ -420,7 +453,7 @@ async function loadGridData() {
 
     counter.textContent = data.length;
   } catch (err) {
-    console.error('Error loading ', err);
+    console.error('Error loading data:', err);
   }
 }
 
