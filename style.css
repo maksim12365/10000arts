@@ -16,7 +16,6 @@ body {
   flex-direction: column;
 }
 
-/* Приветственный экран */
 #welcomeScreen {
   position: fixed;
   top: 0;
@@ -128,7 +127,6 @@ body {
   color: #666;
 }
 
-/* Header */
 header {
   background: white;
   padding: 15px 20px;
@@ -148,7 +146,6 @@ header h1 {
   color: #2563eb;
 }
 
-/* Viewport - БЕЗ СЕТКИ! */
 #viewport {
   flex: 1;
   overflow: hidden;
@@ -170,7 +167,6 @@ header h1 {
   will-change: transform;
 }
 
-/* Клетка - НЕВИДИМАЯ граница! */
 .cell {
   position: absolute;
   background: transparent;
@@ -198,7 +194,6 @@ header h1 {
   background: transparent;
 }
 
-/* Панель инструментов */
 #toolbar {
   position: fixed;
   bottom: 0;
@@ -317,7 +312,6 @@ header h1 {
   font-weight: 600;
 }
 
-/* Холст для рисования - ВЫСОКОЕ КАЧЕСТВО 256x256 */
 #drawCanvas {
   display: block;
   margin: 0 auto;
@@ -338,7 +332,6 @@ header h1 {
   display: none !important;
 }
 
-/* Модальное окно */
 #reportModal {
   position: fixed;
   top: 0;
@@ -372,7 +365,6 @@ header h1 {
   line-height: 1.5;
 }
 
-/* Адаптив для телефонов */
 @media (max-width: 600px) {
   .welcome-content {
     padding: 25px;
