@@ -7,7 +7,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // Константы
 const GRID_SIZE = 100;
 const CELL_SIZE = 32; // Логический размер 32x32
-const CANVAS_SIZE = 128; // Внутреннее разрешение холста (для качества)
+const CANVAS_SIZE = 256; // УВЕЛИЧЕНО для качества (было 128)
 
 // Состояние
 let scale = 1;
@@ -145,9 +145,8 @@ function updateToolButtons() {
   });
 }
 
-// Рисование на холсте (ВЫСОКОЕ КАЧЕСТВО)
+// Рисование на холсте (ВЫСОКОЕ КАЧЕСТВО 256x256)
 function setupCanvasDrawing() {
-  // Белый фон по умолчанию
   clearCanvas();
   
   let lastX = 0;
@@ -183,7 +182,7 @@ function setupCanvasDrawing() {
     const pos = getPos(e);
     
     ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : currentColor;
-    ctx.lineWidth = brushSize * (canvas.width / 32); // Масштабируем размер кисти
+    ctx.lineWidth = brushSize * (canvas.width / 32);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     
@@ -429,7 +428,7 @@ async function loadGridData() {
 
     counter.textContent = data.length;
   } catch (err) {
-    console.error('Error loading ', err);
+    console.error('Error loading data:', err);
   }
 }
 
