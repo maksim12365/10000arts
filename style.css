@@ -8,7 +8,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f5f5f5;
+  background: #ffffff;
   color: #333;
   overflow: hidden;
   height: 100vh;
@@ -23,7 +23,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -32,108 +32,130 @@ body {
 
 .welcome-content {
   background: white;
-  padding: 30px;
-  border-radius: 16px;
+  padding: 40px;
+  border-radius: 20px;
   max-width: 500px;
   width: 90%;
   text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
 .welcome-content h1 {
   font-size: 2rem;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  color: #1a1a1a;
+}
+
+.welcome-content > p {
+  color: #666;
+  margin-bottom: 20px;
 }
 
 .rules {
-  background: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
   margin: 20px 0;
   text-align: left;
 }
 
+.rules h3 {
+  margin-bottom: 15px;
+  color: #1a1a1a;
+}
+
 .rules ul {
   margin-left: 20px;
-  margin-top: 10px;
 }
 
 .rules li {
-  margin: 8px 0;
-  line-height: 1.4;
+  margin: 10px 0;
+  line-height: 1.5;
+  color: #444;
 }
 
 .warning {
-  color: #ef4444;
-  font-weight: bold;
-  margin: 15px 0;
+  color: #dc2626;
+  font-weight: 600;
+  margin: 20px 0;
+  font-size: 0.95rem;
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: #2563eb;
   color: white;
   border: none;
-  padding: 14px 28px;
-  border-radius: 8px;
+  padding: 16px 32px;
+  border-radius: 12px;
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
 }
 
 .btn-secondary {
   background: #6b7280;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .btn-danger {
-  background: #ef4444;
+  background: #dc2626;
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-weight: 600;
   cursor: pointer;
   margin: 10px 0;
+  width: 100%;
 }
 
-.btn-small {
+.btn-icon {
   background: transparent;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  padding: 5px;
+  padding: 5px 10px;
+  color: #666;
 }
 
 /* Header */
 header {
   background: white;
-  padding: 12px;
+  padding: 15px 20px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   z-index: 10;
 }
 
 header h1 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   margin-bottom: 5px;
+  color: #1a1a1a;
 }
 
 #counter {
-  font-weight: bold;
-  color: #3b82f6;
+  font-weight: 700;
+  color: #2563eb;
 }
 
-/* Viewport */
+/* Viewport - БЕЗ СЕТКИ! */
 #viewport {
   flex: 1;
   overflow: hidden;
   position: relative;
   touch-action: none;
   cursor: grab;
-  background: #e5e5e5;
+  background: #ffffff;
 }
 
 #viewport:active {
@@ -148,25 +170,28 @@ header h1 {
   will-change: transform;
 }
 
-/* Клетка */
+/* Клетка - НЕВИДИМАЯ граница! */
 .cell {
   position: absolute;
-  background: white;
-  border: 1px solid #ddd;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: background 0.15s;
 }
 
 .cell:hover {
-  border-color: #3b82f6;
-  z-index: 1;
+  background: rgba(37, 99, 235, 0.1);
 }
 
 .cell.occupied {
-  border: none;
   cursor: default;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+}
+
+.cell.occupied:hover {
+  background: transparent;
 }
 
 /* Панель инструментов */
@@ -176,91 +201,133 @@ header h1 {
   left: 0;
   width: 100%;
   background: white;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-  padding: 15px;
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.12);
+  padding: 20px;
   z-index: 100;
-  border-radius: 16px 16px 0 0;
+  border-radius: 20px 20px 0 0;
 }
 
-.toolbar-info {
+.toolbar-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
   border-bottom: 1px solid #eee;
 }
 
-.toolbar-tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-  justify-content: center;
+#cellInfo {
+  font-weight: 600;
+  color: #333;
 }
 
-.tool-group {
+.toolbar-middle {
   display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.tool-section {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
 }
 
-.tool-group label {
-  font-size: 0.85rem;
-  color: #666;
+.tool-section label {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.tool-buttons, .size-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 .tool-btn, .size-btn {
-  padding: 8px 12px;
-  border: 2px solid #ddd;
+  padding: 10px 14px;
+  border: 2px solid #e5e7eb;
   background: white;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  transition: all 0.2s;
 }
 
 .tool-btn.active, .size-btn.active {
-  border-color: #3b82f6;
+  border-color: #2563eb;
   background: #eff6ff;
+  transform: scale(1.05);
 }
 
 .size-btn {
-  width: 32px;
-  height: 32px;
-  font-weight: bold;
+  width: 36px;
+  height: 36px;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
 #colorPalette {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  max-width: 200px;
+  max-width: 250px;
+  justify-content: center;
 }
 
 .color-btn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid #ddd;
+  border: 2px solid #e5e7eb;
   cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
 }
 
 .color-btn.active {
   border-color: #333;
-  transform: scale(1.1);
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
+.toolbar-bottom {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.toolbar-bottom button {
+  flex: 1;
+  max-width: 150px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Холст для рисования - ВЫСОКОЕ КАЧЕСТВО */
 #drawCanvas {
   display: block;
-  margin: 15px auto 0;
-  background: white;
-  border: 2px solid #333;
-  border-radius: 4px;
-  image-rendering: auto;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 3px solid #e5e7eb;
+  border-radius: 8px;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
   touch-action: none;
-  max-width: 200px;
+  max-width: 256px;
   width: 100%;
   aspect-ratio: 1;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .hidden {
@@ -283,33 +350,54 @@ header h1 {
 
 #reportModal .modal-content {
   background: white;
-  padding: 25px;
-  border-radius: 12px;
+  padding: 30px;
+  border-radius: 16px;
   text-align: center;
-  max-width: 350px;
+  max-width: 380px;
   width: 90%;
+}
+
+#reportModal h2 {
+  margin-bottom: 15px;
+  color: #1a1a1a;
+}
+
+#reportModal p {
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 /* Адаптив для телефонов */
 @media (max-width: 600px) {
-  .toolbar-tools {
-    gap: 10px;
+  .welcome-content {
+    padding: 25px;
   }
   
-  .tool-group {
-    flex-direction: column;
-    align-items: stretch;
+  .welcome-content h1 {
+    font-size: 1.6rem;
+  }
+  
+  .toolbar-middle {
+    gap: 15px;
+  }
+  
+  .tool-section {
+    min-width: 80px;
   }
   
   #colorPalette {
     max-width: 100%;
   }
   
-  .welcome-content {
-    padding: 20px;
+  .color-btn {
+    width: 28px;
+    height: 28px;
   }
   
-  .welcome-content h1 {
-    font-size: 1.5rem;
+  .toolbar-bottom button {
+    max-width: 120px;
+    padding: 12px;
+    font-size: 0.9rem;
   }
 }
