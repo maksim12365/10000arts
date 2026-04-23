@@ -73,20 +73,20 @@ body {
   color: #444;
 }
 
-/* 🔧 Предупреждение о VPN (компактное) */
+/* 🔧 Предупреждение о VPN (минимальное) */
 .vpn-notice {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #f59e0b;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin: 15px 0;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 10px 0;
   text-align: center;
 }
 
 .vpn-notice p {
   color: #92400e;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.75rem;
+  line-height: 1.3;
   margin: 0;
 }
 
@@ -94,42 +94,30 @@ body {
   font-weight: 700;
 }
 
-/* Для телефонов — ещё компактнее */
+/* Для телефонов — минимально */
 @media (max-width: 600px) {
   .vpn-notice {
-    padding: 8px 12px;
-    margin: 12px 0;
-    border-radius: 6px;
+    padding: 5px 8px;
+    margin: 8px 0;
   }
   
   .vpn-notice p {
-    font-size: 0.75rem;
-    line-height: 1.3;
+    font-size: 0.7rem;
   }
   
   .social-links {
-    padding: 12px;
-    margin: 12px 0;
-  }
-  
-  .social-links h3 {
-    font-size: 0.8rem;
-    margin-bottom: 8px;
+    padding: 10px;
+    margin: 10px 0;
   }
   
   .social-btn {
-    padding: 8px 14px;
-    font-size: 0.8rem;
+    padding: 6px 12px;
+    font-size: 0.75rem;
   }
   
   .rules {
-    padding: 12px;
-    margin: 12px 0;
-  }
-  
-  .rules li {
-    font-size: 0.8rem;
-    margin: 5px 0;
+    padding: 10px;
+    margin: 10px 0;
   }
 }
 
