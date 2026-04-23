@@ -31,9 +31,9 @@ body {
 
 .welcome-content {
   background: white;
-  padding: 30px;
+  padding: 25px 30px;
   border-radius: 20px;
-  max-width: 420px;  /* Было 500px — сделали уже */
+  max-width: 380px;  /* Уже было 420px */
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
