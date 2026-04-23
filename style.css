@@ -179,15 +179,20 @@ header h1 {
   background: rgba(37, 99, 235, 0.1);
 }
 
+/* 🔧 ИСПРАВЛЕНО: Качество изображений */
 .cell.occupied {
   cursor: default;
-  background-size: cover;
+  background-size: contain; /* ИЗМЕНЕНО: contain вместо cover */
   background-position: center;
   background-repeat: no-repeat;
-  image-rendering: -webkit-crisp-edges;
   image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden; /* Для Safari */
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0); /* Для Safari */
+  transform: translateZ(0);
 }
 
 .cell.occupied:hover {
@@ -312,20 +317,26 @@ header h1 {
   font-weight: 600;
 }
 
+/* 🔧 ИСПРАВЛЕНО: Качество холста */
 #drawCanvas {
   display: block;
   margin: 0 auto;
   background: #ffffff;
   border: 3px solid #e5e7eb;
   border-radius: 8px;
-  image-rendering: -webkit-crisp-edges;
   image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  image-rendering: optimizeSpeed; /* Добавлено */
   touch-action: none;
   width: 256px;
   height: 256px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .hidden {
