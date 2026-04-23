@@ -434,19 +434,71 @@ header h1 {
 
 @media (max-width: 600px) {
   .welcome-content {
-    padding: 25px;
+    padding: 20px;
   }
   
   .welcome-content h1 {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
+  }
+  
+  .welcome-content > p {
+    font-size: 0.9rem;
+  }
+  
+  .rules {
+    padding: 15px;
+    margin: 15px 0;
+  }
+  
+  .rules h3 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  
+  .rules ul {
+    margin-left: 15px;
+  }
+  
+  .rules li {
+    font-size: 0.85rem;
+    margin: 6px 0;
+  }
+  
+  .social-links {
+    padding: 15px;
+    margin: 15px 0;
+  }
+  
+  .social-links h3 {
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+  
+  .social-buttons {
+    gap: 8px;
+  }
+  
+  .social-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .warning {
+    font-size: 0.85rem;
+    margin: 15px 0;
+  }
+  
+  .btn-primary {
+    padding: 14px 28px;
+    font-size: 1rem;
   }
   
   .toolbar-middle {
-    gap: 15px;
+    gap: 12px;
   }
   
   .tool-section {
-    min-width: 80px;
+    min-width: 70px;
   }
   
   #colorPalette {
@@ -454,18 +506,18 @@ header h1 {
   }
   
   .color-btn {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
   
   .toolbar-bottom button {
-    max-width: 120px;
+    max-width: 110px;
     padding: 12px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
   
   #drawCanvas {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 180px;
   }
 }
