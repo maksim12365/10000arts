@@ -73,6 +73,58 @@ body {
   color: #444;
 }
 
+.social-links {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.social-links h3 {
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: white;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.social-btn.telegram {
+  background: #229ED9;
+}
+
+.social-btn.tiktok {
+  background: #000000;
+}
+
+.social-btn span {
+  font-size: 1.2rem;
+}
+
 .warning {
   color: #dc2626;
   font-weight: 600;
@@ -104,6 +156,22 @@ body {
   border-radius: 10px;
   font-weight: 500;
   cursor: pointer;
+}
+
+.btn-share {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-share:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .btn-danger {
@@ -179,19 +247,18 @@ header h1 {
   background: rgba(37, 99, 235, 0.1);
 }
 
-/* 🔧 ИСПРАВЛЕНО: Качество изображений */
 .cell.occupied {
   cursor: default;
-  background-size: contain; /* ИЗМЕНЕНО: contain вместо cover */
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  -webkit-backface-visibility: hidden; /* Для Safari */
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  -webkit-transform: translateZ(0); /* Для Safari */
+  -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
 
@@ -317,7 +384,6 @@ header h1 {
   font-weight: 600;
 }
 
-/* 🔧 ИСПРАВЛЕНО: Качество холста */
 #drawCanvas {
   display: block;
   margin: 0 auto;
@@ -328,7 +394,7 @@ header h1 {
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  image-rendering: optimizeSpeed; /* Добавлено */
+  image-rendering: optimizeSpeed;
   touch-action: none;
   width: 256px;
   height: 256px;
@@ -375,62 +441,6 @@ header h1 {
   margin-bottom: 20px;
   line-height: 1.5;
 }
-
-/* 🔧 Стили для соцсетей */
-.social-links {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-  border-radius: 12px;
-  margin: 20px 0;
-  text-align: center;
-}
-
-.social-links h3 {
-  color: white;
-  font-size: 1rem;
-  margin-bottom: 15px;
-  font-weight: 500;
-}
-
-.social-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.social-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  color: white;
-}
-
-.social-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.social-btn.telegram {
-  background: #229ED9;
-}
-
-.social-btn.tiktok {
-  background: #000000;
-}
-
-.social-btn span {
-  font-size: 1.2rem;
-}
-
-/* 🔧 Конец стилей для соцсетей */
-
 
 @media (max-width: 600px) {
   .welcome-content {
