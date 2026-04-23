@@ -51,6 +51,7 @@ function initializeApp() {
   setupToolbar();
   setupCanvasDrawing();
   setupViewportControls();
+  setupShare(); // 🔧 Функция "Поделиться"
   loadGridData();
   subscribeToUpdates();
   updateCounter();
@@ -66,7 +67,6 @@ function setupWelcomeScreen() {
         localStorage.setItem('agreedToRules', 'true');
       } catch(err) {}
       
-      // Принудительно скрываем
       const screen = document.getElementById('welcomeScreen');
       if (screen) {
         screen.style.display = 'none';
@@ -74,9 +74,6 @@ function setupWelcomeScreen() {
       }
     });
   }
-  
-  // ❌ УБРАНО автоматическое скрытие!
-  // Теперь экран НЕ будет скрываться сам при загрузке
 }
 
 function createGrid() {
@@ -146,6 +143,36 @@ function updateToolButtons() {
   document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tool === currentTool);
   });
+}
+
+// 🔧 Функция "Поделиться"
+function setupShare() {
+  const btnShare = document.getElementById('btnShare');
+  
+  if (btnShare) {
+    btnShare.addEventListener('click', async () => {
+      const shareData = {
+        title: '🎨 Полотно 10000',
+        text: 'Я нарисовал это на коллективном полотне! Присоединяйся 👉',
+        url: window.location.href
+      };
+      
+      try {
+        if (navigator.share) {
+          // 📱 Телефон: системное меню
+          await navigator.share(shareData);
+        } else {
+          // 💻 ПК: копирование
+          await navigator.clipboard.writeText(shareData.url);
+          alert('✅ Ссылка скопирована в буфер обмена!');
+        }
+      } catch (err) {
+        console.error('Ошибка при шеринге:', err);
+        await navigator.clipboard.writeText(shareData.url);
+        alert('✅ Ссылка скопирована!');
+      }
+    });
+  }
 }
 
 function setupCanvasDrawing() {
