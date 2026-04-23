@@ -376,6 +376,62 @@ header h1 {
   line-height: 1.5;
 }
 
+/* 🔧 Стили для соцсетей */
+.social-links {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.social-links h3 {
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: white;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.social-btn.telegram {
+  background: #229ED9;
+}
+
+.social-btn.tiktok {
+  background: #000000;
+}
+
+.social-btn span {
+  font-size: 1.2rem;
+}
+
+/* 🔧 Конец стилей для соцсетей */
+
+
 @media (max-width: 600px) {
   .welcome-content {
     padding: 25px;
