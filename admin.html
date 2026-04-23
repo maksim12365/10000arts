@@ -2,111 +2,111 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>️ Админка - Модерация</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎨 Коллективное Полотно 10000</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
-    .header { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-    .header h1 { color: #1a1a1a; margin-bottom: 10px; }
-    .stats { display: flex; gap: 20px; margin-top: 15px; }
-    .stat { background: #f8f9fa; padding: 15px 25px; border-radius: 8px; }
-    .stat strong { font-size: 1.5rem; color: #2563eb; }
-    .filter { margin: 20px 0; }
-    .filter label { display: flex; align-items: center; gap: 10px; font-size: 1rem; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-    .cell { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-    .cell img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; }
-    .cell-info { padding: 12px; }
-    .cell-info strong { font-size: 0.9rem; color: #333; }
-    .cell-info p { font-size: 0.8rem; color: #666; margin: 5px 0; }
-    .cell-info .flagged { color: #dc2626; font-weight: 600; }
-    .btn-delete { width: 100%; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px; }
-    .btn-delete:hover { background: #b91c1c; }
-    .cell.flagged { border: 3px solid #dc2626; }
-    .loading { text-align: center; padding: 40px; color: #666; }
-  </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🛡️ Модерация рисунков</h1>
-    <div class="stats">
-      <div class="stat"><strong id="total">0</strong> Всего</div>
-      <div class="stat"><strong id="flaggedCount">0</strong> С жалобами</div>
+
+  <!-- Приветственный экран -->
+  <div id="welcomeScreen">
+    <div class="welcome-content">
+      <h1>🎨 Добро пожаловать!</h1>
+      <p>Это коллективное полотно из <strong>10 000 рисунков</strong></p>
+      
+      <div class="rules">
+        <h3>📋 Правила:</h3>
+        <ul>
+          <li>✅ Каждый может нарисовать <strong>только один раз</strong></li>
+          <li>✅ Размер твоего участка: <strong>32×32 пикселя на полотне</strong></li>
+          <li>✅ Рисуй что угодно (в рамках закона)</li>
+          <li>❌ Запрещены: насилие, 18+, оскорбления, реклама</li>
+          <li>❌ Нельзя стирать чужие рисунки</li>
+        </ul>
+      </div>
+
+      <!-- Соцсети -->
+      <div class="social-links">
+        <h3>📱 Следи за развитием проекта:</h3>
+        <div class="social-buttons">
+          <a href="https://t.me/creat1veguy" target="_blank" class="social-btn telegram">
+            <span>✈️</span> Telegram
+          </a>
+          <a href="https://tiktok.com/@maxcreativeguy" target="_blank" class="social-btn tiktok">
+            <span>🎵</span> TikTok
+          </a>
+        </div>
+      </div>
+      
+      <p class="warning">⚠️ После сохранения рисунок нельзя изменить!</p>
+      
+      <button id="btnAgree" class="btn-primary">✅ Я согласен с правилами</button>
     </div>
   </div>
-  
-  <div class="filter">
-    <label>
-      <input type="checkbox" id="showOnlyFlagged"> 
-      Показать только с жалобами (3+)
-    </label>
+
+  <!-- Верхняя панель -->
+  <header>
+    <h1>🎨 Полотно 10000</h1>
+    <p>Заполнено: <span id="counter">0</span> / 10000</p>
+  </header>
+
+  <!-- Полотно -->
+  <div id="viewport">
+    <div id="grid"></div>
   </div>
-  
-  <div id="cells" class="grid"></div>
-  <div id="loading" class="loading">Загрузка...</div>
 
-  <script>
-    const supabaseClient = window.supabase.createClient(
-      'https://dshyrsxhqevvqbbqbnto.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHlyc3hocWV2dnFiYnFibnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDAyMzEsImV4cCI6MjA5MjM3NjIzMX0.Owrda92DRalj6uNzoMDUEkOEThfdNLtCn9m-5xM03q8'
-    );
+  <!-- Панель инструментов -->
+  <div id="toolbar" class="hidden">
+    <div class="toolbar-top">
+      <span id="cellInfo">📍 Выбрана область</span>
+      <button id="btnCloseToolbar" class="btn-icon">✕</button>
+    </div>
+    
+    <div class="toolbar-middle">
+      <div class="tool-section">
+        <label>Инструмент:</label>
+        <div class="tool-buttons">
+          <button class="tool-btn active" data-tool="brush" title="Кисть">🖌️</button>
+          <button class="tool-btn" data-tool="eraser" title="Ластик">🧽</button>
+        </div>
+      </div>
+      
+      <div class="tool-section">
+        <label>Размер:</label>
+        <div class="size-buttons">
+          <button class="size-btn" data-size="1">1</button>
+          <button class="size-btn active" data-size="2">2</button>
+          <button class="size-btn" data-size="3">3</button>
+          <button class="size-btn" data-size="4">4</button>
+        </div>
+      </div>
+      
+      <div class="tool-section">
+        <label>Цвет:</label>
+        <div id="colorPalette"></div>
+      </div>
+    </div>
+    
+    <div class="toolbar-bottom">
+      <button id="btnClear" class="btn-secondary">🗑 Очистить</button>
+      <button id="btnShare" class="btn-share">📤 Поделиться</button>
+      <button id="btnSave" class="btn-primary">💾 Сохранить</button>
+    </div>
+    
+    <canvas id="drawCanvas" width="256" height="256"></canvas>
+  </div>
 
-    async function loadCells() {
-      document.getElementById('loading').style.display = 'block';
-      document.getElementById('cells').innerHTML = '';
-      
-      const showOnlyFlagged = document.getElementById('showOnlyFlagged').checked;
-      
-      let query = supabaseClient.from('cells').select('*').eq('status', 'active');
-      if (showOnlyFlagged) query = query.gte('report_count', 3);
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      document.getElementById('loading').style.display = 'none';
-      
-      if (error) { console.error(error); return; }
-      
-      document.getElementById('total').textContent = data.length;
-      document.getElementById('flaggedCount').textContent = data.filter(c => c.report_count >= 3).length;
-      
-      const container = document.getElementById('cells');
-      
-      data.forEach(cell => {
-        const div = document.createElement('div');
-        div.className = 'cell' + (cell.report_count >= 3 ? ' flagged' : '');
-        div.innerHTML = `
-          <img src="${cell.image_data}" alt="Рисунок">
-          <div class="cell-info">
-            <strong>📍 ${cell.x}, ${cell.y}</strong>
-            <p class="${cell.report_count >= 3 ? 'flagged' : ''}">🚩 Жалоб: ${cell.report_count}</p>
-            <button class="btn-delete" onclick="deleteCell(${cell.x}, ${cell.y})">🗑 Удалить</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
+  <!-- Модальное окно жалобы -->
+  <div id="reportModal" class="hidden">
+    <div class="modal-content">
+      <h2>⚠️ Это место занято</h2>
+      <p>Здесь уже есть чужой рисунок. Вы можете пожаловаться, если он нарушает правила.</p>
+      <button id="btnReport" class="btn-danger">🚩 Пожаловаться</button>
+      <button id="btnReportClose" class="btn-secondary">Закрыть</button>
+    </div>
+  </div>
 
-    async function deleteCell(x, y) {
-      if (!confirm(`Удалить рисунок на позиции ${x}, ${y}?`)) return;
-      
-      const { error } = await supabaseClient
-        .from('cells')
-        .update({ status: 'free', image_data: null, report_count: 0 })
-        .eq('x', x)
-        .eq('y', y);
-      
-      if (error) {
-        alert('Ошибка: ' + error.message);
-      } else {
-        alert('✅ Удалено! Клетка освобождена.');
-        loadCells();
-      }
-    }
-
-    document.getElementById('showOnlyFlagged').addEventListener('change', loadCells);
-    loadCells();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
