@@ -31,9 +31,9 @@ body {
 
 .welcome-content {
   background: white;
-  padding: 40px;
+  padding: 30px;
   border-radius: 20px;
-  max-width: 500px;
+  max-width: 420px;  /* Было 500px — сделали уже */
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -140,9 +140,21 @@ body {
     gap: 4px;
   }
   
-  .welcome-content {
-    padding: 15px;
-  }
+  /* Для телефонов — компактное меню */
+.welcome-content {
+  padding: 20px 15px;
+  max-width: 95%;
+  border-radius: 15px;
+}
+
+.welcome-content h1 {
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+
+.welcome-content > p {
+  font-size: 0.85rem;
+  margin-bottom: 15px;
 }
 
 .social-links {
