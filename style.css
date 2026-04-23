@@ -73,6 +73,40 @@ body {
   color: #444;
 }
 
+/* 🔧 Предупреждение о VPN */
+.vpn-notice {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.vpn-notice p {
+  color: #92400e;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.vpn-notice strong {
+  font-weight: 700;
+}
+
+/* Для телефонов */
+@media (max-width: 600px) {
+  .vpn-notice {
+    padding: 12px 15px;
+    margin: 15px 0;
+  }
+  
+  .vpn-notice p {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+}
+
 .social-links {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
