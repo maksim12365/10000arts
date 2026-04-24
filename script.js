@@ -177,7 +177,7 @@ async function saveDrawing() {
   const cellData = {
     x: x,
     y: y,
-    image_ imageData,
+    image_data: imageData,
     status: 'active'
   };
   
