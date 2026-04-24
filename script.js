@@ -15,7 +15,6 @@ let gridOffset = { x: 0, y: 0 };
 let scale = 1;
 let isDragging = false;
 let dragStart = { x: 0, y: 0 };
-let lastTouchDistance = 0;
 let drawnPixels = new Set();
 let cellsData = {};
 let canvas, ctx, isDrawingOnCanvas = false, lastPos = { x: 0, y: 0 };
@@ -48,18 +47,16 @@ function loadUserPosition() {
 }
 
 // ============================================
-// 🔧 ПРИВЕТСТВЕННЫЙ ЭКРАН (ИСПРАВЛЕНО!)
+// ПРИВЕТСТВЕННЫЙ ЭКРАН
 // ============================================
 function setupWelcomeScreen() {
   const welcomeScreen = document.getElementById('welcomeScreen');
   const agreeButton = document.getElementById('btnAgree');
   
-  // Меню ВСЕГДА видно при заходе
   if (welcomeScreen) {
     welcomeScreen.classList.remove('hidden');
   }
   
-  // Скрываем ТОЛЬКО после нажатия кнопки
   if (agreeButton && welcomeScreen) {
     agreeButton.addEventListener('click', () => {
       localStorage.setItem('agreedToRules', 'true');
@@ -379,43 +376,34 @@ function setupCanvasDrawing() {
 }
 
 // ============================================
-// ZOOM / PAN (ТЕЛЕФОН + ПК)
+// ZOOM / PAN (РАБОТАЕТ И НА ПК, И НА ТЕЛЕФОНЕ)
 // ============================================
-// ============================================
-// ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
-// ============================================
-
-// ============================================
-// ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
-// ============================================
-
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
-  // Mouse events
+  // === ПК (Mouse) ===
+  let isMouseDown = false;
+  
   viewport.addEventListener('mousedown', (e) => {
     if (e.target === viewport || e.target === grid) {
+      isMouseDown = true;
       isDragging = true;
       dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
       viewport.style.cursor = 'grabbing';
     }
   });
   
-  viewport.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+  document.addEventListener('mousemove', (e) => {
+    if (!isMouseDown || !isDragging) return;
     gridOffset.x = e.clientX - dragStart.x;
     gridOffset.y = e.clientY - dragStart.y;
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   });
   
-  viewport.addEventListener('mouseup', () => {
-    isDragging = false;
-    viewport.style.cursor = 'grab';
-  });
-  
-  viewport.addEventListener('mouseout', () => {
+  document.addEventListener('mouseup', () => {
+    isMouseDown = false;
     isDragging = false;
     viewport.style.cursor = 'grab';
   });
@@ -428,63 +416,71 @@ function setupViewportControls() {
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   }, { passive: false });
   
-  // Touch events для телефона
+  // === ТЕЛЕФОН (Touch) ===
+  let touchStartTime = 0;
+  let touchStartX = 0;
+  let touchStartY = 0;
   let initialPinchDistance = null;
-  let initialScale = 1;
-  let lastTouchPos = { x: 0, y: 0 };
+  let initialScaleAtPinch = 1;
   
   viewport.addEventListener('touchstart', (e) => {
+    touchStartTime = Date.now();
+    
     if (e.touches.length === 1) {
-      // Один палец - drag
       const touch = e.touches[0];
-      lastTouchPos = { x: touch.clientX, y: touch.clientY };
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
       
-      // 🔧 Подсветка клетки
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (target && target.classList.contains('cell') && !target.classList.contains('occupied')) {
+      
+      if (target && target.classList.contains('cell')) {
         target.classList.add('touch-highlight');
+        isDragging = false;
+        return;
       }
       
-      if (e.target === viewport || e.target === grid) {
-        isDragging = true;
-        dragStart = { x: touch.clientX - gridOffset.x, y: touch.clientY - gridOffset.y };
-      }
+      isDragging = true;
+      dragStart = { 
+        x: touch.clientX - gridOffset.x, 
+        y: touch.clientY - gridOffset.y 
+      };
     } else if (e.touches.length === 2) {
-      // Два пальца - зум
-      initialPinchDistance = getDistance(e.touches);
-      initialScale = scale;
+      initialPinchDistance = getTouchDistance(e.touches);
+      initialScaleAtPinch = scale;
+      isDragging = false;
     }
-  }, { passive: false });
+  }, { passive: true });
   
   viewport.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
-      gridOffset.x += touch.clientX - lastTouchPos.x;
-      gridOffset.y += touch.clientY - lastTouchPos.y;
-      lastTouchPos = { x: touch.clientX, y: touch.clientY };
-      grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+      const dx = Math.abs(touch.clientX - touchStartX);
+      const dy = Math.abs(touch.clientY - touchStartY);
+      
+      if (dx > 10 || dy > 10) {
+        gridOffset.x = touch.clientX - dragStart.x;
+        gridOffset.y = touch.clientY - dragStart.y;
+        grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+      }
     } else if (e.touches.length === 2 && initialPinchDistance) {
-      // 🔧 Плавный зум
-      const currentDistance = getDistance(e.touches);
+      const currentDistance = getTouchDistance(e.touches);
       const delta = currentDistance / initialPinchDistance;
-      scale = initialScale * delta;
+      scale = initialScaleAtPinch * delta;
       scale = Math.max(0.3, Math.min(2, scale));
       grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
     }
-    e.preventDefault();
   }, { passive: false });
   
   viewport.addEventListener('touchend', (e) => {
     isDragging = false;
     initialPinchDistance = null;
     
-    // Убираем подсветку
     document.querySelectorAll('.touch-highlight').forEach(el => {
       el.classList.remove('touch-highlight');
     });
   });
   
-  function getDistance(touches) {
+  function getTouchDistance(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
