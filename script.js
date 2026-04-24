@@ -17,14 +17,13 @@ let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let drawnPixels = new Set();
 let cellsData = {};
-
-// Canvas
 let canvas, ctx, isDrawingOnCanvas = false, lastPos = { x: 0, y: 0 };
 
 // ============================================
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  loadUserPosition();
   setupWelcomeScreen();
   createGrid();
   createColorPalette();
@@ -38,21 +37,32 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
+// ЗАГРУЗКА ПОЗИЦИИ ПОЛЬЗОВАТЕЛЯ
+// ============================================
+function loadUserPosition() {
+  const saved = localStorage.getItem('currentUserPosition');
+  if (saved) {
+    currentUserPosition = JSON.parse(saved);
+  }
+}
+
+// ============================================
 // ПРИВЕТСТВЕННЫЙ ЭКРАН
 // ============================================
 function setupWelcomeScreen() {
   const welcomeScreen = document.getElementById('welcomeScreen');
   const agreeButton = document.getElementById('btnAgree');
   
-  if (localStorage.getItem('agreedToRules') === 'true') {
+  if (localStorage.getItem('agreedToRules') !== 'true') {
+    if (welcomeScreen) welcomeScreen.classList.remove('hidden');
+    if (agreeButton && welcomeScreen) {
+      agreeButton.addEventListener('click', () => {
+        localStorage.setItem('agreedToRules', 'true');
+        welcomeScreen.classList.add('hidden');
+      });
+    }
+  } else {
     if (welcomeScreen) welcomeScreen.classList.add('hidden');
-  }
-  
-  if (agreeButton && welcomeScreen) {
-    agreeButton.addEventListener('click', () => {
-      localStorage.setItem('agreedToRules', 'true');
-      welcomeScreen.classList.add('hidden');
-    });
   }
 }
 
@@ -85,7 +95,6 @@ function createGrid() {
       cell.style.left = (x * cellSize) + 'px';
       cell.style.top = (y * cellSize) + 'px';
       cell.style.position = 'absolute';
-      
       cell.addEventListener('click', () => handleCellClick(x, y));
       grid.appendChild(cell);
     }
@@ -93,11 +102,11 @@ function createGrid() {
 }
 
 // ============================================
-// ОБРАБОТКА КЛИКОВ ПО КЛЕТКЕ
+// ОБРАБОТКА КЛИКОВ
 // ============================================
 async function handleCellClick(x, y) {
   if (currentUserPosition) {
-    alert('Вы уже нарисовали! Можно только один раз.');
+    alert('⚠️ Вы уже нарисовали на позиции ' + currentUserPosition.x + ', ' + currentUserPosition.y + '!\n\nМожно рисовать только ОДИН раз.');
     return;
   }
   
@@ -106,14 +115,11 @@ async function handleCellClick(x, y) {
     return;
   }
   
-  // Открываем панель рисования
   const toolbar = document.getElementById('toolbar');
   const cellInfo = document.getElementById('cellInfo');
   if (toolbar && cellInfo) {
     toolbar.classList.remove('hidden');
     cellInfo.textContent = `📍 ${x}, ${y}`;
-    
-    // Сохраняем позицию для later
     toolbar.dataset.x = x;
     toolbar.dataset.y = y;
   }
@@ -160,6 +166,8 @@ async function saveDrawing() {
     
     if (response.ok) {
       currentUserPosition = { x, y };
+      localStorage.setItem('currentUserPosition', JSON.stringify(currentUserPosition));
+      
       drawnPixels.add(`${x},${y}`);
       cellsData[`${x},${y}`] = cellData;
       
@@ -167,9 +175,8 @@ async function saveDrawing() {
       updateCounter();
       
       toolbar.classList.add('hidden');
-      alert('✅ Рисунок сохранён!');
+      alert('✅ Рисунок сохранён! Теперь вы не можете рисовать снова.');
       
-      // Сброс холста
       if (ctx) {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -198,7 +205,7 @@ function updateCellVisual(x, y, imageData) {
 }
 
 // ============================================
-// ЗАГРУЗКА ДАННЫХ ИЗ БАЗЫ
+// ЗАГРУЗКА ДАННЫХ
 // ============================================
 async function loadGridData() {
   try {
@@ -214,13 +221,12 @@ async function loadGridData() {
     
     if (response.ok) {
       const cells = await response.json();
-      
+      console.log('Loaded cells:', cells);
       cells.forEach(cell => {
         drawnPixels.add(`${cell.x},${cell.y}`);
         cellsData[`${cell.x},${cell.y}`] = cell;
         updateCellVisual(cell.x, cell.y, cell.image_data);
       });
-      
       updateCounter();
     }
   } catch (error) {
@@ -229,11 +235,12 @@ async function loadGridData() {
 }
 
 // ============================================
-// СЧЁТЧИК
+// 🔧 СЧЁТЧИК (ИСПРАВЛЕНО!)
 // ============================================
 async function updateCounter() {
   try {
-    const path = `/rest/v1/cells?select=count&status=eq.active`;
+    // Загружаем все активные ячейки и считаем их количество
+    const path = `/rest/v1/cells?select=x,y&status=eq.active`;
     const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
     
     const response = await fetch(url, {
@@ -249,6 +256,7 @@ async function updateCounter() {
       const counterEl = document.getElementById('counter');
       if (counterEl) {
         counterEl.textContent = count;
+        console.log('Counter updated:', count);
       }
     }
   } catch (error) {
@@ -260,12 +268,7 @@ async function updateCounter() {
 // ПАЛИТРА ЦВЕТОВ
 // ============================================
 function createColorPalette() {
-  const colors = [
-    '#ff0000', '#00ff00', '#0000ff', '#ffff00', 
-    '#ff00ff', '#00ffff', '#ffffff', '#000000',
-    '#ffa500', '#800080', '#008000', '#ff69b4'
-  ];
-  
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff', '#000000', '#ffa500', '#800080', '#008000', '#ff69b4'];
   const palette = document.getElementById('colorPalette');
   if (!palette) return;
   
@@ -274,19 +277,15 @@ function createColorPalette() {
     btn.className = 'color-btn';
     btn.style.backgroundColor = color;
     btn.dataset.color = color;
-    
     btn.addEventListener('click', () => {
       document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentColor = color;
     });
-    
     palette.appendChild(btn);
   });
   
-  if (palette.firstChild) {
-    palette.firstChild.classList.add('active');
-  }
+  if (palette.firstChild) palette.firstChild.classList.add('active');
 }
 
 // ============================================
@@ -298,6 +297,12 @@ function setupToolbar() {
       document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentTool = btn.dataset.tool;
+      
+      // 🔧 ЛАСТИК: меняем цвет на белый
+      if (currentTool === 'eraser') {
+        currentColor = '#ffffff';
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      }
     });
   });
   
@@ -311,34 +316,18 @@ function setupToolbar() {
 }
 
 function setupToolbarButtons() {
-  // Закрыть панель
   const btnClose = document.getElementById('btnCloseToolbar');
-  if (btnClose) {
-    btnClose.addEventListener('click', () => {
-      document.getElementById('toolbar').classList.add('hidden');
-    });
-  }
+  if (btnClose) btnClose.addEventListener('click', () => document.getElementById('toolbar').classList.add('hidden'));
   
-  // Очистить холст
   const btnClear = document.getElementById('btnClear');
-  if (btnClear) {
-    btnClear.addEventListener('click', () => {
-      if (ctx) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-    });
-  }
+  if (btnClear) btnClear.addEventListener('click', () => { if (ctx) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); } });
   
-  // Сохранить
   const btnSave = document.getElementById('btnSave');
-  if (btnSave) {
-    btnSave.addEventListener('click', saveDrawing);
-  }
+  if (btnSave) btnSave.addEventListener('click', saveDrawing);
 }
 
 // ============================================
-// РИСОВАНИЕ НА CANVAS
+// 🔧 РИСОВАНИЕ НА CANVAS (ИСПРАВЛЕНО!)
 // ============================================
 function setupCanvasDrawing() {
   canvas = document.getElementById('drawCanvas');
@@ -352,10 +341,7 @@ function setupCanvasDrawing() {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
   
   function startDrawing(e) {
@@ -373,11 +359,17 @@ function setupCanvasDrawing() {
     e.preventDefault();
     
     const pos = getPos(e);
-    ctx.strokeStyle = currentColor;
+    
+    // 🔧 ЛАСТИК: рисуем белым цветом
+    if (currentTool === 'eraser') {
+      ctx.strokeStyle = '#ffffff';
+    } else {
+      ctx.strokeStyle = currentColor;
+    }
+    
     ctx.lineWidth = currentSize * 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    
     ctx.beginPath();
     ctx.moveTo(lastPos.x, lastPos.y);
     ctx.lineTo(pos.x, pos.y);
@@ -390,14 +382,13 @@ function setupCanvasDrawing() {
   canvas.addEventListener('mousemove', draw);
   canvas.addEventListener('mouseup', stopDrawing);
   canvas.addEventListener('mouseout', stopDrawing);
-  
   canvas.addEventListener('touchstart', startDrawing, { passive: false });
   canvas.addEventListener('touchmove', draw, { passive: false });
   canvas.addEventListener('touchend', stopDrawing);
 }
 
 // ============================================
-// ZOOM / PAN (ПЕРЕМЕЩЕНИЕ ПО ПОЛОТНУ)
+// ZOOM / PAN
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
@@ -416,19 +407,13 @@ function setupViewportControls() {
     viewport.style.cursor = 'grabbing';
     e.preventDefault();
   }
-  
   function drag(e) {
     if (!isDragging) return;
     gridOffset.x = e.clientX - dragStart.x;
     gridOffset.y = e.clientY - dragStart.y;
     updateGridTransform();
   }
-  
-  function stopDrag() {
-    isDragging = false;
-    viewport.style.cursor = 'grab';
-  }
-  
+  function stopDrag() { isDragging = false; viewport.style.cursor = 'grab'; }
   function handleWheel(e) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -436,7 +421,6 @@ function setupViewportControls() {
     scale = Math.max(0.1, Math.min(3, scale));
     updateGridTransform();
   }
-  
   function updateGridTransform() {
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   }
@@ -449,59 +433,37 @@ function showReportModal(x, y) {
   const modal = document.getElementById('reportModal');
   const btnReport = document.getElementById('btnReport');
   const btnClose = document.getElementById('btnReportClose');
-  
   if (!modal) return;
   
   modal.classList.remove('hidden');
   
   const handleClose = () => modal.classList.add('hidden');
-  
   if (btnClose) btnClose.onclick = handleClose;
   if (btnReport) {
     btnReport.onclick = async () => {
       try {
         const path = `/rest/v1/cells?select=report_count&x=eq.${x}&y=eq.${y}`;
         const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
-        
-        const response = await fetch(url, {
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        });
-        
+        const response = await fetch(url, { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } });
         if (response.ok) {
           const data = await response.json();
           if (data[0]) {
             const newCount = (data[0].report_count || 0) + 1;
-            
             const updatePath = `/rest/v1/cells`;
             const updateUrl = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(updatePath)}`;
-            
             await fetch(updateUrl, {
               method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-              },
+              headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
               body: JSON.stringify({ report_count: newCount })
             });
-            
             alert('🚩 Жалоба отправлена!');
           }
         }
-      } catch (error) {
-        console.error('Report error:', error);
-      }
+      } catch (error) { console.error('Report error:', error); }
       handleClose();
     };
   }
-  
-  // Закрыть по клику вне окна
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) handleClose();
-  });
+  modal.addEventListener('click', (e) => { if (e.target === modal) handleClose(); });
 }
 
 // ============================================
@@ -510,16 +472,10 @@ function showReportModal(x, y) {
 function setupShare() {
   const shareBtn = document.getElementById('btnShare');
   if (!shareBtn) return;
-  
   shareBtn.addEventListener('click', async () => {
     try {
-      await navigator.share({
-        title: '🎨 Коллективное Полотно 10000',
-        text: 'Присоединяйся к созданию коллективного полотна!',
-        url: window.location.href
-      });
+      await navigator.share({ title: '🎨 Коллективное Полотно 10000', text: 'Присоединяйся к созданию коллективного полотна!', url: window.location.href });
     } catch (err) {
-      // Fallback: копируем ссылку
       await navigator.clipboard.writeText(window.location.href);
       alert('🔗 Ссылка скопирована в буфер обмена!');
     }
