@@ -61,6 +61,12 @@ function createGrid() {
   const gridSize = 100;
   const cellSize = 32;
   
+  const grid = document.createElement('div');
+  grid.id = 'grid';
+  grid.style.position = 'absolute';
+  grid.style.width = (gridSize * cellSize) + 'px';
+  grid.style.height = (gridSize * cellSize) + 'px';
+  
   for (let y = 0; y < gridSize; y++) {
     for (let x = 0; x < gridSize; x++) {
       const cell = document.createElement('div');
@@ -74,9 +80,11 @@ function createGrid() {
       
       cell.addEventListener('click', () => handleCellClick(x, y));
       
-      viewport.appendChild(cell);
+      grid.appendChild(cell);
     }
   }
+  
+  viewport.appendChild(grid);
 }
 
 // ============================================
@@ -146,6 +154,9 @@ function updateCellVisual(x, y, imageData) {
   if (cell) {
     cell.classList.add('occupied');
     cell.style.backgroundImage = `url(${imageData})`;
+    cell.style.backgroundSize = 'contain';
+    cell.style.backgroundPosition = 'center';
+    cell.style.backgroundRepeat = 'no-repeat';
   }
 }
 
@@ -154,7 +165,7 @@ function updateCellVisual(x, y, imageData) {
 // ============================================
 async function loadGridData() {
   try {
-    const path = `/rest/v1/cells?select=*&status=eq.active`;
+    const path = `/rest/v1/cells?select=*&status=eq.active&order=created_at.asc`;
     const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
     
     const response = await fetch(url, {
@@ -200,7 +211,10 @@ async function updateCounter() {
     if (response.ok) {
       const data = await response.json();
       const count = Array.isArray(data) ? data.length : 0;
-      document.getElementById('counter').textContent = `${count} / 10000`;
+      const counterEl = document.getElementById('counter');
+      if (counterEl) {
+        counterEl.textContent = `${count} / 10000`;
+      }
     }
   } catch (error) {
     console.error('Error counting:', error);
@@ -325,7 +339,7 @@ function setupCanvasDrawing() {
 }
 
 // ============================================
-// УПРАВЛЕНИЕ ВИДОМ
+// УПРАВЛЕНИЕ ВИДОМ (ZOOM/PAN)
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
@@ -336,7 +350,7 @@ function setupViewportControls() {
   viewport.addEventListener('mouseup', stopDrag);
   viewport.addEventListener('mouseout', stopDrag);
   
-  viewport.addEventListener('wheel', handleWheel);
+  viewport.addEventListener('wheel', handleWheel, { passive: false });
   
   function startDrag(e) {
     if (e.target === viewport || e.target.classList.contains('cell')) {
@@ -370,6 +384,7 @@ function setupViewportControls() {
     const grid = document.getElementById('grid');
     if (grid) {
       grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+      grid.style.transformOrigin = '0 0';
     }
   }
 }
