@@ -48,22 +48,23 @@ function loadUserPosition() {
 }
 
 // ============================================
-// ПРИВЕТСТВЕННЫЙ ЭКРАН
+// 🔧 ПРИВЕТСТВЕННЫЙ ЭКРАН (ИСПРАВЛЕНО!)
 // ============================================
 function setupWelcomeScreen() {
   const welcomeScreen = document.getElementById('welcomeScreen');
   const agreeButton = document.getElementById('btnAgree');
   
-  if (localStorage.getItem('agreedToRules') !== 'true') {
-    if (welcomeScreen) welcomeScreen.classList.remove('hidden');
-    if (agreeButton && welcomeScreen) {
-      agreeButton.addEventListener('click', () => {
-        localStorage.setItem('agreedToRules', 'true');
-        welcomeScreen.classList.add('hidden');
-      });
-    }
-  } else {
-    if (welcomeScreen) welcomeScreen.classList.add('hidden');
+  // Меню ВСЕГДА видно при заходе
+  if (welcomeScreen) {
+    welcomeScreen.classList.remove('hidden');
+  }
+  
+  // Скрываем ТОЛЬКО после нажатия кнопки
+  if (agreeButton && welcomeScreen) {
+    agreeButton.addEventListener('click', () => {
+      localStorage.setItem('agreedToRules', 'true');
+      welcomeScreen.classList.add('hidden');
+    });
   }
 }
 
@@ -378,21 +379,19 @@ function setupCanvasDrawing() {
 }
 
 // ============================================
-// 🔧 ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
+// ZOOM / PAN (ТЕЛЕФОН + ПК)
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
-  // Mouse events (ПК)
   viewport.addEventListener('mousedown', startDrag);
   viewport.addEventListener('mousemove', drag);
   viewport.addEventListener('mouseup', stopDrag);
   viewport.addEventListener('mouseout', stopDrag);
   viewport.addEventListener('wheel', handleWheel, { passive: false });
   
-  // Touch events (ТЕЛЕФОН)
   viewport.addEventListener('touchstart', handleTouchStart, { passive: false });
   viewport.addEventListener('touchmove', handleTouchMove, { passive: false });
   viewport.addEventListener('touchend', handleTouchEnd);
@@ -421,17 +420,14 @@ function setupViewportControls() {
     updateGridTransform();
   }
   
-  // 🔧 TOUCH ФУНКЦИИ ДЛЯ ТЕЛЕФОНА
   function handleTouchStart(e) {
     if (e.touches.length === 1) {
-      // Один палец = перемещение
       isDragging = true;
       dragStart = { 
         x: e.touches[0].clientX - gridOffset.x, 
         y: e.touches[0].clientY - gridOffset.y 
       };
     } else if (e.touches.length === 2) {
-      // Два пальца = зум
       lastTouchDistance = getTouchDistance(e.touches);
     }
     e.preventDefault();
@@ -439,12 +435,10 @@ function setupViewportControls() {
   
   function handleTouchMove(e) {
     if (e.touches.length === 1 && isDragging) {
-      // Перемещение одним пальцем
       gridOffset.x = e.touches[0].clientX - dragStart.x;
       gridOffset.y = e.touches[0].clientY - dragStart.y;
       updateGridTransform();
     } else if (e.touches.length === 2) {
-      // Зум двумя пальцами
       const newDistance = getTouchDistance(e.touches);
       const delta = newDistance / lastTouchDistance;
       scale *= delta;
