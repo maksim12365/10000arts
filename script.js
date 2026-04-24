@@ -388,125 +388,106 @@ function setupCanvasDrawing() {
 // ============================================
 // ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
 // ============================================
+
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
-  // Mouse events (ПК)
-  viewport.addEventListener('mousedown', startDrag);
-  viewport.addEventListener('mousemove', drag);
-  viewport.addEventListener('mouseup', stopDrag);
-  viewport.addEventListener('mouseout', stopDrag);
-  viewport.addEventListener('wheel', handleWheel, { passive: false });
-  
-  // Touch events (ТЕЛЕФОН)
-  viewport.addEventListener('touchstart', handleTouchStart, { passive: false });
-  viewport.addEventListener('touchmove', handleTouchMove, { passive: false });
-  viewport.addEventListener('touchend', handleTouchEnd);
-  
-  // 🔧 Для подсветки клеток на телефоне
-  let touchedCell = null;
-  
-  function startDrag(e) {
+  // Mouse events
+  viewport.addEventListener('mousedown', (e) => {
     if (e.target === viewport || e.target === grid) {
       isDragging = true;
       dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
       viewport.style.cursor = 'grabbing';
-      e.preventDefault();
     }
-  }
-  function drag(e) {
+  });
+  
+  viewport.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     gridOffset.x = e.clientX - dragStart.x;
     gridOffset.y = e.clientY - dragStart.y;
-    updateGridTransform();
-  }
-  function stopDrag() {
+    grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+  });
+  
+  viewport.addEventListener('mouseup', () => {
     isDragging = false;
     viewport.style.cursor = 'grab';
-  }
-  function handleWheel(e) {
+  });
+  
+  viewport.addEventListener('mouseout', () => {
+    isDragging = false;
+    viewport.style.cursor = 'grab';
+  });
+  
+  viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.95 : 1.05; // 🔧 Более плавный зум
+    const delta = e.deltaY > 0 ? 0.95 : 1.05;
     scale *= delta;
-    scale = Math.max(0.2, Math.min(2, scale)); // 🔧 Ограничения зума
-    updateGridTransform();
-  }
+    scale = Math.max(0.3, Math.min(2, scale));
+    grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+  }, { passive: false });
   
-  // 🔧 TOUCH ФУНКЦИИ
-  function handleTouchStart(e) {
-    const touch = e.touches[0];
-    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-    
-    // 🔧 Подсветка клетки при касании
-    if (target && target.classList.contains('cell')) {
-      touchedCell = target;
-      target.classList.add('touch-active');
-      return; // Не блокируем click
-    }
-    
-    // Если коснулись ПУСТОГО МЕСТА - начинаем drag
+  // Touch events для телефона
+  let initialPinchDistance = null;
+  let initialScale = 1;
+  let lastTouchPos = { x: 0, y: 0 };
+  
+  viewport.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
-      isDragging = true;
-      dragStart = { 
-        x: touch.clientX - gridOffset.x, 
-        y: touch.clientY - gridOffset.y 
-      };
-      e.preventDefault();
-    } else if (e.touches.length === 2) {
-      // Два пальца = зум
-      lastTouchDistance = getTouchDistance(e.touches);
-      e.preventDefault();
-    }
-  }
-  
-  function handleTouchMove(e) {
-    // 🔧 Убираем подсветку если палец ушёл с клетки
-    if (touchedCell) {
+      // Один палец - drag
       const touch = e.touches[0];
+      lastTouchPos = { x: touch.clientX, y: touch.clientY };
+      
+      // 🔧 Подсветка клетки
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (target !== touchedCell) {
-        touchedCell.classList.remove('touch-active');
-        touchedCell = null;
+      if (target && target.classList.contains('cell') && !target.classList.contains('occupied')) {
+        target.classList.add('touch-highlight');
       }
+      
+      if (e.target === viewport || e.target === grid) {
+        isDragging = true;
+        dragStart = { x: touch.clientX - gridOffset.x, y: touch.clientY - gridOffset.y };
+      }
+    } else if (e.touches.length === 2) {
+      // Два пальца - зум
+      initialPinchDistance = getDistance(e.touches);
+      initialScale = scale;
     }
-    
+  }, { passive: false });
+  
+  viewport.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
-      gridOffset.x = touch.clientX - dragStart.x;
-      gridOffset.y = touch.clientY - dragStart.y;
-      updateGridTransform();
-      e.preventDefault();
-    } else if (e.touches.length === 2) {
-      // 🔧 Более плавный зум
-      const newDistance = getTouchDistance(e.touches);
-      const delta = newDistance / lastTouchDistance;
-      scale *= delta;
-      scale = Math.max(0.2, Math.min(2, scale));
-      lastTouchDistance = newDistance;
-      updateGridTransform();
-      e.preventDefault();
+      gridOffset.x += touch.clientX - lastTouchPos.x;
+      gridOffset.y += touch.clientY - lastTouchPos.y;
+      lastTouchPos = { x: touch.clientX, y: touch.clientY };
+      grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+    } else if (e.touches.length === 2 && initialPinchDistance) {
+      // 🔧 Плавный зум
+      const currentDistance = getDistance(e.touches);
+      const delta = currentDistance / initialPinchDistance;
+      scale = initialScale * delta;
+      scale = Math.max(0.3, Math.min(2, scale));
+      grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
     }
-  }
+    e.preventDefault();
+  }, { passive: false });
   
-  function handleTouchEnd() {
+  viewport.addEventListener('touchend', (e) => {
     isDragging = false;
-    // 🔧 Убираем подсветку
-    if (touchedCell) {
-      touchedCell.classList.remove('touch-active');
-      touchedCell = null;
-    }
-  }
+    initialPinchDistance = null;
+    
+    // Убираем подсветку
+    document.querySelectorAll('.touch-highlight').forEach(el => {
+      el.classList.remove('touch-highlight');
+    });
+  });
   
-  function getTouchDistance(touches) {
+  function getDistance(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
-  }
-  
-  function updateGridTransform() {
-    grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   }
 }
 
