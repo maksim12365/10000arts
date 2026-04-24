@@ -392,39 +392,31 @@ function setupCanvasDrawing() {
 // ============================================
 // ZOOM / PAN (ТОЧНО РАБОТАЕТ!)
 // ============================================
+
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
-  if (!viewport || !grid) {
-    console.error('Viewport or grid not found!');
-    return;
-  }
-  
-  console.log('Viewport controls initialized');
+  if (!viewport || !grid) return;
   
   // === ПК (Mouse) ===
   viewport.addEventListener('mousedown', function(e) {
-    console.log('Mousedown!', e.target.className);
-    
-    // НЕ начинаем drag если кликнули по клетке
-    if (e.target.classList.contains('cell')) {
-      console.log('Clicked on cell, not dragging');
+    // Проверяем: если клетка ЗАНЯТА - не drag, показываем жалобу
+    if (e.target.classList.contains('cell') && e.target.classList.contains('occupied')) {
+      console.log('Clicked on OCCUPIED cell');
       return;
     }
     
-    // Начинаем drag
+    // Если клетка ПУСТАЯ или viewport - начинаем drag
+    console.log('Start drag');
     isDragging = true;
     dragStart = {
       x: e.clientX - gridOffset.x,
       y: e.clientY - gridOffset.y
     };
-    
-    console.log('Start drag:', dragStart);
     viewport.style.cursor = 'grabbing';
     e.preventDefault();
   });
   
-  // ВАЖНО: mousemove на document, а не на viewport!
   document.addEventListener('mousemove', function(e) {
     if (!isDragging) return;
     
@@ -434,16 +426,11 @@ function setupViewportControls() {
     grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
   });
   
-  // ВАЖНО: mouseup на document!
   document.addEventListener('mouseup', function() {
-    if (isDragging) {
-      console.log('Stop drag');
-    }
     isDragging = false;
     viewport.style.cursor = 'grab';
   });
   
-  // Зум колёсиком
   viewport.addEventListener('wheel', function(e) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.95 : 1.05;
@@ -461,12 +448,13 @@ function setupViewportControls() {
       const touch = e.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       
-      if (target && target.classList.contains('cell')) {
-        target.classList.add('touch-highlight');
+      // Если ЗАНЯТАЯ клетка - не drag
+      if (target && target.classList.contains('cell') && target.classList.contains('occupied')) {
         isDragging = false;
         return;
       }
       
+      // Пустая клетка или viewport - drag
       isDragging = true;
       touchStartX = touch.clientX - gridOffset.x;
       touchStartY = touch.clientY - gridOffset.y;
