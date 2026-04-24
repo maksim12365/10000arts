@@ -398,16 +398,16 @@ function setupViewportControls() {
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
+  console.log('Viewport controls initialized');
+  
   // === ПК (Mouse) ===
   viewport.addEventListener('mousedown', function(e) {
-    // Проверяем: если клетка ЗАНЯТА - не drag, показываем жалобу
+    // Если ЗАНЯТАЯ клетка - не drag (покажем жалобу в handleCellClick)
     if (e.target.classList.contains('cell') && e.target.classList.contains('occupied')) {
-      console.log('Clicked on OCCUPIED cell');
       return;
     }
     
-    // Если клетка ПУСТАЯ или viewport - начинаем drag
-    console.log('Start drag');
+    // Пустая клетка или viewport - drag
     isDragging = true;
     dragStart = {
       x: e.clientX - gridOffset.x,
@@ -442,22 +442,45 @@ function setupViewportControls() {
   // === ТЕЛЕФОН (Touch) ===
   let touchStartX = 0;
   let touchStartY = 0;
+  let initialPinchDistance = null;
+  let initialScaleAtPinch = 1;
+  let touchedCell = null;
   
   viewport.addEventListener('touchstart', function(e) {
+    console.log('Touchstart, touches:', e.touches.length);
+    
     if (e.touches.length === 1) {
       const touch = e.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       
-      // Если ЗАНЯТАЯ клетка - не drag
-      if (target && target.classList.contains('cell') && target.classList.contains('occupied')) {
+      // 🔧 Если ПУСТАЯ клетка - подсветка
+      if (target && target.classList.contains('cell') && !target.classList.contains('occupied')) {
+        touchedCell = target;
+        target.classList.add('touch-highlight');
+        console.log('Touch on empty cell, highlight');
         isDragging = false;
         return;
       }
       
-      // Пустая клетка или viewport - drag
+      // Если ЗАНЯТАЯ клетка - не drag (сработает click)
+      if (target && target.classList.contains('cell') && target.classList.contains('occupied')) {
+        console.log('Touch on occupied cell, no drag');
+        isDragging = false;
+        return;
+      }
+      
+      // Пустое место - drag
+      console.log('Touch on empty space, drag');
       isDragging = true;
       touchStartX = touch.clientX - gridOffset.x;
       touchStartY = touch.clientY - gridOffset.y;
+      
+    } else if (e.touches.length === 2) {
+      // 🔧 Два пальца - ЗУМ
+      console.log('Two fingers, zoom');
+      initialPinchDistance = getTouchDistance(e.touches);
+      initialScaleAtPinch = scale;
+      isDragging = false;
     }
   }, { passive: true });
   
@@ -468,16 +491,36 @@ function setupViewportControls() {
       gridOffset.y = touch.clientY - touchStartY;
       grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
       e.preventDefault();
+    } else if (e.touches.length === 2 && initialPinchDistance) {
+      // 🔧 Зум двумя пальцами
+      const currentDistance = getTouchDistance(e.touches);
+      const delta = currentDistance / initialPinchDistance;
+      scale = initialScaleAtPinch * delta;
+      scale = Math.max(0.3, Math.min(2, scale));
+      grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
+      e.preventDefault();
     }
   }, { passive: false });
   
-  viewport.addEventListener('touchend', function() {
+  viewport.addEventListener('touchend', function(e) {
+    console.log('Touchend');
     isDragging = false;
-    document.querySelectorAll('.touch-highlight').forEach(function(el) {
-      el.classList.remove('touch-highlight');
-    });
+    initialPinchDistance = null;
+    
+    // 🔧 Убираем подсветку
+    if (touchedCell) {
+      touchedCell.classList.remove('touch-highlight');
+      touchedCell = null;
+    }
   });
+  
+  function getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 }
+
 
 // ============================================
 // МОДАЛЬНОЕ ОКНО ЖАЛОБЫ
