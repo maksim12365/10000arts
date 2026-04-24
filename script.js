@@ -402,12 +402,10 @@ function setupViewportControls() {
   
   // === ПК (Mouse) ===
   viewport.addEventListener('mousedown', function(e) {
-    // Если ЗАНЯТАЯ клетка - не drag (покажем жалобу в handleCellClick)
     if (e.target.classList.contains('cell') && e.target.classList.contains('occupied')) {
       return;
     }
     
-    // Пустая клетка или viewport - drag
     isDragging = true;
     dragStart = {
       x: e.clientX - gridOffset.x,
@@ -442,42 +440,50 @@ function setupViewportControls() {
   // === ТЕЛЕФОН (Touch) ===
   let touchStartX = 0;
   let touchStartY = 0;
+  let touchStartOffsetX = 0;
+  let touchStartOffsetY = 0;
   let initialPinchDistance = null;
   let initialScaleAtPinch = 1;
   let touchedCell = null;
+  let hasMoved = false;
   
   viewport.addEventListener('touchstart', function(e) {
-    console.log('Touchstart, touches:', e.touches.length);
+    console.log('📱 Touchstart, touches:', e.touches.length);
+    hasMoved = false;
     
     if (e.touches.length === 1) {
       const touch = e.touches[0];
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartOffsetX = gridOffset.x;
+      touchStartOffsetY = gridOffset.y;
       
-      // 🔧 Если ПУСТАЯ клетка - подсветка
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      console.log('📱 Target:', target ? target.className : 'null');
+      
+      // 🔧 ПУСТАЯ клетка - ПОДСВЕТКА СРАЗУ
       if (target && target.classList.contains('cell') && !target.classList.contains('occupied')) {
         touchedCell = target;
         target.classList.add('touch-highlight');
-        console.log('Touch on empty cell, highlight');
+        console.log('📱 Empty cell - HIGHLIGHT');
         isDragging = false;
         return;
       }
       
-      // Если ЗАНЯТАЯ клетка - не drag (сработает click)
+      // ЗАНЯТАЯ клетка - не drag (сработает click)
       if (target && target.classList.contains('cell') && target.classList.contains('occupied')) {
-        console.log('Touch on occupied cell, no drag');
+        console.log('📱 Occupied cell - no drag');
         isDragging = false;
         return;
       }
       
-      // Пустое место - drag
-      console.log('Touch on empty space, drag');
+      // Пустое место - DRAG
+      console.log('📱 Empty space - DRAG');
       isDragging = true;
-      touchStartX = touch.clientX - gridOffset.x;
-      touchStartY = touch.clientY - gridOffset.y;
       
     } else if (e.touches.length === 2) {
       // 🔧 Два пальца - ЗУМ
-      console.log('Two fingers, zoom');
+      console.log('📱 Two fingers - ZOOM');
       initialPinchDistance = getTouchDistance(e.touches);
       initialScaleAtPinch = scale;
       isDragging = false;
@@ -487,10 +493,26 @@ function setupViewportControls() {
   viewport.addEventListener('touchmove', function(e) {
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
-      gridOffset.x = touch.clientX - touchStartX;
-      gridOffset.y = touch.clientY - touchStartY;
-      grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+      
+      // 🔧 Если сдвинули больше 10px - это DRAG
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+        hasMoved = true;
+        
+        // Убираем подсветку если была
+        if (touchedCell) {
+          touchedCell.classList.remove('touch-highlight');
+          touchedCell = null;
+        }
+        
+        gridOffset.x = touchStartOffsetX + dx;
+        gridOffset.y = touchStartOffsetY + dy;
+        grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
+        console.log('📱 Dragging:', gridOffset.x, gridOffset.y);
+      }
       e.preventDefault();
+      
     } else if (e.touches.length === 2 && initialPinchDistance) {
       // 🔧 Зум двумя пальцами
       const currentDistance = getTouchDistance(e.touches);
@@ -503,7 +525,7 @@ function setupViewportControls() {
   }, { passive: false });
   
   viewport.addEventListener('touchend', function(e) {
-    console.log('Touchend');
+    console.log('📱 Touchend, hasMoved:', hasMoved);
     isDragging = false;
     initialPinchDistance = null;
     
