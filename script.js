@@ -384,6 +384,10 @@ function setupCanvasDrawing() {
 // ============================================
 // ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
 // ============================================
+
+// ============================================
+// ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
+// ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
@@ -396,16 +400,15 @@ function setupViewportControls() {
   viewport.addEventListener('mouseout', stopDrag);
   viewport.addEventListener('wheel', handleWheel, { passive: false });
   
-  // Touch events (ТЕЛЕФОН) - ТОЛЬКО для пустого места!
+  // Touch events (ТЕЛЕФОН)
   viewport.addEventListener('touchstart', handleTouchStart, { passive: false });
   viewport.addEventListener('touchmove', handleTouchMove, { passive: false });
   viewport.addEventListener('touchend', handleTouchEnd);
   
-  let touchStartTime = 0;
-  let touchStartPos = { x: 0, y: 0 };
+  // 🔧 Для подсветки клеток на телефоне
+  let touchedCell = null;
   
   function startDrag(e) {
-    // Drag только если кликнули по пустому месту (не по клетке)
     if (e.target === viewport || e.target === grid) {
       isDragging = true;
       dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
@@ -425,20 +428,22 @@ function setupViewportControls() {
   }
   function handleWheel(e) {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const delta = e.deltaY > 0 ? 0.95 : 1.05; // 🔧 Более плавный зум
     scale *= delta;
-    scale = Math.max(0.1, Math.min(3, scale));
+    scale = Math.max(0.2, Math.min(2, scale)); // 🔧 Ограничения зума
     updateGridTransform();
   }
   
-  // 🔧 TOUCH ФУНКЦИИ - НЕ ПЕРЕКРЫВАЮТ КЛИКИ ПО КЛЕТКАМ
+  // 🔧 TOUCH ФУНКЦИИ
   function handleTouchStart(e) {
     const touch = e.touches[0];
     const target = document.elementFromPoint(touch.clientX, touch.clientY);
     
-    // Если коснулись КЛЕТКИ - не начинаем drag, пусть сработает click
+    // 🔧 Подсветка клетки при касании
     if (target && target.classList.contains('cell')) {
-      return; // Не предотвращаем, пусть click сработает
+      touchedCell = target;
+      target.classList.add('touch-active');
+      return; // Не блокируем click
     }
     
     // Если коснулись ПУСТОГО МЕСТА - начинаем drag
@@ -448,8 +453,6 @@ function setupViewportControls() {
         x: touch.clientX - gridOffset.x, 
         y: touch.clientY - gridOffset.y 
       };
-      touchStartTime = Date.now();
-      touchStartPos = { x: touch.clientX, y: touch.clientY };
       e.preventDefault();
     } else if (e.touches.length === 2) {
       // Два пальца = зум
@@ -459,25 +462,28 @@ function setupViewportControls() {
   }
   
   function handleTouchMove(e) {
-    // Если начали drag по пустому месту
+    // 🔧 Убираем подсветку если палец ушёл с клетки
+    if (touchedCell) {
+      const touch = e.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (target !== touchedCell) {
+        touchedCell.classList.remove('touch-active');
+        touchedCell = null;
+      }
+    }
+    
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - touchStartPos.x);
-      const dy = Math.abs(touch.clientY - touchStartPos.y);
-      
-      // Если переместили палец больше чем на 10px - это точно drag, не click
-      if (dx > 10 || dy > 10) {
-        gridOffset.x = touch.clientX - dragStart.x;
-        gridOffset.y = touch.clientY - dragStart.y;
-        updateGridTransform();
-      }
+      gridOffset.x = touch.clientX - dragStart.x;
+      gridOffset.y = touch.clientY - dragStart.y;
+      updateGridTransform();
       e.preventDefault();
     } else if (e.touches.length === 2) {
-      // Зум двумя пальцами
+      // 🔧 Более плавный зум
       const newDistance = getTouchDistance(e.touches);
       const delta = newDistance / lastTouchDistance;
       scale *= delta;
-      scale = Math.max(0.1, Math.min(3, scale));
+      scale = Math.max(0.2, Math.min(2, scale));
       lastTouchDistance = newDistance;
       updateGridTransform();
       e.preventDefault();
@@ -486,6 +492,11 @@ function setupViewportControls() {
   
   function handleTouchEnd() {
     isDragging = false;
+    // 🔧 Убираем подсветку
+    if (touchedCell) {
+      touchedCell.classList.remove('touch-active');
+      touchedCell = null;
+    }
   }
   
   function getTouchDistance(touches) {
