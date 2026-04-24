@@ -24,6 +24,7 @@ let cellsData = {};
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('Initializing app...');
   setupWelcomeScreen();
   createGrid();
   createColorPalette();
@@ -43,14 +44,24 @@ function setupWelcomeScreen() {
   const welcomeScreen = document.getElementById('welcomeScreen');
   const agreeButton = document.getElementById('agreeButton');
   
+  console.log('Welcome screen:', welcomeScreen);
+  console.log('Agree button:', agreeButton);
+  
+  if (!welcomeScreen) {
+    console.error('Welcome screen not found!');
+    return;
+  }
+  
   if (localStorage.getItem('agreedToRules') === 'true') {
     welcomeScreen.classList.add('hidden');
   }
   
-  agreeButton?.addEventListener('click', () => {
-    localStorage.setItem('agreedToRules', 'true');
-    welcomeScreen.classList.add('hidden');
-  });
+  if (agreeButton) {
+    agreeButton.addEventListener('click', () => {
+      localStorage.setItem('agreedToRules', 'true');
+      welcomeScreen.classList.add('hidden');
+    });
+  }
 }
 
 // ============================================
@@ -58,14 +69,23 @@ function setupWelcomeScreen() {
 // ============================================
 function createGrid() {
   const viewport = document.getElementById('viewport');
+  if (!viewport) {
+    console.error('Viewport not found!');
+    return;
+  }
+  
   const gridSize = 100;
   const cellSize = 32;
   
+  // Создаём контейнер для сетки
   const grid = document.createElement('div');
   grid.id = 'grid';
   grid.style.position = 'absolute';
   grid.style.width = (gridSize * cellSize) + 'px';
   grid.style.height = (gridSize * cellSize) + 'px';
+  grid.style.left = '0';
+  grid.style.top = '0';
+  grid.style.transformOrigin = '0 0';
   
   for (let y = 0; y < gridSize; y++) {
     for (let x = 0; x < gridSize; x++) {
@@ -77,6 +97,7 @@ function createGrid() {
       cell.style.height = cellSize + 'px';
       cell.style.left = (x * cellSize) + 'px';
       cell.style.top = (y * cellSize) + 'px';
+      cell.style.position = 'absolute';
       
       cell.addEventListener('click', () => handleCellClick(x, y));
       
@@ -85,6 +106,7 @@ function createGrid() {
   }
   
   viewport.appendChild(grid);
+  console.log('Grid created with', gridSize * gridSize, 'cells');
 }
 
 // ============================================
@@ -102,7 +124,11 @@ async function handleCellClick(x, y) {
   }
   
   const canvas = document.getElementById('drawCanvas');
-  const ctx = canvas.getContext('2d');
+  if (!canvas) {
+    alert('Canvas not found!');
+    return;
+  }
+  
   const imageData = canvas.toDataURL('image/png');
   
   const cellData = {
@@ -136,7 +162,10 @@ async function handleCellClick(x, y) {
       updateCounter();
       
       alert('Рисунок сохранён!');
-      document.getElementById('toolbar').classList.add('hidden');
+      const toolbar = document.getElementById('toolbar');
+      if (toolbar) {
+        toolbar.classList.add('hidden');
+      }
     } else {
       const error = await response.json();
       alert('Ошибка: ' + (error.message || 'Не удалось сохранить'));
@@ -177,6 +206,7 @@ async function loadGridData() {
     
     if (response.ok) {
       const cells = await response.json();
+      console.log('Loaded cells:', cells);
       
       cells.forEach(cell => {
         drawnPixels.add(`${cell.x},${cell.y}`);
@@ -186,10 +216,10 @@ async function loadGridData() {
       
       updateCounter();
     } else {
-      console.error('Error loading data:', await response.text());
+      console.error('Error loading ', await response.text());
     }
   } catch (error) {
-    console.error('Error loading data:', error);
+    console.error('Error loading ', error);
   }
 }
 
@@ -232,7 +262,10 @@ function createColorPalette() {
   ];
   
   const palette = document.getElementById('colorPalette');
-  if (!palette) return;
+  if (!palette) {
+    console.log('Color palette not found');
+    return;
+  }
   
   colors.forEach(color => {
     const btn = document.createElement('button');
@@ -280,7 +313,10 @@ function setupToolbar() {
 // ============================================
 function setupCanvasDrawing() {
   const canvas = document.getElementById('drawCanvas');
-  if (!canvas) return;
+  if (!canvas) {
+    console.log('Canvas not found');
+    return;
+  }
   
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
@@ -343,7 +379,10 @@ function setupCanvasDrawing() {
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
-  if (!viewport) return;
+  if (!viewport) {
+    console.error('Viewport not found!');
+    return;
+  }
   
   viewport.addEventListener('mousedown', startDrag);
   viewport.addEventListener('mousemove', drag);
@@ -411,7 +450,7 @@ function setupShare() {
         url: window.location.href
       });
     } catch (err) {
-      alert('Ссылка скопирована в буфер обмена!');
+      console.log('Share failed:', err);
     }
   });
 }
