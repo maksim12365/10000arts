@@ -381,26 +381,37 @@ function setupCanvasDrawing() {
 // ============================================
 // ZOOM / PAN (ТЕЛЕФОН + ПК)
 // ============================================
+// ============================================
+// ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
+// ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
+  // Mouse events (ПК)
   viewport.addEventListener('mousedown', startDrag);
   viewport.addEventListener('mousemove', drag);
   viewport.addEventListener('mouseup', stopDrag);
   viewport.addEventListener('mouseout', stopDrag);
   viewport.addEventListener('wheel', handleWheel, { passive: false });
   
+  // Touch events (ТЕЛЕФОН) - ТОЛЬКО для пустого места!
   viewport.addEventListener('touchstart', handleTouchStart, { passive: false });
   viewport.addEventListener('touchmove', handleTouchMove, { passive: false });
   viewport.addEventListener('touchend', handleTouchEnd);
   
+  let touchStartTime = 0;
+  let touchStartPos = { x: 0, y: 0 };
+  
   function startDrag(e) {
-    isDragging = true;
-    dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
-    viewport.style.cursor = 'grabbing';
-    e.preventDefault();
+    // Drag только если кликнули по пустому месту (не по клетке)
+    if (e.target === viewport || e.target === grid) {
+      isDragging = true;
+      dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
+      viewport.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
   }
   function drag(e) {
     if (!isDragging) return;
@@ -420,33 +431,57 @@ function setupViewportControls() {
     updateGridTransform();
   }
   
+  // 🔧 TOUCH ФУНКЦИИ - НЕ ПЕРЕКРЫВАЮТ КЛИКИ ПО КЛЕТКАМ
   function handleTouchStart(e) {
+    const touch = e.touches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // Если коснулись КЛЕТКИ - не начинаем drag, пусть сработает click
+    if (target && target.classList.contains('cell')) {
+      return; // Не предотвращаем, пусть click сработает
+    }
+    
+    // Если коснулись ПУСТОГО МЕСТА - начинаем drag
     if (e.touches.length === 1) {
       isDragging = true;
       dragStart = { 
-        x: e.touches[0].clientX - gridOffset.x, 
-        y: e.touches[0].clientY - gridOffset.y 
+        x: touch.clientX - gridOffset.x, 
+        y: touch.clientY - gridOffset.y 
       };
+      touchStartTime = Date.now();
+      touchStartPos = { x: touch.clientX, y: touch.clientY };
+      e.preventDefault();
     } else if (e.touches.length === 2) {
+      // Два пальца = зум
       lastTouchDistance = getTouchDistance(e.touches);
+      e.preventDefault();
     }
-    e.preventDefault();
   }
   
   function handleTouchMove(e) {
+    // Если начали drag по пустому месту
     if (e.touches.length === 1 && isDragging) {
-      gridOffset.x = e.touches[0].clientX - dragStart.x;
-      gridOffset.y = e.touches[0].clientY - dragStart.y;
-      updateGridTransform();
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - touchStartPos.x);
+      const dy = Math.abs(touch.clientY - touchStartPos.y);
+      
+      // Если переместили палец больше чем на 10px - это точно drag, не click
+      if (dx > 10 || dy > 10) {
+        gridOffset.x = touch.clientX - dragStart.x;
+        gridOffset.y = touch.clientY - dragStart.y;
+        updateGridTransform();
+      }
+      e.preventDefault();
     } else if (e.touches.length === 2) {
+      // Зум двумя пальцами
       const newDistance = getTouchDistance(e.touches);
       const delta = newDistance / lastTouchDistance;
       scale *= delta;
       scale = Math.max(0.1, Math.min(3, scale));
       lastTouchDistance = newDistance;
       updateGridTransform();
+      e.preventDefault();
     }
-    e.preventDefault();
   }
   
   function handleTouchEnd() {
