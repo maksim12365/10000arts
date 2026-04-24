@@ -456,36 +456,37 @@ function setupViewportControls() {
   let initialScaleAtPinch = 1;
   
   viewport.addEventListener('touchstart', function(e) {
-    console.log('📱 TOUCHSTART - touches:', e.touches.length);
+  console.log('📱 TOUCHSTART - touches:', e.touches.length);
+  
+  if (e.touches.length === 1) {
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartOffsetX = gridOffset.x;
+    touchStartOffsetY = gridOffset.y;
     
-    if (e.touches.length === 1) {
-      const touch = e.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-      touchStartOffsetX = gridOffset.x;
-      touchStartOffsetY = gridOffset.y;
-      
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      console.log('📱 Target element:', target ? target.className : 'null');
-      console.log('📱 Target dataset:', target ? target.dataset : 'null');
-      
-      // 🔧 ПУСТАЯ клетка - ПОДСВЕТКА
-      if (target && target.classList.contains('cell')) {
-        if (!target.classList.contains('occupied')) {
-          console.log('📱 Empty cell - ADD HIGHLIGHT');
-          target.classList.add('touch-highlight');
-          console.log('📱 Classes after add:', target.className);
-          isDragging = false;
-        } else {
-          console.log('📱 Occupied cell - no drag');
-          isDragging = false;
-        }
-        return;
-      }
-      
-      // Пустое место - DRAG
-      console.log('📱 Empty space - DRAG');
-      isDragging = true;
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    console.log('📱 Target element:', target ? target.className : 'null');
+    
+    // 🔧 ПУСТАЯ клетка - ПОДСВЕТКА + РАЗРЕШАЕМ DRAG
+    if (target && target.classList.contains('cell') && !target.classList.contains('occupied')) {
+      console.log('📱 Empty cell - HIGHLIGHT + ALLOW DRAG');
+      touchedCell = target;
+      target.classList.add('touch-highlight');
+      isDragging = true;  // ✅ РАЗРЕШАЕМ DRAG!
+      return;
+    }
+    
+    // ЗАНЯТАЯ клетка - не drag
+    if (target && target.classList.contains('cell') && target.classList.contains('occupied')) {
+      console.log('📱 Occupied cell - no drag');
+      isDragging = false;
+      return;
+    }
+    
+    // Пустое место (viewport) - DRAG
+    console.log('📱 Empty space - DRAG');
+    isDragging = true;
       
     } else if (e.touches.length === 2) {
       console.log('📱 Two fingers - ZOOM');
