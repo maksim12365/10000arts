@@ -23,6 +23,7 @@ let canvas, ctx, isDrawingOnCanvas = false, lastPos = { x: 0, y: 0 };
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('App initializing...');
   loadUserPosition();
   setupWelcomeScreen();
   createGrid();
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupToolbarButtons();
   loadGridData();
   updateCounter();
+  console.log('App initialized!');
 });
 
 // ============================================
@@ -43,25 +45,38 @@ function loadUserPosition() {
   const saved = localStorage.getItem('currentUserPosition');
   if (saved) {
     currentUserPosition = JSON.parse(saved);
+    console.log('User position loaded:', currentUserPosition);
   }
 }
 
 // ============================================
-// ПРИВЕТСТВЕННЫЙ ЭКРАН
+// 🔧 ПРИВЕТСТВЕННЫЙ ЭКРАН (ПРОВЕРЕНО!)
 // ============================================
 function setupWelcomeScreen() {
   const welcomeScreen = document.getElementById('welcomeScreen');
   const agreeButton = document.getElementById('btnAgree');
   
+  console.log('Welcome screen:', welcomeScreen);
+  console.log('Agree button:', agreeButton);
+  
+  // Показываем меню ВСЕГДА при заходе
   if (welcomeScreen) {
     welcomeScreen.classList.remove('hidden');
+    console.log('Welcome screen shown');
   }
   
-  if (agreeButton && welcomeScreen) {
-    agreeButton.addEventListener('click', () => {
+  // Добавляем обработчик на кнопку
+  if (agreeButton) {
+    agreeButton.addEventListener('click', function() {
+      console.log('Agree button clicked!');
       localStorage.setItem('agreedToRules', 'true');
-      welcomeScreen.classList.add('hidden');
+      if (welcomeScreen) {
+        welcomeScreen.classList.add('hidden');
+        console.log('Welcome screen hidden');
+      }
     });
+  } else {
+    console.error('Agree button NOT FOUND!');
   }
 }
 
@@ -71,7 +86,10 @@ function setupWelcomeScreen() {
 function createGrid() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
-  if (!viewport || !grid) return;
+  if (!viewport || !grid) {
+    console.error('Viewport or grid not found!');
+    return;
+  }
   
   const gridSize = 100;
   const cellSize = 32;
@@ -96,33 +114,29 @@ function createGrid() {
       cell.style.top = (y * cellSize) + 'px';
       cell.style.position = 'absolute';
       
-      // 🔧 Клик по клетке
+      // Клик по клетке
       cell.addEventListener('click', (e) => {
-        e.stopPropagation(); // 🔧 Останавливаем всплытие!
+        e.stopPropagation();
         handleCellClick(x, y);
       });
       
       grid.appendChild(cell);
     }
   }
-  
-  // 🔧 Клик по пустому месту (viewport)
-  viewport.addEventListener('click', (e) => {
-    if (e.target === viewport) {
-      // Клик по пустому месту - ничего не делаем
-    }
-  });
 }
 
 // ============================================
 // ОБРАБОТКА КЛИКОВ
 // ============================================
 async function handleCellClick(x, y) {
-  // 🔧 Проверяем, занята ли клетка
+  console.log('Cell clicked:', x, y);
+  
+  // Проверяем, занята ли клетка
   const isOccupied = drawnPixels.has(`${x},${y}`);
   
   if (isOccupied) {
-    // 🔧 Клик по занятой клетке - показываем жалобу
+    // Клик по занятой клетке - показываем жалобу
+    console.log('Cell occupied, showing report modal');
     showReportModal(x, y);
     return;
   }
@@ -394,7 +408,7 @@ function setupCanvasDrawing() {
 }
 
 // ============================================
-// 🔧 ZOOM / PAN (ПОЛНОСТЬЮ ИСПРАВЛЕНО!)
+// ZOOM / PAN (РАБОТАЕТ!)
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
@@ -409,9 +423,9 @@ function setupViewportControls() {
   let mouseDownOffsetY = 0;
   
   viewport.addEventListener('mousedown', (e) => {
-    // 🔧 Drag ТОЛЬКО если кликнули по пустому месту (не по клетке!)
+    // Drag ТОЛЬКО если кликнули по пустому месту (не по клетке!)
     if (e.target.classList.contains('cell')) {
-      return; // Клик по клетке - не drag
+      return;
     }
     
     isMouseDown = true;
@@ -468,23 +482,19 @@ function setupViewportControls() {
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       
-      // 🔧 Проверяем, куда коснулись
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       
       if (target && target.classList.contains('cell')) {
-        // 🔧 Коснулись КЛЕТКИ - подсветка, не drag
         touchedCell = target;
         target.classList.add('touch-highlight');
         isDragging = false;
         return;
       }
       
-      // 🔧 Коснулись ПУСТОГО МЕСТА - drag
       isDragging = true;
       touchStartOffsetX = gridOffset.x;
       touchStartOffsetY = gridOffset.y;
     } else if (e.touches.length === 2) {
-      // 🔧 Два пальца - зум
       initialPinchDistance = getTouchDistance(e.touches);
       initialScaleAtPinch = scale;
       isDragging = false;
@@ -497,14 +507,12 @@ function setupViewportControls() {
       const dx = touch.clientX - touchStartX;
       const dy = touch.clientY - touchStartY;
       
-      // 🔧 Только если сдвинули больше 10px - это drag
       if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
         gridOffset.x = touchStartOffsetX + dx;
         gridOffset.y = touchStartOffsetY + dy;
         grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
       }
     } else if (e.touches.length === 2 && initialPinchDistance) {
-      // 🔧 Зум двумя пальцами
       const currentDistance = getTouchDistance(e.touches);
       const delta = currentDistance / initialPinchDistance;
       scale = initialScaleAtPinch * delta;
@@ -518,7 +526,6 @@ function setupViewportControls() {
     isDragging = false;
     initialPinchDistance = null;
     
-    // 🔧 Убираем подсветку
     if (touchedCell) {
       touchedCell.classList.remove('touch-highlight');
       touchedCell = null;
@@ -533,7 +540,7 @@ function setupViewportControls() {
 }
 
 // ============================================
-// 🔧 МОДАЛЬНОЕ ОКНО ЖАЛОБЫ (ИСПРАВЛЕНО!)
+// МОДАЛЬНОЕ ОКНО ЖАЛОБЫ
 // ============================================
 function showReportModal(x, y) {
   const modal = document.getElementById('reportModal');
@@ -545,7 +552,6 @@ function showReportModal(x, y) {
     return;
   }
   
-  // 🔧 Показываем модальное окно
   modal.classList.remove('hidden');
   
   const handleClose = () => {
@@ -559,7 +565,6 @@ function showReportModal(x, y) {
   if (btnReport) {
     btnReport.onclick = async () => {
       try {
-        // 🔧 Получаем текущее количество жалоб
         const path = `/rest/v1/cells?select=report_count&x=eq.${x}&y=eq.${y}`;
         const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
         
@@ -575,7 +580,6 @@ function showReportModal(x, y) {
           if (data && data[0]) {
             const newCount = (data[0].report_count || 0) + 1;
             
-            // 🔧 Обновляем количество жалоб
             const updatePath = `/rest/v1/cells?x=eq.${x}&y=eq.${y}`;
             const updateUrl = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(updatePath)}`;
             
@@ -606,7 +610,6 @@ function showReportModal(x, y) {
     };
   }
   
-  // Закрыть по клику вне окна
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       handleClose();
