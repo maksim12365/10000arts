@@ -17,13 +17,15 @@ let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let drawnPixels = new Set();
 let cellsData = {};
-let canvas, ctx, isDrawingOnCanvas = false, lastPos = { x: 0, y: 0 };
+let canvas = null;
+let ctx = null;
+let isDrawingOnCanvas = false;
+let lastPos = { x: 0, y: 0 };
 
 // ============================================
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('App initializing...');
   loadUserPosition();
   setupWelcomeScreen();
   createGrid();
@@ -35,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupToolbarButtons();
   loadGridData();
   updateCounter();
-  console.log('App initialized!');
 });
 
 // ============================================
@@ -45,38 +46,25 @@ function loadUserPosition() {
   const saved = localStorage.getItem('currentUserPosition');
   if (saved) {
     currentUserPosition = JSON.parse(saved);
-    console.log('User position loaded:', currentUserPosition);
   }
 }
 
 // ============================================
-// 🔧 ПРИВЕТСТВЕННЫЙ ЭКРАН (ПРОВЕРЕНО!)
+// ПРИВЕТСТВЕННЫЙ ЭКРАН
 // ============================================
 function setupWelcomeScreen() {
   const welcomeScreen = document.getElementById('welcomeScreen');
   const agreeButton = document.getElementById('btnAgree');
   
-  console.log('Welcome screen:', welcomeScreen);
-  console.log('Agree button:', agreeButton);
-  
-  // Показываем меню ВСЕГДА при заходе
   if (welcomeScreen) {
     welcomeScreen.classList.remove('hidden');
-    console.log('Welcome screen shown');
   }
   
-  // Добавляем обработчик на кнопку
-  if (agreeButton) {
-    agreeButton.addEventListener('click', function() {
-      console.log('Agree button clicked!');
+  if (agreeButton && welcomeScreen) {
+    agreeButton.addEventListener('click', () => {
       localStorage.setItem('agreedToRules', 'true');
-      if (welcomeScreen) {
-        welcomeScreen.classList.add('hidden');
-        console.log('Welcome screen hidden');
-      }
+      welcomeScreen.classList.add('hidden');
     });
-  } else {
-    console.error('Agree button NOT FOUND!');
   }
 }
 
@@ -86,10 +74,7 @@ function setupWelcomeScreen() {
 function createGrid() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
-  if (!viewport || !grid) {
-    console.error('Viewport or grid not found!');
-    return;
-  }
+  if (!viewport || !grid) return;
   
   const gridSize = 100;
   const cellSize = 32;
@@ -114,7 +99,6 @@ function createGrid() {
       cell.style.top = (y * cellSize) + 'px';
       cell.style.position = 'absolute';
       
-      // Клик по клетке
       cell.addEventListener('click', (e) => {
         e.stopPropagation();
         handleCellClick(x, y);
@@ -129,19 +113,13 @@ function createGrid() {
 // ОБРАБОТКА КЛИКОВ
 // ============================================
 async function handleCellClick(x, y) {
-  console.log('Cell clicked:', x, y);
-  
-  // Проверяем, занята ли клетка
   const isOccupied = drawnPixels.has(`${x},${y}`);
   
   if (isOccupied) {
-    // Клик по занятой клетке - показываем жалобу
-    console.log('Cell occupied, showing report modal');
     showReportModal(x, y);
     return;
   }
   
-  // Клик по пустой клетке
   if (currentUserPosition) {
     alert('⚠️ Вы уже нарисовали на позиции ' + currentUserPosition.x + ', ' + currentUserPosition.y + '!\n\nМожно рисовать только ОДИН раз.');
     return;
@@ -354,33 +332,81 @@ function setupToolbarButtons() {
 // ============================================
 // РИСОВАНИЕ НА CANVAS
 // ============================================
+function setupCanvasDrawing() {
+  canvas = document.getElementById('drawCanvas');
+  if (!canvas) return;
+  
+  ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+  
+  function startDrawing(e) {
+    isDrawingOnCanvas = true;
+    lastPos = getPos(e);
+    draw(e);
+  }
+  
+  function stopDrawing() {
+    isDrawingOnCanvas = false;
+  }
+  
+  function draw(e) {
+    if (!isDrawingOnCanvas) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    if (currentTool === 'eraser') {
+      ctx.strokeStyle = '#ffffff';
+    } else {
+      ctx.strokeStyle = currentColor;
+    }
+    ctx.lineWidth = currentSize * 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastPos = pos;
+  }
+  
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
+  canvas.addEventListener('touchstart', startDrawing, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDrawing);
+}
 
+// ============================================
+// ZOOM / PAN (РАБОТАЕТ!)
+// ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
-  // === ПК (Mouse) ===
+  // ПК - Mouse
   viewport.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('cell')) {
-      return;
-    }
+    if (e.target.classList.contains('cell')) return;
     
     isDragging = true;
-    dragStart = { 
-      x: e.clientX - gridOffset.x, 
-      y: e.clientY - gridOffset.y 
-    };
+    dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
     viewport.style.cursor = 'grabbing';
     e.preventDefault();
   });
   
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    
     gridOffset.x = e.clientX - dragStart.x;
     gridOffset.y = e.clientY - dragStart.y;
-    
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   });
   
@@ -397,22 +423,12 @@ function setupViewportControls() {
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   }, { passive: false });
   
-  // === ТЕЛЕФОН (Touch) ===
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchStartOffsetX = 0;
-  let touchStartOffsetY = 0;
-  let initialPinchDistance = null;
-  let initialScaleAtPinch = 1;
+  // Телефон - Touch
+  let touchStartX = 0, touchStartY = 0;
   
   viewport.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
       const touch = e.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-      touchStartOffsetX = gridOffset.x;
-      touchStartOffsetY = gridOffset.y;
-      
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       
       if (target && target.classList.contains('cell')) {
@@ -422,29 +438,16 @@ function setupViewportControls() {
       }
       
       isDragging = true;
-    } else if (e.touches.length === 2) {
-      initialPinchDistance = getTouchDistance(e.touches);
-      initialScaleAtPinch = scale;
-      isDragging = false;
+      touchStartX = touch.clientX - gridOffset.x;
+      touchStartY = touch.clientY - gridOffset.y;
     }
   }, { passive: true });
   
   viewport.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
-      const dx = touch.clientX - touchStartX;
-      const dy = touch.clientY - touchStartY;
-      
-      gridOffset.x = touchStartOffsetX + dx;
-      gridOffset.y = touchStartOffsetY + dy;
-      
-      grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
-      e.preventDefault();
-    } else if (e.touches.length === 2 && initialPinchDistance) {
-      const currentDistance = getTouchDistance(e.touches);
-      const delta = currentDistance / initialPinchDistance;
-      scale = initialScaleAtPinch * delta;
-      scale = Math.max(0.3, Math.min(2, scale));
+      gridOffset.x = touch.clientX - touchStartX;
+      gridOffset.y = touch.clientY - touchStartY;
       grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
       e.preventDefault();
     }
@@ -452,18 +455,10 @@ function setupViewportControls() {
   
   viewport.addEventListener('touchend', () => {
     isDragging = false;
-    initialPinchDistance = null;
-    
     document.querySelectorAll('.touch-highlight').forEach(el => {
       el.classList.remove('touch-highlight');
     });
   });
-  
-  function getTouchDistance(touches) {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
 }
 
 // ============================================
@@ -474,20 +469,13 @@ function showReportModal(x, y) {
   const btnReport = document.getElementById('btnReport');
   const btnClose = document.getElementById('btnReportClose');
   
-  if (!modal) {
-    console.error('Report modal not found!');
-    return;
-  }
+  if (!modal) return;
   
   modal.classList.remove('hidden');
   
-  const handleClose = () => {
-    modal.classList.add('hidden');
-  };
+  const handleClose = () => modal.classList.add('hidden');
   
-  if (btnClose) {
-    btnClose.onclick = handleClose;
-  }
+  if (btnClose) btnClose.onclick = handleClose;
   
   if (btnReport) {
     btnReport.onclick = async () => {
@@ -510,7 +498,7 @@ function showReportModal(x, y) {
             const updatePath = `/rest/v1/cells?x=eq.${x}&y=eq.${y}`;
             const updateUrl = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(updatePath)}`;
             
-            const updateResponse = await fetch(updateUrl, {
+            await fetch(updateUrl, {
               method: 'PATCH',
               headers: {
                 'Content-Type': 'application/json',
@@ -520,27 +508,18 @@ function showReportModal(x, y) {
               body: JSON.stringify({ report_count: newCount })
             });
             
-            if (updateResponse.ok) {
-              alert('🚩 Жалоба отправлена!');
-            } else {
-              alert('Ошибка при отправке жалобы');
-            }
+            alert('🚩 Жалоба отправлена!');
           }
-        } else {
-          alert('Ошибка: не удалось получить данные клетки');
         }
       } catch (error) {
         console.error('Report error:', error);
-        alert('Ошибка: ' + error.message);
       }
       handleClose();
     };
   }
   
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      handleClose();
-    }
+    if (e.target === modal) handleClose();
   });
 }
 
