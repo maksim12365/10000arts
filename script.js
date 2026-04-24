@@ -15,6 +15,7 @@ let gridOffset = { x: 0, y: 0 };
 let scale = 1;
 let isDragging = false;
 let dragStart = { x: 0, y: 0 };
+let lastTouchDistance = 0;
 let drawnPixels = new Set();
 let cellsData = {};
 let canvas, ctx, isDrawingOnCanvas = false, lastPos = { x: 0, y: 0 };
@@ -83,6 +84,7 @@ function createGrid() {
   grid.style.left = '0';
   grid.style.top = '0';
   grid.style.transformOrigin = '0 0';
+  grid.style.willChange = 'transform';
   
   for (let y = 0; y < gridSize; y++) {
     for (let x = 0; x < gridSize; x++) {
@@ -221,7 +223,6 @@ async function loadGridData() {
     
     if (response.ok) {
       const cells = await response.json();
-      console.log('Loaded cells:', cells);
       cells.forEach(cell => {
         drawnPixels.add(`${cell.x},${cell.y}`);
         cellsData[`${cell.x},${cell.y}`] = cell;
@@ -235,11 +236,10 @@ async function loadGridData() {
 }
 
 // ============================================
-// 🔧 СЧЁТЧИК (ИСПРАВЛЕНО!)
+// СЧЁТЧИК
 // ============================================
 async function updateCounter() {
   try {
-    // Загружаем все активные ячейки и считаем их количество
     const path = `/rest/v1/cells?select=x,y&status=eq.active`;
     const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
     
@@ -254,10 +254,7 @@ async function updateCounter() {
       const data = await response.json();
       const count = Array.isArray(data) ? data.length : 0;
       const counterEl = document.getElementById('counter');
-      if (counterEl) {
-        counterEl.textContent = count;
-        console.log('Counter updated:', count);
-      }
+      if (counterEl) counterEl.textContent = count;
     }
   } catch (error) {
     console.error('Error counting:', error);
@@ -297,8 +294,6 @@ function setupToolbar() {
       document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentTool = btn.dataset.tool;
-      
-      // 🔧 ЛАСТИК: меняем цвет на белый
       if (currentTool === 'eraser') {
         currentColor = '#ffffff';
         document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
@@ -327,7 +322,7 @@ function setupToolbarButtons() {
 }
 
 // ============================================
-// 🔧 РИСОВАНИЕ НА CANVAS (ИСПРАВЛЕНО!)
+// РИСОВАНИЕ НА CANVAS
 // ============================================
 function setupCanvasDrawing() {
   canvas = document.getElementById('drawCanvas');
@@ -357,16 +352,12 @@ function setupCanvasDrawing() {
   function draw(e) {
     if (!isDrawingOnCanvas) return;
     e.preventDefault();
-    
     const pos = getPos(e);
-    
-    // 🔧 ЛАСТИК: рисуем белым цветом
     if (currentTool === 'eraser') {
       ctx.strokeStyle = '#ffffff';
     } else {
       ctx.strokeStyle = currentColor;
     }
-    
     ctx.lineWidth = currentSize * 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -374,7 +365,6 @@ function setupCanvasDrawing() {
     ctx.moveTo(lastPos.x, lastPos.y);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
-    
     lastPos = pos;
   }
   
@@ -388,18 +378,24 @@ function setupCanvasDrawing() {
 }
 
 // ============================================
-// ZOOM / PAN
+// 🔧 ZOOM / PAN (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
+  // Mouse events (ПК)
   viewport.addEventListener('mousedown', startDrag);
   viewport.addEventListener('mousemove', drag);
   viewport.addEventListener('mouseup', stopDrag);
   viewport.addEventListener('mouseout', stopDrag);
   viewport.addEventListener('wheel', handleWheel, { passive: false });
+  
+  // Touch events (ТЕЛЕФОН)
+  viewport.addEventListener('touchstart', handleTouchStart, { passive: false });
+  viewport.addEventListener('touchmove', handleTouchMove, { passive: false });
+  viewport.addEventListener('touchend', handleTouchEnd);
   
   function startDrag(e) {
     isDragging = true;
@@ -413,7 +409,10 @@ function setupViewportControls() {
     gridOffset.y = e.clientY - dragStart.y;
     updateGridTransform();
   }
-  function stopDrag() { isDragging = false; viewport.style.cursor = 'grab'; }
+  function stopDrag() {
+    isDragging = false;
+    viewport.style.cursor = 'grab';
+  }
   function handleWheel(e) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -421,6 +420,51 @@ function setupViewportControls() {
     scale = Math.max(0.1, Math.min(3, scale));
     updateGridTransform();
   }
+  
+  // 🔧 TOUCH ФУНКЦИИ ДЛЯ ТЕЛЕФОНА
+  function handleTouchStart(e) {
+    if (e.touches.length === 1) {
+      // Один палец = перемещение
+      isDragging = true;
+      dragStart = { 
+        x: e.touches[0].clientX - gridOffset.x, 
+        y: e.touches[0].clientY - gridOffset.y 
+      };
+    } else if (e.touches.length === 2) {
+      // Два пальца = зум
+      lastTouchDistance = getTouchDistance(e.touches);
+    }
+    e.preventDefault();
+  }
+  
+  function handleTouchMove(e) {
+    if (e.touches.length === 1 && isDragging) {
+      // Перемещение одним пальцем
+      gridOffset.x = e.touches[0].clientX - dragStart.x;
+      gridOffset.y = e.touches[0].clientY - dragStart.y;
+      updateGridTransform();
+    } else if (e.touches.length === 2) {
+      // Зум двумя пальцами
+      const newDistance = getTouchDistance(e.touches);
+      const delta = newDistance / lastTouchDistance;
+      scale *= delta;
+      scale = Math.max(0.1, Math.min(3, scale));
+      lastTouchDistance = newDistance;
+      updateGridTransform();
+    }
+    e.preventDefault();
+  }
+  
+  function handleTouchEnd() {
+    isDragging = false;
+  }
+  
+  function getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  
   function updateGridTransform() {
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   }
