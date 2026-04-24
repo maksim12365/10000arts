@@ -388,45 +388,75 @@ function setupCanvasDrawing() {
 // ============================================
 // ZOOM / PAN (РАБОТАЕТ!)
 // ============================================
+
+// ============================================
+// ZOOM / PAN (ТОЧНО РАБОТАЕТ!)
+// ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
-  if (!viewport || !grid) return;
+  if (!viewport || !grid) {
+    console.error('Viewport or grid not found!');
+    return;
+  }
   
-  // ПК - Mouse
-  viewport.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('cell')) return;
+  console.log('Viewport controls initialized');
+  
+  // === ПК (Mouse) ===
+  viewport.addEventListener('mousedown', function(e) {
+    console.log('Mousedown!', e.target.className);
     
+    // НЕ начинаем drag если кликнули по клетке
+    if (e.target.classList.contains('cell')) {
+      console.log('Clicked on cell, not dragging');
+      return;
+    }
+    
+    // Начинаем drag
     isDragging = true;
-    dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
+    dragStart = {
+      x: e.clientX - gridOffset.x,
+      y: e.clientY - gridOffset.y
+    };
+    
+    console.log('Start drag:', dragStart);
     viewport.style.cursor = 'grabbing';
     e.preventDefault();
   });
   
-  document.addEventListener('mousemove', (e) => {
+  // ВАЖНО: mousemove на document, а не на viewport!
+  document.addEventListener('mousemove', function(e) {
     if (!isDragging) return;
+    
     gridOffset.x = e.clientX - dragStart.x;
     gridOffset.y = e.clientY - dragStart.y;
-    grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+    
+    grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
   });
   
-  document.addEventListener('mouseup', () => {
+  // ВАЖНО: mouseup на document!
+  document.addEventListener('mouseup', function() {
+    if (isDragging) {
+      console.log('Stop drag');
+    }
     isDragging = false;
     viewport.style.cursor = 'grab';
   });
   
-  viewport.addEventListener('wheel', (e) => {
+  // Зум колёсиком
+  viewport.addEventListener('wheel', function(e) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.95 : 1.05;
     scale *= delta;
     scale = Math.max(0.3, Math.min(2, scale));
-    grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+    grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
   }, { passive: false });
   
-  // Телефон - Touch
-  let touchStartX = 0, touchStartY = 0;
+  // === ТЕЛЕФОН (Touch) ===
+  let touchStartX = 0;
+  let touchStartY = 0;
   
-  viewport.addEventListener('touchstart', (e) => {
+  viewport.addEventListener('touchstart', function(e) {
     if (e.touches.length === 1) {
       const touch = e.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -443,19 +473,19 @@ function setupViewportControls() {
     }
   }, { passive: true });
   
-  viewport.addEventListener('touchmove', (e) => {
+  viewport.addEventListener('touchmove', function(e) {
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
       gridOffset.x = touch.clientX - touchStartX;
       gridOffset.y = touch.clientY - touchStartY;
-      grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+      grid.style.transform = 'translate(' + gridOffset.x + 'px, ' + gridOffset.y + 'px) scale(' + scale + ')';
       e.preventDefault();
     }
   }, { passive: false });
   
-  viewport.addEventListener('touchend', () => {
+  viewport.addEventListener('touchend', function() {
     isDragging = false;
-    document.querySelectorAll('.touch-highlight').forEach(el => {
+    document.querySelectorAll('.touch-highlight').forEach(function(el) {
       el.classList.remove('touch-highlight');
     });
   });
