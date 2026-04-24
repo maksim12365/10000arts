@@ -95,23 +95,41 @@ function createGrid() {
       cell.style.left = (x * cellSize) + 'px';
       cell.style.top = (y * cellSize) + 'px';
       cell.style.position = 'absolute';
-      cell.addEventListener('click', () => handleCellClick(x, y));
+      
+      // 🔧 Клик по клетке
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation(); // 🔧 Останавливаем всплытие!
+        handleCellClick(x, y);
+      });
+      
       grid.appendChild(cell);
     }
   }
+  
+  // 🔧 Клик по пустому месту (viewport)
+  viewport.addEventListener('click', (e) => {
+    if (e.target === viewport) {
+      // Клик по пустому месту - ничего не делаем
+    }
+  });
 }
 
 // ============================================
 // ОБРАБОТКА КЛИКОВ
 // ============================================
 async function handleCellClick(x, y) {
-  if (currentUserPosition) {
-    alert('⚠️ Вы уже нарисовали на позиции ' + currentUserPosition.x + ', ' + currentUserPosition.y + '!\n\nМожно рисовать только ОДИН раз.');
+  // 🔧 Проверяем, занята ли клетка
+  const isOccupied = drawnPixels.has(`${x},${y}`);
+  
+  if (isOccupied) {
+    // 🔧 Клик по занятой клетке - показываем жалобу
+    showReportModal(x, y);
     return;
   }
   
-  if (drawnPixels.has(`${x},${y}`)) {
-    showReportModal(x, y);
+  // Клик по пустой клетке
+  if (currentUserPosition) {
+    alert('⚠️ Вы уже нарисовали на позиции ' + currentUserPosition.x + ', ' + currentUserPosition.y + '!\n\nМожно рисовать только ОДИН раз.');
     return;
   }
   
@@ -145,7 +163,7 @@ async function saveDrawing() {
   const cellData = {
     x: x,
     y: y,
-    image_data: imageData,
+    image_ imageData,
     status: 'active'
   };
   
@@ -376,7 +394,7 @@ function setupCanvasDrawing() {
 }
 
 // ============================================
-// ZOOM / PAN (РАБОТАЕТ И НА ПК, И НА ТЕЛЕФОНЕ)
+// 🔧 ZOOM / PAN (ПОЛНОСТЬЮ ИСПРАВЛЕНО!)
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
@@ -385,20 +403,36 @@ function setupViewportControls() {
   
   // === ПК (Mouse) ===
   let isMouseDown = false;
+  let mouseDownX = 0;
+  let mouseDownY = 0;
+  let mouseDownOffsetX = 0;
+  let mouseDownOffsetY = 0;
   
   viewport.addEventListener('mousedown', (e) => {
-    if (e.target === viewport || e.target === grid) {
-      isMouseDown = true;
-      isDragging = true;
-      dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
-      viewport.style.cursor = 'grabbing';
+    // 🔧 Drag ТОЛЬКО если кликнули по пустому месту (не по клетке!)
+    if (e.target.classList.contains('cell')) {
+      return; // Клик по клетке - не drag
     }
+    
+    isMouseDown = true;
+    isDragging = true;
+    mouseDownX = e.clientX;
+    mouseDownY = e.clientY;
+    mouseDownOffsetX = gridOffset.x;
+    mouseDownOffsetY = gridOffset.y;
+    viewport.style.cursor = 'grabbing';
+    e.preventDefault();
   });
   
   document.addEventListener('mousemove', (e) => {
     if (!isMouseDown || !isDragging) return;
-    gridOffset.x = e.clientX - dragStart.x;
-    gridOffset.y = e.clientY - dragStart.y;
+    
+    const dx = e.clientX - mouseDownX;
+    const dy = e.clientY - mouseDownY;
+    
+    gridOffset.x = mouseDownOffsetX + dx;
+    gridOffset.y = mouseDownOffsetY + dy;
+    
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   });
   
@@ -420,8 +454,11 @@ function setupViewportControls() {
   let touchStartTime = 0;
   let touchStartX = 0;
   let touchStartY = 0;
+  let touchStartOffsetX = 0;
+  let touchStartOffsetY = 0;
   let initialPinchDistance = null;
   let initialScaleAtPinch = 1;
+  let touchedCell = null;
   
   viewport.addEventListener('touchstart', (e) => {
     touchStartTime = Date.now();
@@ -431,20 +468,23 @@ function setupViewportControls() {
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       
+      // 🔧 Проверяем, куда коснулись
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       
       if (target && target.classList.contains('cell')) {
+        // 🔧 Коснулись КЛЕТКИ - подсветка, не drag
+        touchedCell = target;
         target.classList.add('touch-highlight');
         isDragging = false;
         return;
       }
       
+      // 🔧 Коснулись ПУСТОГО МЕСТА - drag
       isDragging = true;
-      dragStart = { 
-        x: touch.clientX - gridOffset.x, 
-        y: touch.clientY - gridOffset.y 
-      };
+      touchStartOffsetX = gridOffset.x;
+      touchStartOffsetY = gridOffset.y;
     } else if (e.touches.length === 2) {
+      // 🔧 Два пальца - зум
       initialPinchDistance = getTouchDistance(e.touches);
       initialScaleAtPinch = scale;
       isDragging = false;
@@ -454,30 +494,35 @@ function setupViewportControls() {
   viewport.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - touchStartX);
-      const dy = Math.abs(touch.clientY - touchStartY);
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
       
-      if (dx > 10 || dy > 10) {
-        gridOffset.x = touch.clientX - dragStart.x;
-        gridOffset.y = touch.clientY - dragStart.y;
+      // 🔧 Только если сдвинули больше 10px - это drag
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+        gridOffset.x = touchStartOffsetX + dx;
+        gridOffset.y = touchStartOffsetY + dy;
         grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
       }
     } else if (e.touches.length === 2 && initialPinchDistance) {
+      // 🔧 Зум двумя пальцами
       const currentDistance = getTouchDistance(e.touches);
       const delta = currentDistance / initialPinchDistance;
       scale = initialScaleAtPinch * delta;
       scale = Math.max(0.3, Math.min(2, scale));
       grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
     }
+    e.preventDefault();
   }, { passive: false });
   
   viewport.addEventListener('touchend', (e) => {
     isDragging = false;
     initialPinchDistance = null;
     
-    document.querySelectorAll('.touch-highlight').forEach(el => {
-      el.classList.remove('touch-highlight');
-    });
+    // 🔧 Убираем подсветку
+    if (touchedCell) {
+      touchedCell.classList.remove('touch-highlight');
+      touchedCell = null;
+    }
   });
   
   function getTouchDistance(touches) {
@@ -488,43 +533,85 @@ function setupViewportControls() {
 }
 
 // ============================================
-// МОДАЛЬНОЕ ОКНО ЖАЛОБЫ
+// 🔧 МОДАЛЬНОЕ ОКНО ЖАЛОБЫ (ИСПРАВЛЕНО!)
 // ============================================
 function showReportModal(x, y) {
   const modal = document.getElementById('reportModal');
   const btnReport = document.getElementById('btnReport');
   const btnClose = document.getElementById('btnReportClose');
-  if (!modal) return;
   
+  if (!modal) {
+    console.error('Report modal not found!');
+    return;
+  }
+  
+  // 🔧 Показываем модальное окно
   modal.classList.remove('hidden');
   
-  const handleClose = () => modal.classList.add('hidden');
-  if (btnClose) btnClose.onclick = handleClose;
+  const handleClose = () => {
+    modal.classList.add('hidden');
+  };
+  
+  if (btnClose) {
+    btnClose.onclick = handleClose;
+  }
+  
   if (btnReport) {
     btnReport.onclick = async () => {
       try {
+        // 🔧 Получаем текущее количество жалоб
         const path = `/rest/v1/cells?select=report_count&x=eq.${x}&y=eq.${y}`;
         const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
-        const response = await fetch(url, { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } });
+        
+        const response = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        
         if (response.ok) {
           const data = await response.json();
-          if (data[0]) {
+          if (data && data[0]) {
             const newCount = (data[0].report_count || 0) + 1;
-            const updatePath = `/rest/v1/cells`;
+            
+            // 🔧 Обновляем количество жалоб
+            const updatePath = `/rest/v1/cells?x=eq.${x}&y=eq.${y}`;
             const updateUrl = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(updatePath)}`;
-            await fetch(updateUrl, {
+            
+            const updateResponse = await fetch(updateUrl, {
               method: 'PATCH',
-              headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+              },
               body: JSON.stringify({ report_count: newCount })
             });
-            alert('🚩 Жалоба отправлена!');
+            
+            if (updateResponse.ok) {
+              alert('🚩 Жалоба отправлена!');
+            } else {
+              alert('Ошибка при отправке жалобы');
+            }
           }
+        } else {
+          alert('Ошибка: не удалось получить данные клетки');
         }
-      } catch (error) { console.error('Report error:', error); }
+      } catch (error) {
+        console.error('Report error:', error);
+        alert('Ошибка: ' + error.message);
+      }
       handleClose();
     };
   }
-  modal.addEventListener('click', (e) => { if (e.target === modal) handleClose(); });
+  
+  // Закрыть по клику вне окна
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      handleClose();
+    }
+  });
 }
 
 // ============================================
