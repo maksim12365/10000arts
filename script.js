@@ -9,9 +9,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ============================================
 let currentColor = '#ff0000';
 let currentTool = 'brush';
-let currentSize = 1;
-let isDrawing = false;
-let hasDrawn = false;
+let currentSize = 2;
 let currentUserPosition = null;
 let gridOffset = { x: 0, y: 0 };
 let scale = 1;
@@ -20,11 +18,13 @@ let dragStart = { x: 0, y: 0 };
 let drawnPixels = new Set();
 let cellsData = {};
 
+// Canvas
+let canvas, ctx, isDrawingOnCanvas = false, lastPos = { x: 0, y: 0 };
+
 // ============================================
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Initializing app...');
   setupWelcomeScreen();
   createGrid();
   createColorPalette();
@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupCanvasDrawing();
   setupViewportControls();
   setupShare();
+  setupToolbarButtons();
   loadGridData();
-  subscribeToUpdates();
   updateCounter();
 });
 
@@ -42,21 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 function setupWelcomeScreen() {
   const welcomeScreen = document.getElementById('welcomeScreen');
-  const agreeButton = document.getElementById('agreeButton');
-  
-  console.log('Welcome screen:', welcomeScreen);
-  console.log('Agree button:', agreeButton);
-  
-  if (!welcomeScreen) {
-    console.error('Welcome screen not found!');
-    return;
-  }
+  const agreeButton = document.getElementById('btnAgree');
   
   if (localStorage.getItem('agreedToRules') === 'true') {
-    welcomeScreen.classList.add('hidden');
+    if (welcomeScreen) welcomeScreen.classList.add('hidden');
   }
   
-  if (agreeButton) {
+  if (agreeButton && welcomeScreen) {
     agreeButton.addEventListener('click', () => {
       localStorage.setItem('agreedToRules', 'true');
       welcomeScreen.classList.add('hidden');
@@ -69,17 +61,12 @@ function setupWelcomeScreen() {
 // ============================================
 function createGrid() {
   const viewport = document.getElementById('viewport');
-  if (!viewport) {
-    console.error('Viewport not found!');
-    return;
-  }
+  const grid = document.getElementById('grid');
+  if (!viewport || !grid) return;
   
   const gridSize = 100;
   const cellSize = 32;
   
-  // Создаём контейнер для сетки
-  const grid = document.createElement('div');
-  grid.id = 'grid';
   grid.style.position = 'absolute';
   grid.style.width = (gridSize * cellSize) + 'px';
   grid.style.height = (gridSize * cellSize) + 'px';
@@ -100,17 +87,13 @@ function createGrid() {
       cell.style.position = 'absolute';
       
       cell.addEventListener('click', () => handleCellClick(x, y));
-      
       grid.appendChild(cell);
     }
   }
-  
-  viewport.appendChild(grid);
-  console.log('Grid created with', gridSize * gridSize, 'cells');
 }
 
 // ============================================
-// ОБРАБОТКА КЛИКОВ
+// ОБРАБОТКА КЛИКОВ ПО КЛЕТКЕ
 // ============================================
 async function handleCellClick(x, y) {
   if (currentUserPosition) {
@@ -119,13 +102,35 @@ async function handleCellClick(x, y) {
   }
   
   if (drawnPixels.has(`${x},${y}`)) {
-    alert('Эта клетка уже занята!');
+    showReportModal(x, y);
     return;
   }
   
-  const canvas = document.getElementById('drawCanvas');
+  // Открываем панель рисования
+  const toolbar = document.getElementById('toolbar');
+  const cellInfo = document.getElementById('cellInfo');
+  if (toolbar && cellInfo) {
+    toolbar.classList.remove('hidden');
+    cellInfo.textContent = `📍 ${x}, ${y}`;
+    
+    // Сохраняем позицию для later
+    toolbar.dataset.x = x;
+    toolbar.dataset.y = y;
+  }
+}
+
+// ============================================
+// СОХРАНЕНИЕ РИСУНКА
+// ============================================
+async function saveDrawing() {
+  const toolbar = document.getElementById('toolbar');
+  if (!toolbar) return;
+  
+  const x = parseInt(toolbar.dataset.x);
+  const y = parseInt(toolbar.dataset.y);
+  
   if (!canvas) {
-    alert('Canvas not found!');
+    alert('Ошибка: холст не найден');
     return;
   }
   
@@ -161,10 +166,13 @@ async function handleCellClick(x, y) {
       updateCellVisual(x, y, imageData);
       updateCounter();
       
-      alert('Рисунок сохранён!');
-      const toolbar = document.getElementById('toolbar');
-      if (toolbar) {
-        toolbar.classList.add('hidden');
+      toolbar.classList.add('hidden');
+      alert('✅ Рисунок сохранён!');
+      
+      // Сброс холста
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     } else {
       const error = await response.json();
@@ -190,7 +198,7 @@ function updateCellVisual(x, y, imageData) {
 }
 
 // ============================================
-// ЗАГРУЗКА ДАННЫХ
+// ЗАГРУЗКА ДАННЫХ ИЗ БАЗЫ
 // ============================================
 async function loadGridData() {
   try {
@@ -206,7 +214,6 @@ async function loadGridData() {
     
     if (response.ok) {
       const cells = await response.json();
-      console.log('Loaded cells:', cells);
       
       cells.forEach(cell => {
         drawnPixels.add(`${cell.x},${cell.y}`);
@@ -215,11 +222,9 @@ async function loadGridData() {
       });
       
       updateCounter();
-    } else {
-      console.error('Error loading ', await response.text());
     }
   } catch (error) {
-    console.error('Error loading ', error);
+    console.error('Error loading cells:', error);
   }
 }
 
@@ -243,7 +248,7 @@ async function updateCounter() {
       const count = Array.isArray(data) ? data.length : 0;
       const counterEl = document.getElementById('counter');
       if (counterEl) {
-        counterEl.textContent = `${count} / 10000`;
+        counterEl.textContent = count;
       }
     }
   } catch (error) {
@@ -262,10 +267,7 @@ function createColorPalette() {
   ];
   
   const palette = document.getElementById('colorPalette');
-  if (!palette) {
-    console.log('Color palette not found');
-    return;
-  }
+  if (!palette) return;
   
   colors.forEach(color => {
     const btn = document.createElement('button');
@@ -308,22 +310,43 @@ function setupToolbar() {
   });
 }
 
+function setupToolbarButtons() {
+  // Закрыть панель
+  const btnClose = document.getElementById('btnCloseToolbar');
+  if (btnClose) {
+    btnClose.addEventListener('click', () => {
+      document.getElementById('toolbar').classList.add('hidden');
+    });
+  }
+  
+  // Очистить холст
+  const btnClear = document.getElementById('btnClear');
+  if (btnClear) {
+    btnClear.addEventListener('click', () => {
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    });
+  }
+  
+  // Сохранить
+  const btnSave = document.getElementById('btnSave');
+  if (btnSave) {
+    btnSave.addEventListener('click', saveDrawing);
+  }
+}
+
 // ============================================
 // РИСОВАНИЕ НА CANVAS
 // ============================================
 function setupCanvasDrawing() {
-  const canvas = document.getElementById('drawCanvas');
-  if (!canvas) {
-    console.log('Canvas not found');
-    return;
-  }
+  canvas = document.getElementById('drawCanvas');
+  if (!canvas) return;
   
-  const ctx = canvas.getContext('2d');
+  ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  let isDrawingOnCanvas = false;
-  let lastPos = { x: 0, y: 0 };
   
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -337,7 +360,6 @@ function setupCanvasDrawing() {
   
   function startDrawing(e) {
     isDrawingOnCanvas = true;
-    hasDrawn = true;
     lastPos = getPos(e);
     draw(e);
   }
@@ -369,34 +391,30 @@ function setupCanvasDrawing() {
   canvas.addEventListener('mouseup', stopDrawing);
   canvas.addEventListener('mouseout', stopDrawing);
   
-  canvas.addEventListener('touchstart', startDrawing);
-  canvas.addEventListener('touchmove', draw);
+  canvas.addEventListener('touchstart', startDrawing, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
   canvas.addEventListener('touchend', stopDrawing);
 }
 
 // ============================================
-// УПРАВЛЕНИЕ ВИДОМ (ZOOM/PAN)
+// ZOOM / PAN (ПЕРЕМЕЩЕНИЕ ПО ПОЛОТНУ)
 // ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
-  if (!viewport) {
-    console.error('Viewport not found!');
-    return;
-  }
+  const grid = document.getElementById('grid');
+  if (!viewport || !grid) return;
   
   viewport.addEventListener('mousedown', startDrag);
   viewport.addEventListener('mousemove', drag);
   viewport.addEventListener('mouseup', stopDrag);
   viewport.addEventListener('mouseout', stopDrag);
-  
   viewport.addEventListener('wheel', handleWheel, { passive: false });
   
   function startDrag(e) {
-    if (e.target === viewport || e.target.classList.contains('cell')) {
-      isDragging = true;
-      dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
-      viewport.style.cursor = 'grabbing';
-    }
+    isDragging = true;
+    dragStart = { x: e.clientX - gridOffset.x, y: e.clientY - gridOffset.y };
+    viewport.style.cursor = 'grabbing';
+    e.preventDefault();
   }
   
   function drag(e) {
@@ -420,37 +438,90 @@ function setupViewportControls() {
   }
   
   function updateGridTransform() {
-    const grid = document.getElementById('grid');
-    if (grid) {
-      grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
-      grid.style.transformOrigin = '0 0';
-    }
+    grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   }
 }
 
 // ============================================
-// ПОДПИСКА НА ОБНОВЛЕНИЯ
+// МОДАЛЬНОЕ ОКНО ЖАЛОБЫ
 // ============================================
-function subscribeToUpdates() {
-  // Realtime отключён для экономии
+function showReportModal(x, y) {
+  const modal = document.getElementById('reportModal');
+  const btnReport = document.getElementById('btnReport');
+  const btnClose = document.getElementById('btnReportClose');
+  
+  if (!modal) return;
+  
+  modal.classList.remove('hidden');
+  
+  const handleClose = () => modal.classList.add('hidden');
+  
+  if (btnClose) btnClose.onclick = handleClose;
+  if (btnReport) {
+    btnReport.onclick = async () => {
+      try {
+        const path = `/rest/v1/cells?select=report_count&x=eq.${x}&y=eq.${y}`;
+        const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
+        
+        const response = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data[0]) {
+            const newCount = (data[0].report_count || 0) + 1;
+            
+            const updatePath = `/rest/v1/cells`;
+            const updateUrl = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(updatePath)}`;
+            
+            await fetch(updateUrl, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+              },
+              body: JSON.stringify({ report_count: newCount })
+            });
+            
+            alert('🚩 Жалоба отправлена!');
+          }
+        }
+      } catch (error) {
+        console.error('Report error:', error);
+      }
+      handleClose();
+    };
+  }
+  
+  // Закрыть по клику вне окна
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) handleClose();
+  });
 }
 
 // ============================================
 // КНОПКА ПОДЕЛИТЬСЯ
 // ============================================
 function setupShare() {
-  const shareBtn = document.querySelector('.btn-share');
+  const shareBtn = document.getElementById('btnShare');
   if (!shareBtn) return;
   
   shareBtn.addEventListener('click', async () => {
     try {
       await navigator.share({
-        title: 'Коллективное Полотно 10000',
+        title: '🎨 Коллективное Полотно 10000',
         text: 'Присоединяйся к созданию коллективного полотна!',
         url: window.location.href
       });
     } catch (err) {
-      console.log('Share failed:', err);
+      // Fallback: копируем ссылку
+      await navigator.clipboard.writeText(window.location.href);
+      alert('🔗 Ссылка скопирована в буфер обмена!');
     }
   });
 }
