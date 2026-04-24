@@ -354,104 +354,37 @@ function setupToolbarButtons() {
 // ============================================
 // РИСОВАНИЕ НА CANVAS
 // ============================================
-function setupCanvasDrawing() {
-  canvas = document.getElementById('drawCanvas');
-  if (!canvas) return;
-  
-  ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - rect.left, y: clientY - rect.top };
-  }
-  
-  function startDrawing(e) {
-    isDrawingOnCanvas = true;
-    lastPos = getPos(e);
-    draw(e);
-  }
-  
-  function stopDrawing() {
-    isDrawingOnCanvas = false;
-  }
-  
-  function draw(e) {
-    if (!isDrawingOnCanvas) return;
-    e.preventDefault();
-    const pos = getPos(e);
-    if (currentTool === 'eraser') {
-      ctx.strokeStyle = '#ffffff';
-    } else {
-      ctx.strokeStyle = currentColor;
-    }
-    ctx.lineWidth = currentSize * 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
-    ctx.moveTo(lastPos.x, lastPos.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastPos = pos;
-  }
-  
-  canvas.addEventListener('mousedown', startDrawing);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mouseout', stopDrawing);
-  canvas.addEventListener('touchstart', startDrawing, { passive: false });
-  canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', stopDrawing);
-}
 
-// ============================================
-// ZOOM / PAN (РАБОТАЕТ!)
-// ============================================
 function setupViewportControls() {
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   if (!viewport || !grid) return;
   
   // === ПК (Mouse) ===
-  let isMouseDown = false;
-  let mouseDownX = 0;
-  let mouseDownY = 0;
-  let mouseDownOffsetX = 0;
-  let mouseDownOffsetY = 0;
-  
   viewport.addEventListener('mousedown', (e) => {
-    // Drag ТОЛЬКО если кликнули по пустому месту (не по клетке!)
     if (e.target.classList.contains('cell')) {
       return;
     }
     
-    isMouseDown = true;
     isDragging = true;
-    mouseDownX = e.clientX;
-    mouseDownY = e.clientY;
-    mouseDownOffsetX = gridOffset.x;
-    mouseDownOffsetY = gridOffset.y;
+    dragStart = { 
+      x: e.clientX - gridOffset.x, 
+      y: e.clientY - gridOffset.y 
+    };
     viewport.style.cursor = 'grabbing';
     e.preventDefault();
   });
   
   document.addEventListener('mousemove', (e) => {
-    if (!isMouseDown || !isDragging) return;
+    if (!isDragging) return;
     
-    const dx = e.clientX - mouseDownX;
-    const dy = e.clientY - mouseDownY;
-    
-    gridOffset.x = mouseDownOffsetX + dx;
-    gridOffset.y = mouseDownOffsetY + dy;
+    gridOffset.x = e.clientX - dragStart.x;
+    gridOffset.y = e.clientY - dragStart.y;
     
     grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
   });
   
   document.addEventListener('mouseup', () => {
-    isMouseDown = false;
     isDragging = false;
     viewport.style.cursor = 'grab';
   });
@@ -465,35 +398,30 @@ function setupViewportControls() {
   }, { passive: false });
   
   // === ТЕЛЕФОН (Touch) ===
-  let touchStartTime = 0;
   let touchStartX = 0;
   let touchStartY = 0;
   let touchStartOffsetX = 0;
   let touchStartOffsetY = 0;
   let initialPinchDistance = null;
   let initialScaleAtPinch = 1;
-  let touchedCell = null;
   
   viewport.addEventListener('touchstart', (e) => {
-    touchStartTime = Date.now();
-    
     if (e.touches.length === 1) {
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
+      touchStartOffsetX = gridOffset.x;
+      touchStartOffsetY = gridOffset.y;
       
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       
       if (target && target.classList.contains('cell')) {
-        touchedCell = target;
         target.classList.add('touch-highlight');
         isDragging = false;
         return;
       }
       
       isDragging = true;
-      touchStartOffsetX = gridOffset.x;
-      touchStartOffsetY = gridOffset.y;
     } else if (e.touches.length === 2) {
       initialPinchDistance = getTouchDistance(e.touches);
       initialScaleAtPinch = scale;
@@ -507,29 +435,28 @@ function setupViewportControls() {
       const dx = touch.clientX - touchStartX;
       const dy = touch.clientY - touchStartY;
       
-      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-        gridOffset.x = touchStartOffsetX + dx;
-        gridOffset.y = touchStartOffsetY + dy;
-        grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
-      }
+      gridOffset.x = touchStartOffsetX + dx;
+      gridOffset.y = touchStartOffsetY + dy;
+      
+      grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+      e.preventDefault();
     } else if (e.touches.length === 2 && initialPinchDistance) {
       const currentDistance = getTouchDistance(e.touches);
       const delta = currentDistance / initialPinchDistance;
       scale = initialScaleAtPinch * delta;
       scale = Math.max(0.3, Math.min(2, scale));
       grid.style.transform = `translate(${gridOffset.x}px, ${gridOffset.y}px) scale(${scale})`;
+      e.preventDefault();
     }
-    e.preventDefault();
   }, { passive: false });
   
-  viewport.addEventListener('touchend', (e) => {
+  viewport.addEventListener('touchend', () => {
     isDragging = false;
     initialPinchDistance = null;
     
-    if (touchedCell) {
-      touchedCell.classList.remove('touch-highlight');
-      touchedCell = null;
-    }
+    document.querySelectorAll('.touch-highlight').forEach(el => {
+      el.classList.remove('touch-highlight');
+    });
   });
   
   function getTouchDistance(touches) {
