@@ -27,35 +27,36 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;  /* ← Добавлено */
+  padding: 20px;
 }
 
 .welcome-content {
   background: white;
-  padding: 20px 25px;  /* Было 25px 30px */
+  padding: 20px 25px;
   border-radius: 20px;
-  max-width: 450px;  /* Увеличили с 380px */
+  max-width: 450px;
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
 .welcome-content h1 {
-  font-size: 1.5rem;  /* Уменьшили с 2rem */
+  font-size: 1.5rem;
   margin-bottom: 8px;
   color: #1a1a1a;
 }
 
 .welcome-content > p {
   color: #666;
-  margin-bottom: 15px;  /* Уменьшили с 20px */
+  margin-bottom: 15px;
   font-size: 0.85rem;
 }
+
 .rules {
   background: #f8f9fa;
-  padding: 15px 18px;  /* Уменьшили с 25px */
+  padding: 15px 18px;
   border-radius: 12px;
-  margin: 15px 0;  /* Уменьшили с 20px 0 */
+  margin: 15px 0;
   text-align: left;
 }
 
@@ -69,25 +70,24 @@ body {
 }
 
 .rules li {
-  margin: 6px 0;  /* Уменьшили с 10px 0 */
-  line-height: 1.4;  /* Уменьшили с 1.5 */
+  margin: 6px 0;
+  line-height: 1.4;
   color: #444;
-  font-size: 0.85rem;  /* Добавили */
+  font-size: 0.85rem;
 }
 
-/* 🔧 Предупреждение о VPN */
 .vpn-notice {
   background: #fef3c7;
   border: 1px solid #f59e0b;
   border-radius: 6px;
-  padding: 6px 10px;  /* Уменьшили */
-  margin: 10px 0;  /* Уменьшили с 8px 0 */
+  padding: 6px 10px;
+  margin: 10px 0;
   text-align: center;
 }
 
 .vpn-notice p {
   color: #92400e;
-  font-size: 0.75rem;  /* Уменьшили */
+  font-size: 0.75rem;
   line-height: 1.3;
   margin: 0;
 }
@@ -96,45 +96,25 @@ body {
   font-weight: 700;
 }
 
-/* Для телефонов — минимальные отступы */
-@media (max-width: 600px) {
-
-  
-  /* Для телефонов — компактное меню */
-.welcome-content {
-  padding: 20px 15px;
-  max-width: 95%;
-  border-radius: 15px;
-}
-
-.welcome-content h1 {
-  font-size: 1.3rem;
-  margin-bottom: 8px;
-}
-
-.welcome-content > p {
-  font-size: 0.85rem;
-  margin-bottom: 15px;
-}
-
+/* === ГЛОБАЛЬНЫЕ СТИЛИ (для ПК и телефонов) === */
 .social-links {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  padding: 15px 20px;
   border-radius: 12px;
-  margin: 20px 0;
+  margin: 15px 0;
   text-align: center;
 }
 
 .social-links h3 {
   color: white;
-  font-size: 1rem;
-  margin-bottom: 15px;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
   font-weight: 500;
 }
 
 .social-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -143,11 +123,11 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   transition: transform 0.2s, box-shadow 0.2s;
   color: white;
 }
@@ -172,17 +152,17 @@ body {
 .warning {
   color: #dc2626;
   font-weight: 600;
-  margin: 20px 0;
-  font-size: 0.95rem;
+  margin: 15px 0;
+  font-size: 0.85rem;
 }
 
 .btn-primary {
   background: #2563eb;
   color: white;
   border: none;
-  padding: 16px 32px;
+  padding: 14px 28px;
   border-radius: 12px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -486,65 +466,45 @@ header h1 {
   line-height: 1.5;
 }
 
+/* === ТОЛЬКО ДЛЯ ТЕЛЕФОНОВ === */
 @media (max-width: 600px) {
   .welcome-content {
-    padding: 20px;
+    padding: 15px 12px;
+    max-width: 95%;
   }
   
   .welcome-content h1 {
-    font-size: 1.4rem;
-  }
-  
-  .welcome-content > p {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
   }
   
   .rules {
-    padding: 15px;
-    margin: 15px 0;
-  }
-  
-  .rules h3 {
-    font-size: 0.95rem;
-    margin-bottom: 10px;
-  }
-  
-  .rules ul {
-    margin-left: 15px;
+    padding: 12px;
+    margin: 10px 0;
   }
   
   .rules li {
-    font-size: 0.85rem;
-    margin: 6px 0;
+    font-size: 0.75rem;
+    margin: 4px 0;
+  }
+  
+  .vpn-notice {
+    padding: 6px 8px;
+    margin: 8px 0;
   }
   
   .social-links {
-    padding: 15px;
-    margin: 15px 0;
-  }
-  
-  .social-links h3 {
-    font-size: 0.85rem;
-    margin-bottom: 10px;
-  }
-  
-  .social-buttons {
-    gap: 8px;
+    padding: 12px;
+    margin: 10px 0;
   }
   
   .social-btn {
-    padding: 10px 16px;
-    font-size: 0.85rem;
-  }
-  
-  .warning {
-    font-size: 0.85rem;
-    margin: 15px 0;
+    padding: 8px 12px;
+    font-size: 0.75rem;
   }
   
   .btn-primary {
-    padding: 14px 28px;
-    font-size: 1rem;
+    padding: 12px 20px;
+    font-size: 0.9rem;
   }
   
   .toolbar-middle {
