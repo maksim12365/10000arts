@@ -1289,3 +1289,146 @@ header p {
   }
 }
 
+/* ============================================ */
+/* ЭФФЕКТ ПРИ СОХРАНЕНИИ (CELEBRATION) */
+/* ============================================ */
+
+/* Конфетти */
+.confetti {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10001;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Сообщение о праздновании */
+.celebration-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: white;
+  border-radius: 20px;
+  padding: 30px 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.celebration-message.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.celebration-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  text-align: center;
+}
+
+.celebration-icon {
+  font-size: 4rem;
+  animation: celebrationIconBounce 0.6s ease infinite;
+}
+
+@keyframes celebrationIconBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.celebration-text h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #667eea;
+  font-weight: 700;
+}
+
+.celebration-text p {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.celebration-stars {
+  font-size: 2rem;
+  animation: celebrationStarsSpin 2s linear infinite;
+}
+
+@keyframes celebrationStarsSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Подсветка клетки */
+.cell.celebration-highlight {
+  animation: cellCelebrate 0.6s ease 3;
+}
+
+@keyframes cellCelebrate {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(255, 215, 0, 0);
+  }
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  .celebration-message {
+    left: 50%;
+    right: 20px;
+    left: auto;
+    transform: translate(0, -50%) scale(0.9);
+    padding: 20px 25px;
+    min-width: 280px;
+  }
+  
+  .celebration-message.show {
+    transform: translate(0, -50%) scale(1);
+  }
+  
+  .celebration-icon {
+    font-size: 3rem;
+  }
+  
+  .celebration-text h3 {
+    font-size: 1.2rem;
+  }
+  
+  .celebration-text p {
+    font-size: 0.8rem;
+  }
+  
+  .confetti {
+    /* Меньше конфетти на телефоне для производительности */
+  }
+}
+
+/* Отключение анимаций для пользователей с prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .confetti,
+  .celebration-message,
+  .celebration-icon,
+  .celebration-stars,
+  .cell.celebration-highlight {
+    animation: none !important;
+    transition: none !important;
+  }
+}
