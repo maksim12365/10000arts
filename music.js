@@ -5,7 +5,7 @@
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'https://files.catbox.moe/quvju4.mp3',
+  audioFile: 'https://archive.org/details/famy-ava-ost-teen-wolf-online-audio-converter.com',
   week: 1
 };
 
