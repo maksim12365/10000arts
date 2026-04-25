@@ -1,11 +1,11 @@
 // ============================================
-// МУЗЫКА НЕДЕЛИ (РАБОТАЕТ 100%)
+// МУЗЫКА НЕДЕЛИ (С jsDelivr - РАБОТАЕТ!)
 // ============================================
 
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'https://raw.githubusercontent.com/maksim12365/10000arts/main/music/track.mp3',
+  audioFile: 'https://cdn.jsdelivr.net/gh/maksim12365/10000arts@main/music/track.mp3',
   week: 1
 };
 
@@ -43,17 +43,15 @@ function initMusicWidget() {
   audioElement.addEventListener('ended', function() {
     isPlaying = false;
     playBtn.textContent = '▶️';
-    console.log('🎵 Track ended');
   });
   
   audioElement.addEventListener('error', function(e) {
     console.error('❌ Audio error:', e);
-    console.error('❌ File URL:', MUSIC_CONFIG.audioFile);
-    alert('Ошибка загрузки файла. Проверь ссылку!');
+    console.error('❌ File:', MUSIC_CONFIG.audioFile);
   });
   
-  console.log('✅ Music initialized:', MUSIC_CONFIG.track);
-  console.log('✅ File URL:', MUSIC_CONFIG.audioFile);
+  console.log('✅ Music initialized');
+  console.log('✅ URL:', MUSIC_CONFIG.audioFile);
 }
 
 function toggleMusic() {
@@ -72,8 +70,7 @@ function toggleMusic() {
       isPlaying = true;
       console.log('▶️ Playing');
     }).catch(error => {
-      console.error('❌ Play error:', error);
-      alert('Не удалось воспроизвести. Проверь файл!');
+      console.error('❌ Play failed:', error);
     });
   }
 }
