@@ -5,7 +5,7 @@
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'https://files.catbox.moe/mf8y3f.mp3',
+  audioFile: 'https://raw.githubusercontent.com/maksim12365/10000arts/main/music/track.mp3',
   week: 1
 };
 
@@ -14,12 +14,8 @@ let audioElement = null;
 
 function initMusicWidget() {
   const widget = document.getElementById('musicWidget');
-  if (!widget) {
-    console.error('❌ musicWidget not found!');
-    return;
-  }
+  if (!widget) return;
   
-  // Создаём HTML
   widget.innerHTML = `
     <div class="music-label">🎵 Трек недели #${MUSIC_CONFIG.week}</div>
     <div class="music-content">
@@ -33,73 +29,55 @@ function initMusicWidget() {
     </div>
   `;
   
-  // Создаём аудио элемент
-  audioElement = new Audio(MUSIC_CONFIG.audioFile);
+  audioElement = new Audio();
+  audioElement.src = MUSIC_CONFIG.audioFile;
   audioElement.preload = 'auto';
   
-  // Находим кнопку
   const playBtn = document.getElementById('musicPlayBtn');
-  if (!playBtn) {
-    console.error('❌ Play button not found!');
-    return;
-  }
   
-  // Добавляем обработчик КЛИКА
-  playBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  playBtn.addEventListener('click', function() {
     console.log('🎵 Button clicked!');
     toggleMusic();
   });
   
-  // Обработка окончания трека
   audioElement.addEventListener('ended', function() {
     isPlaying = false;
     playBtn.textContent = '▶️';
     console.log('🎵 Track ended');
   });
   
-  // Обработка ошибок
   audioElement.addEventListener('error', function(e) {
     console.error('❌ Audio error:', e);
-    alert('Ошибка: файл не найден или не поддерживается');
+    console.error('❌ File URL:', MUSIC_CONFIG.audioFile);
+    alert('Ошибка загрузки файла. Проверь ссылку!');
   });
   
-  console.log('✅ Music widget initialized:', MUSIC_CONFIG.track);
+  console.log('✅ Music initialized:', MUSIC_CONFIG.track);
+  console.log('✅ File URL:', MUSIC_CONFIG.audioFile);
 }
 
 function toggleMusic() {
-  if (!audioElement) {
-    console.error('❌ Audio element not initialized!');
-    return;
-  }
+  if (!audioElement) return;
   
   const playBtn = document.getElementById('musicPlayBtn');
   
   if (isPlaying) {
-    // Остановить
     audioElement.pause();
     playBtn.textContent = '▶️';
     isPlaying = false;
-    console.log('🎵 Music paused');
+    console.log('⏸️ Paused');
   } else {
-    // Играть
-    const playPromise = audioElement.play();
-    
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        playBtn.textContent = '⏸️';
-        isPlaying = true;
-        console.log('🎵 Music playing');
-      }).catch(error => {
-        console.error('❌ Play failed:', error);
-        alert('Не удалось воспроизвести. Проверьте файл.');
-      });
-    }
+    audioElement.play().then(() => {
+      playBtn.textContent = '⏸️';
+      isPlaying = true;
+      console.log('▶️ Playing');
+    }).catch(error => {
+      console.error('❌ Play error:', error);
+      alert('Не удалось воспроизвести. Проверь файл!');
+    });
   }
 }
 
-// Инициализация после загрузки страницы
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initMusicWidget);
 } else {
