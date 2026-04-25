@@ -1,17 +1,17 @@
 // ============================================
-// МУЗЫКА НЕДЕЛИ (YOUTUBE - МОБИЛЬНАЯ ВЕРСИЯ!)
+// МУЗЫКА НЕДЕЛИ (ПРЯМОЙ MP3 + jsDelivr - РАБОТАЕТ В РФ!)
 // ============================================
 
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  youtubeId: 'xk7iWfqcpro',
+  // Ссылка через jsDelivr (работает в России!)
+  audioFile: 'https://cdn.jsdelivr.net/gh/maksim12365/10000arts@main/music/track.mp3',
   week: 1
 };
 
-let player = null;
+let audioElement = null;
 let isPlaying = false;
-let playerReady = false;
 
 function initMusicWidget() {
   const widget = document.getElementById('musicWidget');
@@ -28,127 +28,70 @@ function initMusicWidget() {
         ▶️
       </button>
     </div>
-    <div id="youtube-player"></div>
   `;
   
-  // Стили для скрытого плеера
-  const playerDiv = document.getElementById('youtube-player');
-  playerDiv.style.position = 'absolute';
-  playerDiv.style.left = '-9999px';
-  playerDiv.style.width = '1px';
-  playerDiv.style.height = '1px';
-  playerDiv.style.overflow = 'hidden';
-  
-  // Загружаем YouTube API
-  if (typeof YT === 'undefined') {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-  } else {
-    createPlayer();
-  }
-  
-  // Глобальная функция для YouTube API
-  window.onYouTubeIframeAPIReady = createPlayer;
+  // Создаём аудио элемент
+  audioElement = new Audio();
+  audioElement.preload = 'metadata';
   
   const playBtn = document.getElementById('musicPlayBtn');
   playBtn.addEventListener('click', toggleMusic);
   
-  console.log('✅ Music widget initialized');
-}
-
-function createPlayer() {
-  if (player) return;
-  
-  try {
-    player = new YT.Player('youtube-player', {
-      height: '1',
-      width: '1',
-      videoId: MUSIC_CONFIG.youtubeId,
-      playerVars: {
-        'playsinline': 1,
-        'controls': 0,
-        'disablekb': 1,
-        'fs': 0,
-        'rel': 0,
-        'iv_load_policy': 3,
-        'modestbranding': 1
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange,
-        'onError': onPlayerError
-      }
-    });
-    console.log('▶️ Player creating...');
-  } catch (e) {
-    console.error('❌ Player error:', e);
-  }
-}
-
-function onPlayerReady(event) {
-  playerReady = true;
-  console.log('✅ Player ready!');
-}
-
-function onPlayerStateChange(event) {
-  const btn = document.getElementById('musicPlayBtn');
-  
-  if (event.data === YT.PlayerState.PLAYING) {
+  // Обработчики
+  audioElement.addEventListener('play', () => {
     isPlaying = true;
-    btn.textContent = '⏸️';
+    playBtn.textContent = '⏸️';
     console.log('▶️ Playing');
-  } else if (event.data === YT.PlayerState.PAUSED) {
+  });
+  
+  audioElement.addEventListener('pause', () => {
     isPlaying = false;
-    btn.textContent = '▶️';
+    playBtn.textContent = '▶️';
     console.log('⏸️ Paused');
-  } else if (event.data === YT.PlayerState.ENDED) {
+  });
+  
+  audioElement.addEventListener('ended', () => {
     isPlaying = false;
-    btn.textContent = '▶️';
+    playBtn.textContent = '▶️';
     console.log('⏹️ Ended');
-  }
-}
-
-function onPlayerError(event) {
-  console.error('❌ YouTube error:', event.data);
-  const btn = document.getElementById('musicPlayBtn');
-  btn.textContent = '❌';
-  alert('Ошибка воспроизведения. Попробуйте позже.');
+  });
+  
+  audioElement.addEventListener('error', (e) => {
+    console.error('❌ Audio error:', e);
+    playBtn.textContent = '❌';
+    // Фолбэк: открываем VK
+    window.open('https://vk.com/audio686447732_456240900_cd7692d0d8633ae71b', '_blank');
+  });
+  
+  console.log('✅ Music initialized');
+  console.log('✅ URL:', MUSIC_CONFIG.audioFile);
 }
 
 function toggleMusic() {
-  console.log('🎵 Toggle clicked, ready:', playerReady);
+  if (!audioElement) return;
   
-  if (!player || !playerReady) {
-    console.log('⏳ Player not ready, creating...');
-    createPlayer();
-    setTimeout(() => {
-      if (player && playerReady) {
-        doPlay();
-      } else {
-        alert('Подождите загрузки плеера...');
-      }
-    }, 500);
-    return;
+  // Если файл ещё не загружен - загружаем
+  if (!audioElement.src) {
+    audioElement.src = MUSIC_CONFIG.audioFile;
   }
   
-  doPlay();
-}
-
-function doPlay() {
-  const btn = document.getElementById('musicPlayBtn');
-  
-  try {
-    if (isPlaying) {
-      player.pauseVideo();
-    } else {
-      player.playVideo();
+  if (isPlaying) {
+    audioElement.pause();
+  } else {
+    // На мобильных требуется пользовательское взаимодействие
+    const playPromise = audioElement.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.error('❌ Play failed:', error);
+        // Фолбэк: открываем в приложении
+        if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+          window.open('https://vk.com/audio686447732_456240900_cd7692d0d8633ae71b', '_blank');
+        } else {
+          alert('Не удалось воспроизвести. Попробуйте ещё раз.');
+        }
+      });
     }
-  } catch (e) {
-    console.error('❌ Play error:', e);
-    // Фолбэк: открываем в приложении YouTube
-    window.open(`https://www.youtube.com/watch?v=${MUSIC_CONFIG.youtubeId}`, '_blank');
   }
 }
 
