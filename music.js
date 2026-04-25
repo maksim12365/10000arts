@@ -8,7 +8,7 @@ let isPlaying = false;
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'https://files.catbox.moe/dd6l8r.mp3',  // Файл в корне!
+  audioFile: 'https://archive.org/download/famy-ava-ost-teen-wolf-online-audio-converter.com/Famy%20-%20Ava%20%28OST%20_Оборотень_%20_%20_Teen%20Wolf_%29%20%28online-audio-converter.com%29.mp3',  // Файл в корне!
   week: 1
 };
 
