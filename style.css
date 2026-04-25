@@ -548,3 +548,94 @@ header h1 {
     height: 180px;
   }
 }
+
+/* ============================================ */
+/* МУЗЫКА НЕДЕЛИ (АУДИО) */
+/* ============================================ */
+
+.music-widget {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 20px;
+  margin: 0 auto 15px auto;
+  max-width: 700px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.music-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.music-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.music-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.music-track {
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.music-artist {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+.music-play-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.music-play-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+.music-play-btn:active {
+  transform: scale(0.95);
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  .music-widget {
+    margin: 0 10px 15px 10px;
+    padding: 12px 15px;
+  }
+  
+  .music-track {
+    font-size: 1rem;
+  }
+  
+  .music-artist {
+    font-size: 0.8rem;
+  }
+  
+  .music-play-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+}
