@@ -1,17 +1,16 @@
 // ============================================
-// МУЗЫКА НЕДЕЛИ (ПРЯМОЙ MP3 + jsDelivr - РАБОТАЕТ В РФ!)
+// МУЗЫКА НЕДЕЛИ (ПРЯМОЙ ФАЙЛ - РАБОТАЕТ!)
 // ============================================
+
+let audio = null;
+let isPlaying = false;
 
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  // Ссылка через jsDelivr (работает в России!)
-  audioFile: 'https://cdn.jsdelivr.net/gh/maksim12365/10000arts@main/music/track.mp3',
+  audioFile: '/track.mp3',  // Файл в корне!
   week: 1
 };
-
-let audioElement = null;
-let isPlaying = false;
 
 function initMusicWidget() {
   const widget = document.getElementById('musicWidget');
@@ -30,72 +29,38 @@ function initMusicWidget() {
     </div>
   `;
   
-  // Создаём аудио элемент
-  audioElement = new Audio();
-  audioElement.preload = 'metadata';
+  // Создаём аудио
+  audio = new Audio(MUSIC_CONFIG.audioFile);
   
-  const playBtn = document.getElementById('musicPlayBtn');
-  playBtn.addEventListener('click', toggleMusic);
-  
-  // Обработчики
-  audioElement.addEventListener('play', () => {
-    isPlaying = true;
-    playBtn.textContent = '⏸️';
-    console.log('▶️ Playing');
-  });
-  
-  audioElement.addEventListener('pause', () => {
-    isPlaying = false;
-    playBtn.textContent = '▶️';
-    console.log('⏸️ Paused');
-  });
-  
-  audioElement.addEventListener('ended', () => {
-    isPlaying = false;
-    playBtn.textContent = '▶️';
-    console.log('⏹️ Ended');
-  });
-  
-  audioElement.addEventListener('error', (e) => {
-    console.error('❌ Audio error:', e);
-    playBtn.textContent = '❌';
-    // Фолбэк: открываем VK
-    window.open('https://vk.com/audio686447732_456240900_cd7692d0d8633ae71b', '_blank');
-  });
-  
-  console.log('✅ Music initialized');
-  console.log('✅ URL:', MUSIC_CONFIG.audioFile);
-}
-
-function toggleMusic() {
-  if (!audioElement) return;
-  
-  // Если файл ещё не загружен - загружаем
-  if (!audioElement.src) {
-    audioElement.src = MUSIC_CONFIG.audioFile;
-  }
-  
-  if (isPlaying) {
-    audioElement.pause();
-  } else {
-    // На мобильных требуется пользовательское взаимодействие
-    const playPromise = audioElement.play();
-    
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.error('❌ Play failed:', error);
-        // Фолбэк: открываем в приложении
-        if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
-          window.open('https://vk.com/audio686447732_456240900_cd7692d0d8633ae71b', '_blank');
-        } else {
-          alert('Не удалось воспроизвести. Попробуйте ещё раз.');
-        }
+  const btn = document.getElementById('musicPlayBtn');
+  btn.addEventListener('click', () => {
+    if (isPlaying) {
+      audio.pause();
+      btn.textContent = '▶️';
+      isPlaying = false;
+    } else {
+      audio.play().catch(() => {
+        // Если не получилось - пробуем ещё раз
+        setTimeout(() => audio.play(), 100);
       });
+      btn.textContent = '⏸️';
+      isPlaying = true;
     }
-  }
+  });
+  
+  audio.addEventListener('ended', () => {
+    btn.textContent = '▶️';
+    isPlaying = false;
+  });
+  
+  audio.addEventListener('error', (e) => {
+    console.error('❌ Error:', e);
+    btn.textContent = '❌';
+  });
+  
+  console.log('✅ Music loaded:', MUSIC_CONFIG.audioFile);
 }
 
-// Инициализация
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initMusicWidget);
 } else {
