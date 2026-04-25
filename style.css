@@ -770,3 +770,38 @@ header p {
     font-size: 0.75rem !important;
   }
 }
+
+/* ============================================ */
+/* КНОПКА "МОЯ ПОЗИЦИЯ" */
+/* ============================================ */
+
+.my-pos-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 5px auto 0 auto;
+  display: inline-block;
+}
+
+.my-pos-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+}
+
+.my-pos-btn:active {
+  transform: translateY(0);
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  .my-pos-btn {
+    width: 100%;
+    margin-top: 5px;
+  }
+}
