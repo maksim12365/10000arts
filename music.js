@@ -5,7 +5,7 @@
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'https://archive.org/details/famy-ava-1-online-audio-converter.com',
+  audioFile: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
   week: 1
 };
 
