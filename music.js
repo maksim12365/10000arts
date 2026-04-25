@@ -1,5 +1,5 @@
 // ============================================
-// МУЗЫКА НЕДЕЛИ (АУДИО ПЛЕЕР) - ИСПРАВЛЕНО
+// МУЗЫКА НЕДЕЛИ (РАБОТАЕТ 100%)
 // ============================================
 
 const MUSIC_CONFIG = {
@@ -9,10 +9,17 @@ const MUSIC_CONFIG = {
   week: 1
 };
 
+let isPlaying = false;
+let audioElement = null;
+
 function initMusicWidget() {
   const widget = document.getElementById('musicWidget');
-  if (!widget) return;
+  if (!widget) {
+    console.error('❌ musicWidget not found!');
+    return;
+  }
   
+  // Создаём HTML
   widget.innerHTML = `
     <div class="music-label">🎵 Трек недели #${MUSIC_CONFIG.week}</div>
     <div class="music-content">
@@ -20,71 +27,81 @@ function initMusicWidget() {
         <span class="music-track">${MUSIC_CONFIG.track}</span>
         <span class="music-artist">${MUSIC_CONFIG.artist}</span>
       </div>
-      <button class="music-play-btn" id="musicPlayBtn">
+      <button id="musicPlayBtn" class="music-play-btn" type="button">
         ▶️
       </button>
     </div>
-    <audio id="musicAudio" preload="auto">
-      <source src="${MUSIC_CONFIG.audioFile}" type="audio/mpeg">
-      Ваш браузер не поддерживает аудио.
-    </audio>
   `;
   
-  // Добавляем обработчик на кнопку
-  const btn = document.getElementById('musicPlayBtn');
-  const audio = document.getElementById('musicAudio');
+  // Создаём аудио элемент
+  audioElement = new Audio(MUSIC_CONFIG.audioFile);
+  audioElement.preload = 'auto';
   
-  btn.addEventListener('click', toggleMusic);
-  
-  // Когда трек закончится
-  audio.addEventListener('ended', () => {
-    isPlaying = false;
-    btn.textContent = '▶️';
-    console.log('🎵 Music: Ended');
-  });
-  
-  // Обработка ошибок
-  audio.addEventListener('error', (e) => {
-    console.error('❌ Audio error:', e);
-    alert('Ошибка загрузки аудио. Проверьте файл.');
-  });
-  
-  console.log('🎵 Music widget loaded:', MUSIC_CONFIG.track);
-}
-
-let isPlaying = false;
-
-function toggleMusic() {
-  const btn = document.getElementById('musicPlayBtn');
-  const audio = document.getElementById('musicAudio');
-  
-  if (!audio || !btn) {
-    console.error('Audio или кнопка не найдены');
+  // Находим кнопку
+  const playBtn = document.getElementById('musicPlayBtn');
+  if (!playBtn) {
+    console.error('❌ Play button not found!');
     return;
   }
   
+  // Добавляем обработчик КЛИКА
+  playBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🎵 Button clicked!');
+    toggleMusic();
+  });
+  
+  // Обработка окончания трека
+  audioElement.addEventListener('ended', function() {
+    isPlaying = false;
+    playBtn.textContent = '▶️';
+    console.log('🎵 Track ended');
+  });
+  
+  // Обработка ошибок
+  audioElement.addEventListener('error', function(e) {
+    console.error('❌ Audio error:', e);
+    alert('Ошибка: файл не найден или не поддерживается');
+  });
+  
+  console.log('✅ Music widget initialized:', MUSIC_CONFIG.track);
+}
+
+function toggleMusic() {
+  if (!audioElement) {
+    console.error('❌ Audio element not initialized!');
+    return;
+  }
+  
+  const playBtn = document.getElementById('musicPlayBtn');
+  
   if (isPlaying) {
     // Остановить
-    audio.pause();
-    btn.textContent = '▶️';
+    audioElement.pause();
+    playBtn.textContent = '▶️';
     isPlaying = false;
-    console.log('🎵 Music: Stopped');
+    console.log('🎵 Music paused');
   } else {
-    // Запустить с обработкой ошибок
-    const playPromise = audio.play();
+    // Играть
+    const playPromise = audioElement.play();
     
     if (playPromise !== undefined) {
       playPromise.then(() => {
-        btn.textContent = '⏸️';
+        playBtn.textContent = '⏸️';
         isPlaying = true;
-        console.log('🎵 Music: Playing');
+        console.log('🎵 Music playing');
       }).catch(error => {
-        console.error('❌ Error playing audio:', error);
-        alert('Не удалось воспроизвести аудио. Попробуйте позже.');
+        console.error('❌ Play failed:', error);
+        alert('Не удалось воспроизвести. Проверьте файл.');
       });
     }
   }
 }
 
-// Запуск после загрузки страницы
-document.addEventListener('DOMContentLoaded', initMusicWidget);
+// Инициализация после загрузки страницы
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMusicWidget);
+} else {
+  initMusicWidget();
+}
