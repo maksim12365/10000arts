@@ -1270,7 +1270,7 @@ header p {
 }
 
 /* ============================================ */
-/* ПРЕДСКАЗАНИЕ ЗАПОЛНЕНИЯ */
+/* ПРЕДСКАЗАНИЕ ЗАПОЛНЕНИЯ (СВЁРТЫВАЕМЫЙ) */
 /* ============================================ */
 
 .prediction-widget {
@@ -1281,12 +1281,69 @@ header p {
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   z-index: 9998;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* Кнопка свёртывания (всегда видна) */
+.prediction-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.prediction-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.prediction-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Основной контент */
+.prediction-content {
   padding: 20px;
+  padding-top: 50px;
   min-width: 280px;
   max-width: 350px;
   transition: all 0.3s ease;
 }
 
+/* Свёрнутое состояние */
+.prediction-widget.collapsed {
+  width: 52px;
+  height: 52px;
+  min-width: auto;
+  max-width: none;
+}
+
+.prediction-widget.collapsed .prediction-content {
+  display: none;
+}
+
+.prediction-widget.collapsed .prediction-toggle {
+  position: relative;
+  top: 10px;
+  right: 10px;
+}
+
+/* Заголовок */
 .prediction-header {
   font-weight: 700;
   font-size: 1rem;
@@ -1431,24 +1488,23 @@ header p {
   .prediction-widget {
     bottom: 10px;
     left: 10px;
-    right: 10px;
+  }
+  
+  .prediction-content {
     min-width: auto;
     max-width: none;
     padding: 15px;
+    padding-top: 50px;
   }
   
   .prediction-milestones {
     padding: 12px;
   }
-  
-  .milestone-item {
-    font-size: 0.75rem;
-  }
 }
 
-/* Скрытие на очень маленьких экранах */
+/* На очень маленьких экранах */
 @media (max-width: 400px) {
   .prediction-widget {
-    display: none;
+    bottom: 70px;
   }
 }
