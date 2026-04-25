@@ -1025,3 +1025,176 @@ header p {
     transform-origin: top left;
   }
 }
+
+/* ============================================ */
+/* ГЕНЕРАТОР ПАТТЕРНОВ */
+/* ============================================ */
+
+/* Кнопка открытия */
+.pattern-toggle-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 10px auto;
+  display: block;
+}
+
+.pattern-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+}
+
+/* Панель паттернов */
+#patternPanel {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  padding: 20px;
+  min-width: 320px;
+  max-width: 90%;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+#patternPanel:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+#patternPanel.hidden {
+  display: none;
+}
+
+.pattern-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.pattern-header span {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #333;
+}
+
+.pattern-close {
+  background: #f0f0f0;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.pattern-close:hover {
+  background: #e0e0e0;
+}
+
+/* Сетка паттернов */
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.pattern-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pattern-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.pattern-btn:active {
+  transform: scale(0.95);
+}
+
+.pattern-btn.applied {
+  animation: patternApplied 0.3s ease;
+}
+
+@keyframes patternApplied {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Предпросмотр */
+.pattern-preview {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 2px solid #f0f0f0;
+}
+
+#patternPreview {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  margin-bottom: 10px;
+}
+
+.pattern-hint {
+  font-size: 0.75rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  #patternPanel {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    min-width: auto;
+  }
+  
+  #patternPanel:not(.hidden) {
+    transform: none;
+  }
+  
+  .pattern-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  
+  .pattern-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+  
+  .pattern-toggle-btn {
+    width: 100%;
+  }
+}
