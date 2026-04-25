@@ -872,17 +872,17 @@ header p {
 
 
 /* ============================================ */
-/* МИНИ-КАРТА ПОЛОТНА */
+/* МИНИ-КАРТА ПОЛОТНА (ИСПРАВЛЕННАЯ) */
 /* ============================================ */
 
 #minimap-container {
   position: fixed;
-  bottom: 20px;
+  bottom: 80px;  /* ↑ Подняли выше от низа */
   right: 20px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
+  z-index: 9998;  /* ↓ Ниже чем welcome screen (10000) */
   overflow: hidden;
   transition: all 0.3s ease;
   max-width: 350px;
@@ -987,7 +987,46 @@ header p {
   background: #f9f9f9;
 }
 
-/* Скроллбар для мини-карты */
+/* Адаптив для телефона — ИСПРАВЛЕНО! */
+@media (max-width: 600px) {
+  #minimap-container {
+    bottom: 100px;  /* ↑ Ещё выше на телефоне */
+    right: 10px;
+    left: auto;     /* ← Не на всю ширину */
+    max-width: 200px;  /* ← Меньше размер */
+    transform: scale(0.85);  /* ← Уменьшаем */
+    transform-origin: bottom right;
+  }
+  
+  .minimap-wrapper {
+    max-height: 250px;
+    padding: 8px;
+  }
+  
+  .minimap-grid {
+    transform: scale(0.9);
+    transform-origin: top left;
+  }
+  
+  .minimap-header span {
+    font-size: 0.8rem;
+  }
+  
+  .minimap-legend {
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.7rem;
+  }
+}
+
+/* На очень маленьких экранах — скрываем по умолчанию */
+@media (max-width: 400px) {
+  #minimap-container {
+    display: none;  /* Скрываем на совсем маленьких */
+  }
+}
+
+/* Скроллбар */
 .minimap-wrapper::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -1005,25 +1044,6 @@ header p {
 
 .minimap-wrapper::-webkit-scrollbar-thumb:hover {
   background: #764ba2;
-}
-
-/* Адаптив для телефона */
-@media (max-width: 600px) {
-  #minimap-container {
-    bottom: 10px;
-    right: 10px;
-    left: 10px;
-    max-width: none;
-  }
-  
-  .minimap-wrapper {
-    max-height: 250px;
-  }
-  
-  .minimap-grid {
-    transform: scale(0.8);
-    transform-origin: top left;
-  }
 }
 
 /* ============================================ */
