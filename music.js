@@ -5,7 +5,7 @@
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'music/track.mp3',
+  audioFile: 'https://files.catbox.moe/quvju4.mp3',
   week: 1
 };
 
