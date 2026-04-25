@@ -8,7 +8,7 @@ let isPlaying = false;
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: '/track.mp3',  // Файл в корне!
+  audioFile: 'https://files.catbox.moe/dd6l8r.mp3',  // Файл в корне!
   week: 1
 };
 
