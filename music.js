@@ -3,8 +3,8 @@
 // ============================================
 
 const MUSIC_CONFIG = {
-  track: 'Blinding Lights',
-  artist: 'The Weeknd',
+  track: 'Ava',
+  artist: 'Famy',
   audioFile: 'music/track.mp3', // Путь к файлу
   week: 1
 };
