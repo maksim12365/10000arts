@@ -869,3 +869,159 @@ header p {
     display: none !important;
   }
 }
+
+
+/* ============================================ */
+/* МИНИ-КАРТА ПОЛОТНА */
+/* ============================================ */
+
+#minimap-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  max-width: 350px;
+}
+
+.minimap-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.minimap-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.minimap-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.minimap-wrapper {
+  padding: 10px;
+  overflow: auto;
+  max-height: 350px;
+}
+
+.minimap-grid {
+  position: relative;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.minimap-cell {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #e0e0e0;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.minimap-cell:hover {
+  background: #667eea;
+  z-index: 10;
+}
+
+.minimap-cell.occupied {
+  background: #667eea;
+}
+
+.minimap-legend {
+  padding: 8px 15px;
+  background: #f9f9f9;
+  display: flex;
+  gap: 15px;
+  font-size: 0.75rem;
+  color: #666;
+  border-top: 1px solid #e0e0e0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.legend-dot.empty {
+  background: #e0e0e0;
+}
+
+.legend-dot.occupied {
+  background: #667eea;
+}
+
+#minimap-count {
+  font-size: 0.75rem;
+  color: #999;
+  text-align: center;
+  padding: 5px;
+  background: #f9f9f9;
+}
+
+/* Скроллбар для мини-карты */
+.minimap-wrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.minimap-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.minimap-wrapper::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.minimap-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  #minimap-container {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .minimap-wrapper {
+    max-height: 250px;
+  }
+  
+  .minimap-grid {
+    transform: scale(0.8);
+    transform-origin: top left;
+  }
+}
