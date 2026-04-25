@@ -5,7 +5,7 @@
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'https://raw.githubusercontent.com/maksim12365/10000arts/refs/heads/main/music/track.mp3',
+  audioFile: 'https://archive.org/details/famy-ava-1-online-audio-converter.com',
   week: 1
 };
 
