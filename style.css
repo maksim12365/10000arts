@@ -677,3 +677,125 @@ header h1 {
     padding: 12px 20px;
   }
 }
+
+/* ============================================ */
+/* КОМПАКТНОЕ МЕНЮ */
+/* ============================================ */
+
+/* Делаем header компактным */
+header {
+  text-align: center;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  margin: 10px auto;
+  max-width: 90%;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  font-size: 1.5rem;
+  margin: 5px 0;
+}
+
+header p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+/* Музыкальный виджет компактнее */
+.music-widget {
+  margin: 0 auto 10px auto !important;
+  padding: 10px 15px !important;
+  max-width: 500px !important;
+}
+
+.music-label {
+  font-size: 0.75rem !important;
+  margin-bottom: 5px !important;
+}
+
+.music-track {
+  font-size: 0.95rem !important;
+}
+
+.music-artist {
+  font-size: 0.8rem !important;
+}
+
+.music-play-btn {
+  width: 40px !important;
+  height: 40px !important;
+  font-size: 1.1rem !important;
+}
+
+/* Кнопка скачать компактнее */
+.download-btn {
+  padding: 6px 15px !important;
+  font-size: 0.85rem !important;
+  margin-top: 5px !important;
+}
+
+/* ВСЁ В ОДНУ СТРОКУ */
+@media (min-width: 768px) {
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  header h1 {
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+  }
+  
+  header > p {
+    margin: 0;
+  }
+  
+  .download-btn {
+    margin: 0;
+  }
+  
+  .music-widget {
+    width: 100%;
+    order: -1; /* Музыка сверху */
+  }
+}
+
+/* На телефоне ещё компактнее */
+@media (max-width: 600px) {
+  header {
+    padding: 8px 15px;
+    margin: 5px;
+  }
+  
+  header h1 {
+    font-size: 1.2rem;
+  }
+  
+  header p {
+    font-size: 0.8rem;
+  }
+  
+  .music-widget {
+    padding: 8px 12px !important;
+  }
+  
+  .music-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .music-info {
+    text-align: center;
+  }
+  
+  .download-btn {
+    width: 100%;
+    padding: 8px 15px !important;
+  }
+}
