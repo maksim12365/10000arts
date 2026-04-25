@@ -1,111 +1,76 @@
 // ============================================
-// СКАЧАТЬ СВОЙ РИСУНОК (РАБОТАЕТ!)
+// СКАЧАТЬ СВОЙ РИСУНОК (ДЛЯ 10000 ARTS)
 // ============================================
 
-// Генерируем уникальный ID для пользователя
-let userId = localStorage.getItem('userId');
-if (!userId) {
-  userId = 'user_' + Math.random().toString(36).substr(2, 9);
-  localStorage.setItem('userId', userId);
-}
-
-// Храним клетки которые нарисовал текущий пользователь
-let userCells = [];
-
 function downloadDrawing() {
-  const grid = document.getElementById('grid');
-  if (!grid) {
-    alert('❌ Полотно не найдено!');
+  // 1. Проверяем, рисовал ли пользователь
+  const userPos = localStorage.getItem('currentUserPosition');
+  
+  if (!userPos) {
+    alert('❌ Вы ещё не нарисовали свой рисунок!\n\nСначала выберите клетку, нарисуйте и нажмите "Сохранить".');
     return;
   }
   
-  // Создаём canvas
+  const position = JSON.parse(userPos);
+  const { x, y } = position;
+  
+  // 2. Находим клетку с рисунком
+  const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+  
+  if (!cell || !cell.style.backgroundImage) {
+    alert('❌ Не удалось найти ваш рисунок. Попробуйте обновить страницу.');
+    return;
+  }
+  
+  // 3. Извлекаем URL картинки из backgroundImage
+  // Формат: url("data:image/png;base64,...")
+  const bgImage = cell.style.backgroundImage;
+  const match = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
+  
+  if (!match || !match[1]) {
+    alert('❌ Ошибка: не удалось получить изображение');
+    return;
+  }
+  
+  const imageUrl = match[1];
+  
+  // 4. Создаём canvas и рисуем картинку
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   
-  // Размер 100x100 клеток по 32 пикселя
-  const gridSize = 100;
-  const cellSize = 32;
-  canvas.width = gridSize * cellSize;
-  canvas.height = gridSize * cellSize;
+  // Размер как у канваса для рисования (100x100 пикселей)
+  canvas.width = 100;
+  canvas.height = 100;
   
-  // Белый фон
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
   
-  // Получаем ВСЕ клетки
-  const cells = grid.querySelectorAll('.cell');
+  img.onload = function() {
+    // Рисуем картинку на канвас
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    
+    // 5. Скачиваем файл
+    const link = document.createElement('a');
+    link.download = `my-art-${x}-${y}-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    console.log('✅ Рисунок скачан:', x, y);
+  };
   
-  // Если есть сохранённые клетки пользователя
-  if (userCells.length > 0) {
-    // Рисуем ТОЛЬКО клетки пользователя
-    userCells.forEach(cellData => {
-      ctx.fillStyle = cellData.color;
-      ctx.fillRect(
-        cellData.col * cellSize,
-        cellData.row * cellSize,
-        cellSize,
-        cellSize
-      );
-    });
-    console.log('✅ Скачан ТОЛЬКО твой рисунок:', userCells.length, 'клеток');
-  } else {
-    // Если нет сохранённых - скачиваем всё полотно
-    cells.forEach(cell => {
-      const col = parseInt(cell.dataset.col || 0);
-      const row = parseInt(cell.dataset.row || 0);
-      const bgColor = window.getComputedStyle(cell).backgroundColor;
-      
-      // Рисуем только закрашенные клетки
-      if (bgColor && bgColor !== 'rgb(255, 255, 255)' && bgColor !== 'rgba(0, 0, 0, 0)') {
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-      }
-    });
-    console.log('✅ Скачано всё полотно');
-  }
+  img.onerror = function() {
+    alert('❌ Не удалось загрузить изображение. Попробуйте ещё раз.');
+    console.error('❌ Image load error');
+  };
   
-  // Скачиваем файл
-  const link = document.createElement('a');
-  link.download = `my-art-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  
-  console.log('🎨 Drawing downloaded!');
+  img.src = imageUrl;
 }
 
-// Функция для отслеживания клеток пользователя
-function trackUserCell(col, row, color) {
-  // Удаляем старую клетку с этими координатами если есть
-  userCells = userCells.filter(c => c.col !== col || c.row !== row);
-  
-  // Добавляем новую
-  userCells.push({ col, row, color, userId });
-  
-  // Сохраняем в localStorage (на случай перезагрузки)
-  localStorage.setItem('userCells', JSON.stringify(userCells));
-}
-
-// Загружаем сохранённые клетки при старте
-function loadUserCells() {
-  const saved = localStorage.getItem('userCells');
-  if (saved) {
-    userCells = JSON.parse(saved);
-    console.log('✅ Загружено сохранённых клеток:', userCells.length);
-  }
-}
-
-// Добавляем кнопку при загрузке
+// Инициализация кнопки
 document.addEventListener('DOMContentLoaded', () => {
-  loadUserCells();
-  
   const button = document.getElementById('downloadBtn');
   if (button) {
     button.addEventListener('click', downloadDrawing);
-    console.log('✅ Download button initialized');
+    console.log('✅ Download button ready');
   }
 });
-
-// Делаем функции доступными извне
-window.trackUserCell = trackUserCell;
-window.userId = userId;
