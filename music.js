@@ -1,16 +1,16 @@
 // ============================================
-// МУЗЫКА НЕДЕЛИ (С jsDelivr - РАБОТАЕТ!)
+// МУЗЫКА НЕДЕЛИ (YOUTUBE - РАБОТАЕТ 100%!)
 // ============================================
 
 const MUSIC_CONFIG = {
   track: 'Ava',
   artist: 'Famy',
-  audioFile: 'https://music.youtube.com/watch?v=xk7iWfqcpro&si=VtuDOl9v6hfFhVmB',
+  youtubeId: 'LjY_AOtDMRg',  // ← Твоя песня!
   week: 1
 };
 
+let player = null;
 let isPlaying = false;
-let audioElement = null;
 
 function initMusicWidget() {
   const widget = document.getElementById('musicWidget');
@@ -27,51 +27,64 @@ function initMusicWidget() {
         ▶️
       </button>
     </div>
+    <div id="youtube-player" style="display: none;"></div>
   `;
   
-  audioElement = new Audio();
-  audioElement.src = MUSIC_CONFIG.audioFile;
-  audioElement.preload = 'auto';
+  // Загружаем YouTube API
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  const firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  
+  // Создаём плеер
+  window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('youtube-player', {
+      height: '0',
+      width: '0',
+      videoId: MUSIC_CONFIG.youtubeId,
+      playerVars: {
+        'playsinline': 1,
+        'controls': 0,
+        'disablekb': 1
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  };
   
   const playBtn = document.getElementById('musicPlayBtn');
+  playBtn.addEventListener('click', toggleMusic);
   
-  playBtn.addEventListener('click', function() {
-    console.log('🎵 Button clicked!');
-    toggleMusic();
-  });
+  console.log('✅ YouTube music initialized:', MUSIC_CONFIG.track);
+}
+
+function onPlayerReady(event) {
+  console.log('▶️ Player ready');
+}
+
+function onPlayerStateChange(event) {
+  const btn = document.getElementById('musicPlayBtn');
   
-  audioElement.addEventListener('ended', function() {
+  if (event.data === YT.PlayerState.PLAYING) {
+    isPlaying = true;
+    btn.textContent = '⏸️';
+    console.log('▶️ Playing');
+  } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
     isPlaying = false;
-    playBtn.textContent = '▶️';
-  });
-  
-  audioElement.addEventListener('error', function(e) {
-    console.error('❌ Audio error:', e);
-    console.error('❌ File:', MUSIC_CONFIG.audioFile);
-  });
-  
-  console.log('✅ Music initialized');
-  console.log('✅ URL:', MUSIC_CONFIG.audioFile);
+    btn.textContent = '▶️';
+    console.log('⏸️ Paused');
+  }
 }
 
 function toggleMusic() {
-  if (!audioElement) return;
-  
-  const playBtn = document.getElementById('musicPlayBtn');
+  if (!player) return;
   
   if (isPlaying) {
-    audioElement.pause();
-    playBtn.textContent = '▶️';
-    isPlaying = false;
-    console.log('⏸️ Paused');
+    player.pauseVideo();
   } else {
-    audioElement.play().then(() => {
-      playBtn.textContent = '⏸️';
-      isPlaying = true;
-      console.log('▶️ Playing');
-    }).catch(error => {
-      console.error('❌ Play failed:', error);
-    });
+    player.playVideo();
   }
 }
 
