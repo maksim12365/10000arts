@@ -330,8 +330,9 @@ function setupToolbarButtons() {
 }
 
 // ============================================
-// РИСОВАНИЕ НА CANVAS
+// РИСОВАНИЕ НА CANVAS (ИСПРАВЛЕНО ДЛЯ ТЕЛЕФОНА!)
 // ============================================
+
 function setupCanvasDrawing() {
   canvas = document.getElementById('drawCanvas');
   if (!canvas) return;
@@ -342,24 +343,34 @@ function setupCanvasDrawing() {
   
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
+    // 🔧 ИСПРАВЛЕНО: Правильно получаем координаты для тача
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - rect.left, y: clientY - rect.top };
+    return { 
+      x: clientX - rect.left, 
+      y: clientY - rect.top 
+    };
   }
   
   function startDrawing(e) {
+    // 🔧 ИСПРАВЛЕНО: Предотвращаем скролл и зум
+    e.preventDefault();
     isDrawingOnCanvas = true;
     lastPos = getPos(e);
     draw(e);
   }
   
-  function stopDrawing() {
+  function stopDrawing(e) {
+    // 🔧 ИСПРАВЛЕНО: Предотвращаем скролл
+    if (e) e.preventDefault();
     isDrawingOnCanvas = false;
   }
   
   function draw(e) {
     if (!isDrawingOnCanvas) return;
+    // 🔧 ИСПРАВЛЕНО: Предотвращаем скролл во время рисования
     e.preventDefault();
+    
     const pos = getPos(e);
     if (currentTool === 'eraser') {
       ctx.strokeStyle = '#ffffff';
@@ -376,15 +387,20 @@ function setupCanvasDrawing() {
     lastPos = pos;
   }
   
+  // 🔧 ИСПРАВЛЕНО: Добавляем passive: false для всех touch событий
   canvas.addEventListener('mousedown', startDrawing);
   canvas.addEventListener('mousemove', draw);
   canvas.addEventListener('mouseup', stopDrawing);
   canvas.addEventListener('mouseout', stopDrawing);
+  
+  // 🔧 КРИТИЧЕСКИ ВАЖНО: passive: false чтобы работало preventDefault()
   canvas.addEventListener('touchstart', startDrawing, { passive: false });
   canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', stopDrawing);
+  canvas.addEventListener('touchend', stopDrawing, { passive: false });
+  canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
+  
+  console.log('✅ Canvas drawing initialized (mobile fixed)');
 }
-
 // ============================================
 // ZOOM / PAN (ИСПРАВЛЕНО - РАБОТАЕТ ВЕЗДЕ!)
 // ============================================
