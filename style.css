@@ -1847,3 +1847,41 @@ header p {
     font-size: 1.1rem;
   }
 }
+
+/* 🔧 КРИТИЧЕСКИ ВАЖНО: Виджеты не должны перехватывать тач на canvas */
+
+/* Все виджеты внизу экрана */
+#minimap-container,
+#predictionWidget,
+.symmetry-quick-btn,
+.speedrun-stats-btn,
+.particles-toggle,
+.palette-generator,
+#patternPanel,
+#symmetryPanel {
+  pointer-events: none !important;  /* Не перехватывают клики/тач */
+}
+
+/* Но кнопки внутри виджетов должны работать */
+#minimap-container *,
+#predictionWidget *,
+.symmetry-quick-btn,
+.speedrun-stats-btn,
+.particles-toggle,
+.palette-generator *,
+#patternPanel *,
+#symmetryPanel * {
+  pointer-events: auto !important;  /* Кнопки работают */
+}
+
+/* Canvas должен быть выше всего */
+#drawCanvas {
+  pointer-events: auto !important;
+  z-index: 10000 !important;  /* Выше всех виджетов */
+}
+
+/* Toolbar тоже должен работать */
+#toolbar {
+  z-index: 10001 !important;
+  pointer-events: auto !important;
+}
