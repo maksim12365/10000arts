@@ -336,6 +336,12 @@ function setupToolbarButtons() {
 function setupCanvasDrawing() {
   canvas = document.getElementById('drawCanvas');
   if (!canvas) return;
+
+  // 🔧 Убедись что canvas имеет правильные размеры
+  const computedStyle = window.getComputedStyle(canvas);
+  canvas.width = parseInt(computedStyle.width) || 256;
+  canvas.height = parseInt(computedStyle.height) || 256;
+  
   
   ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
