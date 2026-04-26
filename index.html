@@ -128,26 +128,5 @@
 <script src="celebration.js"></script>
 <script src="palette-generator.js"></script>
 <script src="speedrun.js"></script>
-<script>
-// 🔧 ВРЕМЕННО: Скрыть все виджеты для теста
-document.addEventListener('DOMContentLoaded', () => {
-  const widgets = [
-    'minimap-container',
-    'predictionWidget',
-    'patternPanel',
-    'symmetryPanel'
-  ];
-  
-  widgets.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  
-  // Скрыть быстрые кнопки
-  document.querySelectorAll('.symmetry-quick-btn, .speedrun-stats-btn, .particles-toggle').forEach(btn => {
-    if (btn) btn.style.display = 'none';
-  });
-});
-</script>
 </body>
 </html>
