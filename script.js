@@ -386,11 +386,7 @@ function setupCanvasDrawing() {
 }
 
 // ============================================
-// ZOOM / PAN (РАБОТАЕТ!)
-// ============================================
-
-// ============================================
-// ZOOM / PAN (ТОЧНО РАБОТАЕТ!)
+// ZOOM / PAN (ИСПРАВЛЕНО - РАБОТАЕТ ВЕЗДЕ!)
 // ============================================
 
 function setupViewportControls() {
@@ -402,15 +398,15 @@ function setupViewportControls() {
   }
   
   console.log('✅ Viewport controls initialized');
-  console.log('Viewport:', viewport);
-  console.log('Grid:', grid);
   
   // === ПК (Mouse) ===
   viewport.addEventListener('mousedown', function(e) {
     console.log('🖱️ Mouse down on:', e.target.className);
     
-    if (e.target.classList.contains('cell') && e.target.classList.contains('occupied')) {
-      console.log('🖱️ Occupied cell - no drag');
+    // 🔧 ИСПРАВЛЕНО: Разрешаем драг ВЕЗДЕ (даже на занятых клетках)
+    // Блокируем драг только если это кнопка или input
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+      console.log('🖱️ Button/Input - no drag');
       return;
     }
     
@@ -456,37 +452,29 @@ function setupViewportControls() {
   let initialScaleAtPinch = 1;
   
   viewport.addEventListener('touchstart', function(e) {
-  console.log('📱 TOUCHSTART - touches:', e.touches.length);
-  
-  if (e.touches.length === 1) {
-    const touch = e.touches[0];
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-    touchStartOffsetX = gridOffset.x;
-    touchStartOffsetY = gridOffset.y;
+    console.log('📱 TOUCHSTART - touches:', e.touches.length);
     
-    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-    console.log('📱 Target element:', target ? target.className : 'null');
-    
-    // 🔧 ПУСТАЯ клетка - ПОДСВЕТКА + РАЗРЕШАЕМ DRAG
-    if (target && target.classList.contains('cell') && !target.classList.contains('occupied')) {
-      console.log('📱 Empty cell - HIGHLIGHT + ALLOW DRAG');
-      touchedCell = target;
-      target.classList.add('touch-highlight');
-      isDragging = true;  // ✅ РАЗРЕШАЕМ DRAG!
-      return;
-    }
-    
-    // ЗАНЯТАЯ клетка - не drag
-    if (target && target.classList.contains('cell') && target.classList.contains('occupied')) {
-      console.log('📱 Occupied cell - no drag');
-      isDragging = false;
-      return;
-    }
-    
-    // Пустое место (viewport) - DRAG
-    console.log('📱 Empty space - DRAG');
-    isDragging = true;
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartOffsetX = gridOffset.x;
+      touchStartOffsetY = gridOffset.y;
+      
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      console.log('📱 Target element:', target ? target.className : 'null');
+      
+      // 🔧 ИСПРАВЛЕНО: Разрешаем драг ВЕЗДЕ (даже на занятых клетках)
+      // Блокируем только если это кнопка или input
+      if (target && (target.tagName === 'BUTTON' || target.tagName === 'INPUT')) {
+        console.log('📱 Button/Input - no drag');
+        isDragging = false;
+        return;
+      }
+      
+      // ВСЕГДА разрешаем драг на клетках (пустых и занятых)
+      console.log('📱 Cell or empty space - ALLOW DRAG');
+      isDragging = true;
       
     } else if (e.touches.length === 2) {
       console.log('📱 Two fingers - ZOOM');
@@ -524,12 +512,6 @@ function setupViewportControls() {
     console.log('📱 TOUCHEND');
     isDragging = false;
     initialPinchDistance = null;
-    
-    // Убираем подсветку
-    document.querySelectorAll('.touch-highlight').forEach(function(el) {
-      console.log('📱 Remove highlight from:', el);
-      el.classList.remove('touch-highlight');
-    });
   });
   
   function getTouchDistance(touches) {
