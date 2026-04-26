@@ -1432,3 +1432,176 @@ header p {
     transition: none !important;
   }
 }
+
+/* ============================================ */
+/* ГЕНЕРАТОР ПАЛИТР (ВСТРОЕННЫЙ) */
+/* ============================================ */
+
+.palette-generator {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  margin: 10px auto;
+  max-width: 400px;
+  transition: all 0.3s ease;
+}
+
+.palette-generator.collapsed {
+  padding: 10px 15px;
+}
+
+.palette-generator.collapsed .generator-types,
+.palette-generator.collapsed .generated-palette,
+.palette-generator.collapsed .apply-palette-btn {
+  display: none;
+}
+
+.generator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.generator-header span {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.generator-toggle {
+  background: #f0f0f0;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.generator-toggle:hover {
+  background: #e0e0e0;
+}
+
+/* Типы палитр */
+.generator-types {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.gen-type-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gen-type-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Сгенерированная палитра */
+.generated-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 15px;
+  min-height: 50px;
+}
+
+.generated-color-btn {
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.generated-color-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.generated-color-btn.active {
+  box-shadow: 0 0 0 3px #667eea;
+  transform: scale(1.05);
+}
+
+.palette-hint {
+  font-size: 0.8rem;
+  color: #999;
+  text-align: center;
+  margin: 15px 0;
+}
+
+/* Кнопка применения */
+.apply-palette-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apply-palette-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+}
+
+/* Анимация применения */
+#colorPalette.palette-applied {
+  animation: paletteApplied 0.5s ease;
+}
+
+@keyframes paletteApplied {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  .palette-generator {
+    margin: 10px;
+    padding: 12px;
+  }
+  
+  .generator-types {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  
+  .gen-type-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+  
+  .generated-palette {
+    gap: 6px;
+  }
+  
+  .generated-color-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
