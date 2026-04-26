@@ -440,6 +440,15 @@ header h1 {
   backface-visibility: hidden;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  /* 🔧 ИСПРАВЛЕНИЕ ДЛЯ ТЕЛЕФОНА */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  position: relative;
+  z-index: 100;
+  max-width: 100%;
+  touch-action: none !important;  /* Принудительно */
 }
 
 .hidden {
