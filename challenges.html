@@ -4,65 +4,293 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎯 Челленджи - Полотно 10000</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.0/dist/tesseract.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    
+    header {
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    header h1 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    
+    .buttons a {
+      background: #667eea;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    
+    .buttons a:hover {
+      transform: translateY(-2px);
+    }
+    
+    .buttons a:nth-child(2) {
+      background: #11998e;
+    }
+    
+    #stats {
+      text-align: center;
+      padding: 20px;
+      background: white;
+      margin: 20px auto;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-size: 1.1rem;
+    }
+    
+    #challengeList {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .challenge-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 15px 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-left: 4px solid #667eea;
+    }
+    
+    .challenge-card h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .challenge-card p {
+      margin: 5px 0;
+      color: #666;
+    }
+    
+    .challenge-card button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 15px;
+      transition: transform 0.2s;
+    }
+    
+    .challenge-card button:hover {
+      transform: translateY(-2px);
+    }
+    
+    .challenge-card button:disabled {
+      background: #11998e;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .difficulty-easy { border-left-color: #11998e; }
+    .difficulty-normal { border-left-color: #667eea; }
+    .difficulty-hard { border-left-color: #FF4444; }
+    .difficulty-impossible { border-left-color: #000; }
+    
+    .challenge-card.completed {
+      border-left-color: #11998e;
+      opacity: 0.7;
+    }
+    
+    #activeChallenge {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 100000;
+      overflow-y: auto;
+    }
+    
+    #activeChallenge > div {
+      background: white;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 16px;
+    }
+    
+    .timer-display {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #FF4444;
+      text-align: center;
+      margin: 15px 0;
+    }
+    
+    #challengeCanvas {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      display: block;
+      margin: 20px auto;
+      cursor: crosshair;
+    }
+    
+    #colorPicker {
+      text-align: center;
+      margin: 15px 0;
+    }
+    
+    #colorPicker button {
+      width: 35px;
+      height: 35px;
+      border: 2px solid #333;
+      border-radius: 50%;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+    
+    .attempts-left {
+      text-align: center;
+      color: #666;
+      font-size: 0.9rem;
+      margin: 15px 0;
+    }
+    
+    .action-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .action-buttons button {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin: 0 10px;
+    }
+    
+    .action-buttons button:first-child {
+      background: #11998e;
+      color: white;
+    }
+    
+    .action-buttons button:last-child {
+      background: #999;
+      color: white;
+    }
+    
+    @media (max-width: 600px) {
+      .buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .buttons a {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+      }
+      
+      #activeChallenge > div {
+        margin: 20px auto;
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <header style="text-align:center;padding:20px;">
+  <header>
     <h1>🎯 Испытания</h1>
     <p>Выполни челленджи — получи достижения!</p>
-    <a href="index.html" style="background:#667eea;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">← На главную</a>
-    <a href="achievements.html" style="background:#11998e;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;margin-left:10px;">🏆 Достижения</a>
+    <div class="buttons">
+      <a href="index.html">← На главную</a>
+      <a href="achievements.html">🏆 Достижения</a>
+    </div>
   </header>
   
-  <div id="stats" style="text-align:center;padding:20px;background:#f5f5f5;margin:20px auto;max-width:600px;border-radius:12px;"></div>
+  <div id="stats"></div>
+  <div id="challengeList"><p style="text-align:center;padding:40px;">Загрузка...</p></div>
   
-  <div id="challengeList" style="max-width:800px;margin:0 auto;padding:20px;"></div>
-  
-  <div id="activeChallenge" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100000;">
-    <div style="background:white;max-width:600px;margin:50px auto;padding:20px;border-radius:16px;">
+  <div id="activeChallenge">
+    <div>
       <h2 id="activeTitle">Челлендж</h2>
       <div id="timer" class="timer-display">00:00</div>
-      <canvas id="challengeCanvas" width="256" height="256" style="border:2px solid #ddd;border-radius:8px;display:block;margin:20px auto;"></canvas>
-      <div id="colorPicker" style="text-align:center;margin:10px 0;">
-        <button onclick="setColor('#ff0000')" style="width:30px;height:30px;background:#ff0000;border:none;border-radius:50%;"></button>
-        <button onclick="setColor('#00ff00')" style="width:30px;height:30px;background:#00ff00;border:none;border-radius:50%;"></button>
-        <button onclick="setColor('#0000ff')" style="width:30px;height:30px;background:#0000ff;border:none;border-radius:50%;"></button>
-        <button onclick="setColor('#ffff00')" style="width:30px;height:30px;background:#ffff00;border:none;border-radius:50%;"></button>
-        <button onclick="setColor('#000000')" style="width:30px;height:30px;background:#000000;border:none;border-radius:50%;"></button>
-        <button onclick="clearCanvas()" style="padding:5px 10px;margin-left:10px;">🗑 Очистить</button>
+      <canvas id="challengeCanvas" width="256" height="256"></canvas>
+      <div id="colorPicker">
+        <button onclick="setColor('#ff0000')" style="background:#ff0000;"></button>
+        <button onclick="setColor('#00ff00')" style="background:#00ff00;"></button>
+        <button onclick="setColor('#0000ff')" style="background:#0000ff;"></button>
+        <button onclick="setColor('#ffff00')" style="background:#ffff00;"></button>
+        <button onclick="setColor('#000000')" style="background:#000000;"></button>
+        <button onclick="clearCanvas()" style="background:#f0f0f0;width:auto;padding:0 15px;border-radius:5px;">🗑 Очистить</button>
       </div>
       <div class="attempts-left" id="attemptsInfo"></div>
-      <div style="text-align:center;margin-top:20px;">
-        <button onclick="submitChallenge()" style="background:#11998e;color:white;padding:15px 30px;border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;">✅ Готово</button>
-        <button onclick="closeChallenge()" style="background:#999;color:white;padding:15px 30px;border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;margin-left:10px;">❌ Отмена</button>
+      <div class="action-buttons">
+        <button onclick="submitChallenge()">✅ Готово</button>
+        <button onclick="closeChallenge()">❌ Отмена</button>
       </div>
     </div>
   </div>
   
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.0/dist/tesseract.min.js"></script>
   <script src="challenge-system.js"></script>
   <script>
     let currentChallenge = null;
     let timerInterval = null;
     let currentColor = '#000000';
     let isDrawing = false;
+    let canvas, ctx;
     
-    // Статистика
+    // Инициализация
+    function init() {
+      console.log('🎯 Challenges page loaded');
+      console.log('ChallengeSystem:', typeof ChallengeSystem);
+      console.log('CHALLENGES:', typeof CHALLENGES);
+      
+      if (typeof ChallengeSystem === 'undefined') {
+        document.getElementById('challengeList').innerHTML = 
+          '<p style="text-align:center;color:red;padding:40px;">⚠️ Ошибка загрузки системы челленджей!<br>Проверь консоль (F12)</p>';
+        return;
+      }
+      
+      canvas = document.getElementById('challengeCanvas');
+      ctx = canvas.getContext('2d');
+      
+      renderChallenges();
+    }
+    
     function updateStats() {
       const stats = ChallengeSystem.getStats();
       const completed = ChallengeSystem.getCompletedCount();
-      document.getElementById('stats').innerHTML = `
-        <strong>🏆 Очки:</strong> ${stats.points} | 
-        <strong>✅ Выполнено:</strong> ${completed}/${CHALLENGES.length}
-      `;
+      document.getElementById('stats').innerHTML = 
+        `<strong>🏆 Очки:</strong> ${stats.points} | <strong>✅ Выполнено:</strong> ${completed}/${CHALLENGES.length}`;
     }
     
-    // Рендер челленджей
     function renderChallenges() {
       const available = ChallengeSystem.getAvailableChallenges();
       const container = document.getElementById('challengeList');
+      
+      if (available.length === 0) {
+        container.innerHTML = '<p style="text-align:center;padding:40px;">Челленджей пока нет. Заходи через неделю!</p>';
+        return;
+      }
       
       container.innerHTML = available.map(c => {
         const completed = ChallengeSystem.isCompleted(c.id);
@@ -74,8 +302,8 @@
             <p>🎯 ${c.attempts === 1 ? '1 попытка' : 'Безлимит попыток'}</p>
             <p>🏆 ${c.reward.points} очков</p>
             ${completed 
-              ? '<button disabled style="background:#11998e;color:white;">✅ Выполнено</button>' 
-              : `<button onclick="openChallenge('${c.id}')" style="background:#667eea;color:white;">▶️ Начать</button>`
+              ? '<button disabled>✅ Выполнено</button>' 
+              : `<button onclick="openChallenge('${c.id}')">▶️ Начать</button>`
             }
           </div>
         `;
@@ -97,7 +325,6 @@
       document.getElementById('activeTitle').textContent = currentChallenge.title;
       document.getElementById('attemptsInfo').textContent = `Попыток осталось: ${currentChallenge.attempts}`;
       
-      // Таймер
       if (currentChallenge.timeLimit) {
         let timeLeft = currentChallenge.timeLimit;
         document.getElementById('timer').textContent = `00:${timeLeft}`;
@@ -114,13 +341,9 @@
         document.getElementById('timer').textContent = '∞';
       }
       
-      // Canvas
-      const canvas = document.getElementById('challengeCanvas');
-      const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Рисование
       canvas.addEventListener('mousedown', startDraw);
       canvas.addEventListener('mousemove', draw);
       canvas.addEventListener('mouseup', stopDraw);
@@ -137,8 +360,7 @@
     
     function draw(e) {
       if (!isDrawing) return;
-      const canvas = document.getElementById('challengeCanvas');
-      const ctx = canvas.getContext('2d');
+      e.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX || e.touches[0].clientX) - rect.left;
       const y = (e.clientY || e.touches[0].clientY) - rect.top;
@@ -156,8 +378,6 @@
     };
     
     window.clearCanvas = function() {
-      const canvas = document.getElementById('challengeCanvas');
-      const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
@@ -165,9 +385,7 @@
     window.submitChallenge = async function() {
       if (!currentChallenge) return;
       
-      const canvas = document.getElementById('challengeCanvas');
       const result = await ChallengeSystem.completeChallenge(currentChallenge.id, canvas);
-      
       alert(result.reason);
       
       if (result.completed) {
@@ -183,7 +401,12 @@
       currentChallenge = null;
     };
     
-    renderChallenges();
+    // Запуск
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
 </body>
 </html>
