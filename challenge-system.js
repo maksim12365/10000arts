@@ -1,5 +1,5 @@
 // ============================================
-// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (УПРОЩЁННАЯ)
+// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (С ПРОВЕРКАМИ)
 // ============================================
 
 // 1. USER ID
@@ -16,15 +16,15 @@ const userId = getUserId();
 
 // 2. СПИСОК ЧЕЛЛЕНДЖЕЙ
 const CHALLENGES = [
-  { id: 'easy_line', title: '📏 Прямая линия', description: 'Нарисуй прямую линию', difficulty: 'easy', week: 1, checkType: 'honor', timeLimit: null, attempts: 1, reward: { points: 10, achievement: 'first_line' } },
+  { id: 'easy_line', title: '📏 Прямая линия', description: 'Нарисуй прямую линию', difficulty: 'easy', week: 1, checkType: 'line', timeLimit: null, attempts: 1, reward: { points: 10, achievement: 'first_line' } },
   { id: 'easy_colors', title: '🌈 5 цветов за 20 сек', description: 'Используй 5 разных цветов за 20 секунд', difficulty: 'easy', week: 1, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 20, attempts: 1, reward: { points: 20, achievement: 'color_master' } },
-  { id: 'easy_smiley', title: '😊 Нарисуй смайлик', description: 'Нарисуй любой смайлик за 30 секунд', difficulty: 'easy', week: 1, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 30, achievement: 'smiley_artist' } },
-  { id: 'normal_shape', title: '🟠 Нарисуй круг', description: 'Нарисуй круг максимально точно', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: null, attempts: 999, reward: { points: 40, achievement: 'shape_master' } },
-  { id: 'normal_rainbow', title: '🌈 Радуга за 15 сек', description: 'Нарисуй радугу в правильном порядке за 15 секунд', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 15, attempts: 1, reward: { points: 50, achievement: 'rainbow_creator' } },
+  { id: 'easy_smiley', title: '😊 Нарисуй смайлик', description: 'Нарисуй любой смайлик за 30 секунд', difficulty: 'easy', week: 1, checkType: 'smiley', timeLimit: 30, attempts: 1, reward: { points: 30, achievement: 'smiley_artist' } },
+  { id: 'normal_shape', title: '🟠 Нарисуй круг', description: 'Нарисуй круг максимально точно', difficulty: 'normal', week: 2, checkType: 'circle', timeLimit: null, attempts: 999, reward: { points: 40, achievement: 'shape_master' } },
+  { id: 'normal_rainbow', title: '🌈 Радуга за 15 сек', description: 'Нарисуй радугу в правильном порядке за 15 секунд', difficulty: 'normal', week: 2, checkType: 'rainbow', timeLimit: 15, attempts: 1, reward: { points: 50, achievement: 'rainbow_creator' } },
   { id: 'normal_random', title: '🎲 Случайный объект', description: 'Нарисуй то, что покажет система за 30 сек', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 40, achievement: 'quick_draw' } },
-  { id: 'hard_word', title: '✏️ Нарисуй слово', description: 'Напиши слово за 10 секунд', difficulty: 'hard', week: 3, checkType: 'honor', timeLimit: 10, attempts: 1, reward: { points: 80, achievement: 'word_artist' } },
-  { id: 'hard_red_dot', title: '🔴 Красная точка', description: 'Рисуй только когда горит красная точка (5 цветов)', difficulty: 'hard', week: 3, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 70, achievement: 'timing_master' } },
-  { id: 'impossible_star', title: '⭐ Звезда за 5 сек', description: 'Нарисуй 5-конечную звезду за 5 секунд', difficulty: 'impossible', week: 4, checkType: 'honor', timeLimit: 5, attempts: 1, reward: { points: 200, achievement: 'legend' } }
+  { id: 'hard_word', title: '✏️ Нарисуй слово', description: 'Напиши слово за 10 секунд', difficulty: 'hard', week: 3, checkType: 'word', timeLimit: 10, attempts: 1, reward: { points: 80, achievement: 'word_artist' } },
+  { id: 'hard_red_dot', title: '🔴 Красная точка', description: 'Рисуй только когда горит красная точка (5 цветов)', difficulty: 'hard', week: 3, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 30, attempts: 1, reward: { points: 70, achievement: 'timing_master' } },
+  { id: 'impossible_star', title: '⭐ Звезда за 5 сек', description: 'Нарисуй 5-конечную звезду за 5 секунд', difficulty: 'impossible', week: 4, checkType: 'star', timeLimit: 5, attempts: 1, reward: { points: 200, achievement: 'legend' } }
 ];
 
 // 3. ДОСТИЖЕНИЯ
@@ -38,17 +38,189 @@ const ACHIEVEMENTS = [
   { id: 'legend', title: '⭐ Легенда', description: 'Нарисуй звезду за 5 сек', icon: '⭐', rarity: 'legendary' }
 ];
 
-// 4. МЕНЕДЖЕР ЧЕЛЛЕНДЖЕЙ
+// 4. ПРОВЕРКИ РИСУНКОВ
+const Checker = {
+  // Проверка линии
+  checkLine(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const points = [];
+    
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i + 3] > 128) points.push({ x, y });
+      }
+    }
+    
+    if (points.length < 50) return { success: false, reason: 'Слишком мало пикселей' };
+    
+    const sumX = points.reduce((s, p) => s + p.x, 0);
+    const sumY = points.reduce((s, p) => s + p.y, 0);
+    const avgX = sumX / points.length;
+    const avgY = sumY / points.length;
+    
+    let num = 0, den = 0;
+    for (const p of points) {
+      num += (p.x - avgX) * (p.y - avgY);
+      den += (p.x - avgX) ** 2;
+    }
+    
+    const slope = den === 0 ? 0 : num / den;
+    const intercept = avgY - slope * avgX;
+    
+    let totalDeviation = 0;
+    for (const p of points) {
+      const expectedY = slope * p.x + intercept;
+      totalDeviation += Math.abs(p.y - expectedY);
+    }
+    
+    const avgDeviation = totalDeviation / points.length;
+    const isLine = avgDeviation < 20;
+    
+    return {
+      success: isLine,
+      reason: isLine ? '✅ Прямая линия!' : '❌ Это не прямая линия (отклонение: ' + Math.round(avgDeviation) + 'px)'
+    };
+  },
+  
+  // Проверка количества цветов
+  checkColorCount(canvas, minColors) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const uniqueColors = new Set();
+    
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i + 3] > 128) {
+        const r = Math.round(pixels[i] / 50) * 50;
+        const g = Math.round(pixels[i + 1] / 50) * 50;
+        const b = Math.round(pixels[i + 2] / 50) * 50;
+        uniqueColors.add(`${r},${g},${b}`);
+      }
+    }
+    
+    const count = uniqueColors.size;
+    return {
+      success: count >= minColors,
+      reason: count >= minColors ? `✅ ${count} цветов!` : `❌ Нужно ${minColors} цветов, использовано ${count}`
+    };
+  },
+  
+  // Проверка круга
+  checkCircle(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const points = [];
+    
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i + 3] > 128) points.push({ x, y });
+      }
+    }
+    
+    if (points.length < 100) return { success: false, reason: 'Слишком мало пикселей' };
+    
+    const centerX = points.reduce((s, p) => s + p.x, 0) / points.length;
+    const centerY = points.reduce((s, p) => s + p.y, 0) / points.length;
+    const distances = points.map(p => Math.sqrt((p.x - centerX) ** 2 + (p.y - centerY) ** 2));
+    const avgDistance = distances.reduce((s, d) => s + d, 0) / distances.length;
+    const variance = distances.reduce((s, d) => s + (d - avgDistance) ** 2, 0) / distances.length;
+    const stdDev = Math.sqrt(variance);
+    const circularity = 1 - (stdDev / avgDistance);
+    
+    return {
+      success: circularity > 0.65,
+      reason: circularity > 0.65 ? `✅ Круг! (точность: ${Math.round(circularity * 100)}%)` : '❌ Не похоже на круг'
+    };
+  },
+  
+  // Проверка звезды (5 лучей)
+  checkStar(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const edgePoints = [];
+    
+    for (let y = 1; y < canvas.height - 1; y++) {
+      for (let x = 1; x < canvas.width - 1; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i + 3] > 128) {
+          const neighbors = [
+            pixels[((y-1) * canvas.width + x) * 4 + 3],
+            pixels[((y+1) * canvas.width + x) * 4 + 3],
+            pixels[(y * canvas.width + (x-1)) * 4 + 3],
+            pixels[(y * canvas.width + (x+1)) * 4 + 3]
+          ];
+          if (neighbors.some(n => n < 128)) edgePoints.push({ x, y });
+        }
+      }
+    }
+    
+    if (edgePoints.length < 50) return { success: false, reason: 'Слишком мало пикселей' };
+    
+    const centerX = edgePoints.reduce((s, p) => s + p.x, 0) / edgePoints.length;
+    const centerY = edgePoints.reduce((s, p) => s + p.y, 0) / edgePoints.length;
+    
+    const angles = {};
+    for (const p of edgePoints) {
+      const angle = Math.round(Math.atan2(p.y - centerY, p.x - centerX) * 180 / Math.PI / 30) * 30;
+      const dist = Math.sqrt((p.x - centerX) ** 2 + (p.y - centerY) ** 2);
+      if (!angles[angle] || angles[angle].dist < dist) angles[angle] = { ...p, dist };
+    }
+    
+    const allDists = Object.values(angles).map(p => p.dist);
+    const avgDist = allDists.reduce((s, d) => s + d, 0) / allDists.length;
+    
+    let pointsCount = 0;
+    for (const p of Object.values(angles)) {
+      if (p.dist > avgDist * 1.3) pointsCount++;
+    }
+    
+    return {
+      success: pointsCount >= 5,
+      reason: pointsCount >= 5 ? `✅ Звезда с ${pointsCount} лучами!` : `❌ Найдено ${pointsCount} лучей, нужно 5`
+    };
+  },
+  
+  // Общая проверка
+  checkChallenge(challengeId, canvas) {
+    const challenge = CHALLENGES.find(c => c.id === challengeId);
+    if (!challenge) return { success: false, reason: 'Челлендж не найден' };
+    
+    switch (challenge.checkType) {
+      case 'line': return this.checkLine(canvas);
+      case 'color_count': return this.checkColorCount(canvas, challenge.check.minColors);
+      case 'circle': return this.checkCircle(canvas);
+      case 'star': return this.checkStar(canvas);
+      case 'smiley': return { success: true, reason: '✅ Честная система -我们相信 тебе!' };
+      case 'rainbow': return { success: true, reason: '✅ Честная система -我们相信 тебе!' };
+      case 'word': return { success: true, reason: '✅ Честная система -我们相信 тебе!' };
+      case 'honor': return { success: true, reason: '✅ Честная система' };
+      default: return { success: true, reason: 'OK' };
+    }
+  }
+};
+
+// 5. МЕНЕДЖЕР
 const ChallengeManager = {
   getAvailableChallenges() {
     const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
     if (!firstVisit) {
       localStorage.setItem(`firstVisit_${userId}`, Date.now());
-      return CHALLENGES.filter(c => c.week === 1);
     }
+    
     const daysSinceFirst = (Date.now() - firstVisit) / (1000 * 60 * 60 * 24);
     const weeksPassed = Math.floor(daysSinceFirst / 7);
-    return CHALLENGES.filter(c => c.week <= weeksPassed + 1);
+    
+    return {
+      available: CHALLENGES.filter(c => c.week <= weeksPassed + 1),
+      locked: CHALLENGES.filter(c => c.week > weeksPassed + 1),
+      weeksPassed: weeksPassed
+    };
   },
   
   isCompleted(challengeId) {
@@ -59,34 +231,37 @@ const ChallengeManager = {
   
   startChallenge(challengeId) {
     const key = `challenge_${userId}_${challengeId}`;
-    const existing = localStorage.getItem(key);
-    if (existing) {
-      const data = JSON.parse(existing);
-      const challenge = CHALLENGES.find(c => c.id === challengeId);
-      if (data.attemptsUsed >= challenge.attempts) {
-        return { success: false, reason: 'Попытки закончились' };
-      }
+    const existing = JSON.parse(localStorage.getItem(key) || '{}');
+    const challenge = CHALLENGES.find(c => c.id === challengeId);
+    
+    if (existing.attemptsUsed >= challenge.attempts) {
+      return { success: false, reason: 'Попытки закончились' };
     }
-    const challengeData = { 
-      started: true, 
-      startTime: Date.now(), 
-      attemptsUsed: existing ? JSON.parse(existing).attemptsUsed : 0, 
-      completed: false 
-    };
-    localStorage.setItem(key, JSON.stringify(challengeData));
+    
+    if (!existing.started) {
+      localStorage.setItem(key, JSON.stringify({ 
+        started: true, 
+        startTime: Date.now(), 
+        attemptsUsed: 0, 
+        completed: false 
+      }));
+    }
+    
     return { success: true };
   },
   
-  async completeChallenge(challengeId, canvas, extraData = {}) {
+  async completeChallenge(challengeId, canvas) {
     const key = `challenge_${userId}_${challengeId}`;
     const existing = localStorage.getItem(key);
+    
     if (!existing) return { success: false, reason: 'Челлендж не начат' };
     
     const data = JSON.parse(existing);
     const challenge = CHALLENGES.find(c => c.id === challengeId);
     
+    // Проверяем попытки
     if (data.attemptsUsed >= challenge.attempts) {
-      return { success: false, reason: 'Попытки закончились' };
+      return { success: false, reason: '❌ Попытки закончились!' };
     }
     
     // Проверяем время
@@ -95,26 +270,37 @@ const ChallengeManager = {
       if (elapsed > challenge.timeLimit) {
         data.attemptsUsed++;
         localStorage.setItem(key, JSON.stringify(data));
-        return { success: false, reason: `Время вышло! (${Math.round(elapsed)} сек)` };
+        return { 
+          success: false, 
+          reason: `⏰ Время вышло! (${Math.round(elapsed)} сек при лимите ${challenge.timeLimit})`,
+          attemptsLeft: challenge.attempts - data.attemptsUsed
+        };
       }
     }
     
-    // Для честной системы (honor) - просто засчитываем
-    // TODO: Здесь можно добавить AI проверку позже
-    const checkResult = { success: true, reason: 'Челлендж выполнен!' };
+    // Проверяем рисунок
+    const checkResult = Checker.checkChallenge(challengeId, canvas);
     
     data.attemptsUsed++;
-    data.completed = true;
-    data.completedAt = new Date().toISOString();
-    data.checkResult = checkResult;
     
-    localStorage.setItem(key, JSON.stringify(data));
-    
-    // Добавляем очки и достижение
-    this.addPoints(challenge.reward.points);
-    this.unlockAchievement(challenge.reward.achievement);
-    
-    return { success: true, reason: '✅ ' + checkResult.reason, completed: true };
+    if (checkResult.success) {
+      data.completed = true;
+      data.completedAt = new Date().toISOString();
+      data.checkResult = checkResult;
+      localStorage.setItem(key, JSON.stringify(data));
+      
+      this.addPoints(challenge.reward.points);
+      this.unlockAchievement(challenge.reward.achievement);
+      
+      return { success: true, reason: checkResult.reason, completed: true };
+    } else {
+      localStorage.setItem(key, JSON.stringify(data));
+      return { 
+        success: false, 
+        reason: checkResult.reason,
+        attemptsLeft: challenge.attempts - data.attemptsUsed
+      };
+    }
   },
   
   addPoints(points) {
@@ -162,16 +348,15 @@ const ChallengeManager = {
   
   getCompletedCount() {
     let count = 0;
-    CHALLENGES.forEach(c => {
-      if (this.isCompleted(c.id)) count++;
-    });
+    CHALLENGES.forEach(c => { if (this.isCompleted(c.id)) count++; });
     return count;
   }
 };
 
-// 5. ЭКСПОРТ
+// 6. ЭКСПОРТ
 window.ChallengeSystem = ChallengeManager;
 window.CHALLENGES = CHALLENGES;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
+window.Checker = Checker;
 
-console.log('🎯 Challenge System loaded');
+console.log('🎯 Challenge System loaded with validations');
