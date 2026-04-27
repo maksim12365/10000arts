@@ -1,5 +1,5 @@
 // ============================================
-// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (ТОЧНЫЙ ПОДСЧЁТ ЦВЕТОВ)
+// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (ГРУППИРОВКА ЦВЕТОВ)
 // ============================================
 
 // 1. USER ID
@@ -72,7 +72,20 @@ const Checker = {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
-    const uniqueColors = new Set();
+    
+    // Основные цвета которые используем в палитре
+    const baseColors = [
+      { r: 255, g: 0, b: 0, name: 'red' },      // Красный
+      { r: 0, g: 255, b: 0, name: 'green' },    // Зелёный
+      { r: 0, g: 0, b: 255, name: 'blue' },     // Синий
+      { r: 255, g: 255, b: 0, name: 'yellow' }, // Жёлтый
+      { r: 0, g: 0, b: 0, name: 'black' },      // Чёрный
+      { r: 255, g: 0, b: 255, name: 'magenta' }, // Фиолетовый
+      { r: 0, g: 255, b: 255, name: 'cyan' },   // Голубой
+      { r: 255, g: 128, b: 0, name: 'orange' }  // Оранжевый
+    ];
+    
+    const foundColors = new Set();
     
     for (let i = 0; i < pixels.length; i += 4) {
       const r = pixels[i];
@@ -80,15 +93,28 @@ const Checker = {
       const b = pixels[i + 2];
       const a = pixels[i + 3];
       
-      // Пропускаем прозрачные и белые/светлые пиксели
+      // Пропускаем прозрачные и белые
       if (a < 128) continue;
       if (r > 240 && g > 240 && b > 240) continue;
       
-      // ТОЧНЫЙ цвет без округления!
-      uniqueColors.add(`${r},${g},${b}`);
+      // Находим ближайший базовый цвет
+      let minDist = Infinity;
+      let closestColor = null;
+      
+      for (const base of baseColors) {
+        const dist = Math.sqrt((r - base.r) ** 2 + (g - base.g) ** 2 + (b - base.b) ** 2);
+        if (dist < minDist && dist < 100) { // В пределах 100 единиц
+          minDist = dist;
+          closestColor = base.name;
+        }
+      }
+      
+      if (closestColor) {
+        foundColors.add(closestColor);
+      }
     }
     
-    const count = uniqueColors.size;
+    const count = foundColors.size;
     return {
       success: count >= minColors,
       reason: count >= minColors 
@@ -342,4 +368,4 @@ window.CHALLENGES = CHALLENGES;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
 window.Checker = Checker;
 
-console.log('🎯 Challenge System loaded - EXACT COLOR COUNT');
+console.log('🎯 Challenge System loaded - BASE COLOR GROUPING');
