@@ -2909,3 +2909,35 @@ header p {
   background-image: none !important;
   background-color: inherit !important;
 }
+
+/* 🔧 ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ ЦВЕТОВ */
+
+.generated-color-btn {
+  background-color: #ffffff !important;  /* По умолчанию белый */
+  background-image: none !important;      /* Убираем градиент */
+  border: 2px solid rgba(0,0,0,0.2) !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Когда цвет установлен - используем его */
+.generated-color-btn[style*="background-color"] {
+  /* Цвет уже установлен inline */
+}
+
+/* Активная кнопка */
+.generated-color-btn.active {
+  border: 3px solid #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Убираем все эффекты */
+.generated-color-btn:hover {
+  background-image: none !important;
+}
