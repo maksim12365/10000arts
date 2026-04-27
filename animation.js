@@ -1,5 +1,5 @@
 // ============================================
-// АНИМАЦИЯ С ONION SKINNING (3 кадра макс)
+// АНИМАЦИЯ С ONION SKINNING (ИСПРАВЛЕНО)
 // ============================================
 
 const ANIMATION_CONFIG = {
@@ -10,17 +10,13 @@ const ANIMATION_CONFIG = {
   isOpen: false,
   isPlaying: false,
   playInterval: null,
-  onionSkinOpacity: 0.3  // 30% прозрачности
+  onionSkinOpacity: 0.3
 };
 
-// ============================================
-// ОТКРЫТЬ РЕДАКТОР
-// ============================================
-
+// Открыть редактор
 window.openAnimationEditor = function() {
   if (ANIMATION_CONFIG.isOpen) return;
   
-  // Проверяем что выбрана клетка
   const toolbar = document.getElementById('toolbar');
   const x = toolbar?.dataset?.x;
   const y = toolbar?.dataset?.y;
@@ -30,54 +26,55 @@ window.openAnimationEditor = function() {
     return;
   }
   
+  // Закрываем toolbar
+  const closeBtn = document.getElementById('btnCloseToolbar');
+  if (closeBtn) closeBtn.click();
+  
   // Создаём модальное окно
   const modal = document.createElement('div');
   modal.id = 'animationModal';
-  modal.className = 'animation-modal';
   modal.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-header">
+    <div class="animation-modal-content">
+      <div class="animation-modal-header">
         <h3>🎬 Анимация (макс. 3 кадра)</h3>
-        <button onclick="closeAnimationEditor()">✕</button>
+        <button class="animation-close-btn" onclick="closeAnimationEditor()">✕</button>
       </div>
       
-      <div class="canvas-container">
+      <div class="animation-canvas-wrapper">
         <canvas id="animationCanvas" width="256" height="256"></canvas>
         <canvas id="onionSkinCanvas" width="256" height="256"></canvas>
       </div>
       
       <div class="animation-controls">
         <div class="frame-info">
-          Кадр: <strong id="frameNum">1</strong> / ${ANIMATION_CONFIG.MAX_FRAMES}
+          Кадр: <strong id="frameNum">1</strong> / 3
         </div>
         
-        <div class="frame-buttons">
+        <div class="frame-nav-buttons">
           <button onclick="previousFrame()" id="prevBtn" disabled>⏮️</button>
           <button onclick="togglePlay()" id="playBtn">▶️</button>
           <button onclick="nextFrame()" id="nextBtn" disabled>⏭️</button>
         </div>
         
-        <button onclick="addFrame()" id="addFrameBtn" class="btn-secondary">
+        <button onclick="addFrame()" id="addFrameBtn" class="animation-btn-primary">
           + Добавить кадр
         </button>
         
-        <div class="onion-skin-control">
-          <label>
-            <input type="checkbox" id="onionSkinToggle" checked onchange="toggleOnionSkin()">
-            🧅 Onion Skinning (вкл)
-          </label>
-        </div>
+        <label class="onion-toggle">
+          <input type="checkbox" id="onionSkinToggle" checked onchange="updateOnionSkin()">
+          🧅 Onion Skinning
+        </label>
         
-        <div class="fps-control">
-          <label>FPS: <input type="range" min="4" max="12" value="8" onchange="updateFPS(this.value)"></label>
+        <div class="fps-slider">
+          <label>FPS: <input type="range" min="4" max="12" value="8" oninput="updateFPS(this.value)"></label>
           <span id="fpsValue">8</span>
         </div>
       </div>
       
-      <div class="modal-actions">
-        <button onclick="closeAnimationEditor()" class="btn-secondary">❌ Отмена</button>
-        <button onclick="saveAnimation()" class="btn-primary">✅ Сохранить</button>
-        <button onclick="exportGIF()" class="btn-success">💾 GIF</button>
+      <div class="animation-modal-actions">
+        <button onclick="closeAnimationEditor()" class="animation-btn-secondary">❌ Отмена</button>
+        <button onclick="saveAnimation()" class="animation-btn-success">✅ Сохранить</button>
+        <button onclick="exportGIF()" class="animation-btn-info">💾 GIF</button>
       </div>
     </div>
   `;
@@ -87,19 +84,16 @@ window.openAnimationEditor = function() {
   ANIMATION_CONFIG.frames = [getCanvasSnapshot()];
   ANIMATION_CONFIG.currentFrame = 0;
   
-  // Копируем текущий рисунок на animationCanvas
-  copyToAnimationCanvas();
+  setTimeout(() => {
+    copyToAnimationCanvas();
+    updateOnionSkin();
+    updateFrameUI();
+  }, 100);
   
-  updateFrameUI();
-  updateOnionSkin();
-  
-  console.log('🎬 Animation editor opened');
+  console.log('🎬 Animation opened');
 };
 
-// ============================================
-// ЗАКРЫТЬ РЕДАКТОР
-// ============================================
-
+// Закрыть
 window.closeAnimationEditor = function() {
   if (ANIMATION_CONFIG.playInterval) {
     clearInterval(ANIMATION_CONFIG.playInterval);
@@ -114,19 +108,19 @@ window.closeAnimationEditor = function() {
   ANIMATION_CONFIG.currentFrame = 0;
   ANIMATION_CONFIG.isPlaying = false;
   
-  console.log('🎬 Animation editor closed');
+  // Показываем toolbar обратно
+  const toolbar = document.getElementById('toolbar');
+  if (toolbar) toolbar.classList.remove('hidden');
 };
 
-// ============================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// ============================================
-
+// Снимок canvas
 function getCanvasSnapshot() {
   const canvas = document.getElementById('drawCanvas');
   if (!canvas) return null;
   return canvas.toDataURL('image/jpeg', 0.6);
 }
 
+// Копировать на animation canvas
 function copyToAnimationCanvas() {
   const source = document.getElementById('drawCanvas');
   const target = document.getElementById('animationCanvas');
@@ -141,10 +135,10 @@ function copyToAnimationCanvas() {
   img.src = source.toDataURL();
 }
 
+// Восстановить кадр
 function restoreFrameToDrawCanvas(frameIndex) {
   const drawCanvas = document.getElementById('drawCanvas');
-  const animCanvas = document.getElementById('animationCanvas');
-  if (!drawCanvas || !animCanvas) return;
+  if (!drawCanvas) return;
   
   const ctx = drawCanvas.getContext('2d');
   const img = new Image();
@@ -155,7 +149,8 @@ function restoreFrameToDrawCanvas(frameIndex) {
   img.src = ANIMATION_CONFIG.frames[frameIndex];
 }
 
-function updateOnionSkin() {
+// Onion skin
+window.updateOnionSkin = function() {
   const onionCanvas = document.getElementById('onionSkinCanvas');
   const checkbox = document.getElementById('onionSkinToggle');
   if (!onionCanvas || !checkbox) return;
@@ -164,11 +159,10 @@ function updateOnionSkin() {
   ctx.clearRect(0, 0, onionCanvas.width, onionCanvas.height);
   
   if (!checkbox.checked || ANIMATION_CONFIG.currentFrame === 0) {
-    onionCanvas.style.display = 'none';
+    onionCanvas.style.opacity = '0';
     return;
   }
   
-  // Показываем предыдущий кадр полупрозрачным
   const prevFrame = ANIMATION_CONFIG.frames[ANIMATION_CONFIG.currentFrame - 1];
   if (prevFrame) {
     const img = new Image();
@@ -178,30 +172,25 @@ function updateOnionSkin() {
       ctx.globalAlpha = 1.0;
     };
     img.src = prevFrame;
-    onionCanvas.style.display = 'block';
+    onionCanvas.style.opacity = '1';
   }
-}
+};
 
-// ============================================
-// УПРАВЛЕНИЕ КАДРАМИ
-// ============================================
-
+// Добавить кадр
 window.addFrame = function() {
   if (ANIMATION_CONFIG.frames.length >= ANIMATION_CONFIG.MAX_FRAMES) {
     alert('❌ Максимум 3 кадра!');
     return;
   }
   
-  // Сохраняем текущее состояние как новый кадр
   ANIMATION_CONFIG.frames.push(getCanvasSnapshot());
   ANIMATION_CONFIG.currentFrame = ANIMATION_CONFIG.frames.length - 1;
   
   updateFrameUI();
   updateOnionSkin();
-  
-  console.log('🎬 Frame added:', ANIMATION_CONFIG.frames.length);
 };
 
+// Назад
 window.previousFrame = function() {
   if (ANIMATION_CONFIG.currentFrame > 0) {
     ANIMATION_CONFIG.currentFrame--;
@@ -214,6 +203,7 @@ window.previousFrame = function() {
   }
 };
 
+// Вперёд
 window.nextFrame = function() {
   if (ANIMATION_CONFIG.currentFrame < ANIMATION_CONFIG.frames.length - 1) {
     ANIMATION_CONFIG.currentFrame++;
@@ -238,10 +228,7 @@ function updateFrameUI() {
   if (addBtn) addBtn.disabled = ANIMATION_CONFIG.frames.length >= ANIMATION_CONFIG.MAX_FRAMES;
 }
 
-// ============================================
-// PLAY / PAUSE
-// ============================================
-
+// Play
 window.togglePlay = function() {
   const btn = document.getElementById('playBtn');
   if (!btn) return;
@@ -265,24 +252,14 @@ window.togglePlay = function() {
   }
 };
 
-// ============================================
-// НАСТРОЙКИ
-// ============================================
-
+// FPS
 window.updateFPS = function(value) {
   ANIMATION_CONFIG.DEFAULT_FPS = parseInt(value);
   const fpsValue = document.getElementById('fpsValue');
   if (fpsValue) fpsValue.textContent = value;
 };
 
-window.toggleOnionSkin = function() {
-  updateOnionSkin();
-};
-
-// ============================================
-// СОХРАНЕНИЕ АНИМАЦИИ
-// ============================================
-
+// Сохранить
 window.saveAnimation = function() {
   if (ANIMATION_CONFIG.frames.length === 0) {
     alert('❌ Нет кадров!');
@@ -294,7 +271,7 @@ window.saveAnimation = function() {
   const y = toolbar?.dataset?.y;
   
   if (!x || !y) {
-    alert('❌ Выбери клетку на полотне!');
+    alert('❌ Выбери клетку!');
     return;
   }
   
@@ -309,8 +286,7 @@ window.saveAnimation = function() {
   updateCellOnGrid(x, y, animationData);
   
   closeAnimationEditor();
-  alert('✅ Анимация сохранена!');
-  console.log('✅ Animation saved at:', x, y);
+  alert('✅ Сохранено!');
 };
 
 function updateCellOnGrid(x, y, data) {
@@ -320,7 +296,6 @@ function updateCellOnGrid(x, y, data) {
   cell.classList.add('occupied', 'animated-cell');
   cell.dataset.type = 'animated';
   cell.dataset.animation = JSON.stringify(data);
-  
   animateCell(cell, data);
 }
 
@@ -339,10 +314,7 @@ function animateCell(cell, data) {
   }, 1000 / data.fps);
 }
 
-// ============================================
-// ЭКСПОРТ В GIF
-// ============================================
-
+// GIF
 window.exportGIF = function() {
   if (ANIMATION_CONFIG.frames.length === 0) {
     alert('❌ Нет кадров!');
@@ -350,7 +322,7 @@ window.exportGIF = function() {
   }
   
   if (typeof GIF === 'undefined') {
-    alert('❌ Библиотека GIF.js не загружена!');
+    alert('❌ GIF.js не загружен!');
     return;
   }
   
@@ -377,13 +349,9 @@ window.exportGIF = function() {
   });
   
   gif.render();
-  console.log('💾 GIF exported');
 };
 
-// ============================================
-// ЗАГРУЗКА АНИМАЦИЙ ПРИ СТАРТЕ
-// ============================================
-
+// Загрузка анимаций
 function loadAnimations() {
   const cells = document.querySelectorAll('.cell[data-type="animated"]');
   cells.forEach(cell => {
@@ -391,10 +359,9 @@ function loadAnimations() {
       const data = JSON.parse(cell.dataset.animation);
       animateCell(cell, data);
     } catch (e) {
-      console.error('❌ Error loading animation:', e);
+      console.error('❌ Animation error:', e);
     }
   });
-  console.log('🎬 Animations loaded:', cells.length);
 }
 
 if (document.readyState === 'loading') {
