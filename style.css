@@ -3536,3 +3536,92 @@ header p {
     padding: 12px 8px !important;
   }
 }
+
+/* ========== НИЖНИЕ КНОПКИ (ЧЕЛЛЕНДЖИ + ДОСТИЖЕНИЯ) ========== */
+
+.bottom-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 10px;
+  margin: 20px auto 0 auto;
+  max-width: 600px;
+}
+
+.bottom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  white-space: nowrap;
+}
+
+.bottom-btn.challenges {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex: 1;
+}
+
+.bottom-btn.achievements {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  flex: 1;
+}
+
+.bottom-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.bottom-btn:active {
+  transform: translateY(0);
+}
+
+/* ========== МОБИЛЬНАЯ ВЕРСИЯ (ИСПРАВЛЕНИЕ) ========== */
+@media screen and (max-width: 600px) {
+  .bottom-nav {
+    display: flex !important;
+    flex-direction: row !important;  /* ГОРИЗОНТАЛЬНО */
+    gap: 8px !important;
+    padding: 10px 5px !important;
+    margin: 15px auto 0 auto !important;
+    flex-wrap: nowrap !important;  /* НЕ ПЕРЕНОСИТЬ */
+  }
+  
+  .bottom-btn {
+    flex: 1 1 0 !important;  /* РАВНОМЕРНО */
+    min-width: 0 !important;
+    max-width: 48% !important;  /* МАКС ПОЛОВИНА ЭКРАНА */
+    padding: 10px 12px !important;
+    font-size: 0.85rem !important;  /* МЕНЬШЕ ШРИФТ */
+    line-height: 1.2 !important;
+  }
+  
+  .bottom-btn.challenges,
+  .bottom-btn.achievements {
+    flex: 1 1 0 !important;
+  }
+}
+
+/* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ (меньше 360px) */
+@media screen and (max-width: 360px) {
+  .bottom-btn {
+    padding: 8px 10px !important;
+    font-size: 0.75rem !important;  /* ЕЩЁ МЕНЬШЕ */
+  }
+  
+  .bottom-nav {
+    gap: 6px !important;
+    padding: 8px 5px !important;
+  }
+}
