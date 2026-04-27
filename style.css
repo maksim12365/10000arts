@@ -2059,3 +2059,33 @@ header p {
   }
 }
 
+/* ============================================ */
+/* Z-INDEX ДЛЯ ПАНЕЛЕЙ (ПОРЯДОК СЛОЁВ) */
+/* ============================================ */
+
+/* Паттерны должны быть ВЫШЕ фильтров */
+#patternPanel {
+  z-index: 1001 !important;  /* Выше фильтров */
+}
+
+/* Фильтры ниже паттернов */
+#filtersPanel {
+  z-index: 1000 !important;
+}
+
+/* Палитры ещё ниже */
+#paletteGenerator {
+  z-index: 999 !important;
+}
+
+/* Все панели должны быть относительно позиционированы */
+#patternPanel,
+#filtersPanel,
+#paletteGenerator {
+  position: relative;  /* Важно для z-index! */
+}
+
+/* Модальные окна выше всего */
+.modal-overlay {
+  z-index: 10000 !important;
+}
