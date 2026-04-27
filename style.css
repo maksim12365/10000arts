@@ -2941,3 +2941,253 @@ header p {
 .generated-color-btn:hover {
   background-image: none !important;
 }
+
+/* ============================================ */
+/* АНИМАЦИЯ — МОДАЛЬНОЕ ОКНО */
+/* ============================================ */
+
+.animation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animation-modal .modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.modal-header button {
+  background: #f0f0f0;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.modal-header button:hover {
+  background: #e0e0e0;
+}
+
+/* Контейнер для canvas с onion skin */
+.canvas-container {
+  position: relative;
+  width: 256px;
+  height: 256px;
+  margin: 0 auto 15px auto;
+}
+
+#animationCanvas,
+#onionSkinCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+#onionSkinCanvas {
+  pointer-events: none;  /* Чтобы можно было рисовать сквозь */
+  z-index: 10;
+}
+
+#animationCanvas {
+  z-index: 5;
+}
+
+/* Контролы */
+.animation-controls {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.frame-info {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.frame-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.frame-buttons button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+
+.frame-buttons button:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.frame-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#addFrameBtn {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+#addFrameBtn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+#addFrameBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.onion-skin-control {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.onion-skin-control label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.fps-control {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.fps-control input {
+  width: 150px;
+}
+
+/* Кнопки действий */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.modal-actions button:hover {
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+  color: white;
+}
+
+/* Анимированная клетка на полотне */
+.animated-cell {
+  border: 2px solid #667eea !important;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  .animation-modal .modal-content {
+    padding: 15px;
+    width: 95%;
+  }
+  
+  .canvas-container {
+    width: 100%;
+    max-width: 256px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+  }
+  
+  .frame-buttons {
+    flex-wrap: wrap;
+  }
+}
