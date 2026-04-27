@@ -1887,7 +1887,7 @@ header p {
 }
 
 /* ============================================ */
-/* МАСКИ И ФИЛЬТРЫ */
+/* МАСКИ И ФИЛЬТРЫ (КОМПАКТНО ДЛЯ ТЕЛЕФОНА) */
 /* ============================================ */
 
 .filters-panel {
@@ -1913,23 +1913,23 @@ header p {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;  /* Уменьшил */
 }
 
 .filters-header span {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;  /* Чуть меньше */
   color: #333;
 }
 
 .filters-toggle {
   background: #f0f0f0;
   border: none;
-  width: 28px;
-  height: 28px;
+  width: 26px;  /* Чуть меньше */
+  height: 26px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: background 0.2s;
 }
 
@@ -1940,18 +1940,18 @@ header p {
 /* Сетка фильтров */
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-bottom: 15px;
+  grid-template-columns: repeat(5, 1fr);  /* 5 колонок */
+  gap: 6px;  /* Меньше отступы */
+  margin-bottom: 10px;
 }
 
 .filter-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
-  border-radius: 10px;
-  width: 50px;
-  height: 50px;
-  font-size: 1.5rem;
+  border-radius: 8px;  /* Чуть меньше скругление */
+  width: 42px;  /* КОМПАКТНО: было 50px */
+  height: 42px; /* КОМПАКТНО: было 50px */
+  font-size: 1.2rem;  /* Чуть меньше иконки */
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -1961,7 +1961,7 @@ header p {
 
 .filter-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
 }
 
 .filter-btn.applied {
@@ -1982,9 +1982,9 @@ header p {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 8px 16px;  /* Меньше */
+  border-radius: 8px;
+  font-size: 0.8rem;  /* Меньше текст */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -1992,29 +1992,61 @@ header p {
 
 .filter-reset-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+  box-shadow: 0 3px 12px rgba(245, 87, 108, 0.4);
 }
 
-/* Адаптив для телефона */
+/* ============================================ */
+/* ТЕЛЕФОН: ЕЩЁ КОМПАКТНЕЕ */
+/* ============================================ */
+
 @media (max-width: 600px) {
   .filters-panel {
-    margin: 10px;
-    padding: 12px;
+    margin: 8px;  /* Меньше отступы */
+    padding: 10px;
+  }
+  
+  .filters-header {
+    margin-bottom: 8px;
+  }
+  
+  .filters-header span {
+    font-size: 0.85rem;
   }
   
   .filters-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(5, 1fr);  /* 5 в ряд */
+    gap: 4px;  /* Минимальные отступы */
+    margin-bottom: 8px;
   }
   
   .filter-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 1.3rem;
+    width: 38px;  /* ЕЩЁ КОМПАКТНЕЕ */
+    height: 38px;
+    font-size: 1.1rem;
   }
   
   .filter-reset-btn {
     width: 100%;
-    padding: 12px;
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+  
+  /* Если всё равно много — показываем только первые 5 */
+  .filter-btn:nth-child(n+6) {
+    /* display: none; */  /* Раскомментируй если нужно скрыть */
+  }
+}
+
+/* Очень маленький экран */
+@media (max-width: 400px) {
+  .filters-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+  }
+  
+  .filter-btn {
+    width: 34px;  /* МАКСИМАЛЬНО КОМПАКТНО */
+    height: 34px;
+    font-size: 1rem;
   }
 }
