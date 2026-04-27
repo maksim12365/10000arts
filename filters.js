@@ -144,7 +144,7 @@ const FILTER_LIST = [
 function createFiltersPanel() {
   const panel = document.createElement('div');
   panel.id = 'filtersPanel';
-  panel.className = 'filters-panel collapsed';  // ← СВЁРНУТА ПО УМОЛЧАНИЮ
+  panel.className = 'filters-panel collapsed';
   
   panel.innerHTML = `
     <div class="filters-header">
@@ -152,34 +152,24 @@ function createFiltersPanel() {
       <button class="filters-toggle" onclick="toggleFiltersPanel()">−</button>
     </div>
     <div class="filters-grid">
-      ${FILTER_LIST.map(f => `
-        <button class="filter-btn" onclick="applyFilter('${f.id}')" title="${f.name}">${f.icon}</button>
-      `).join('')}
+      ${FILTER_LIST.map(f => `<button class="filter-btn" onclick="applyFilter('${f.id}')" title="${f.name}">${f.icon}</button>`).join('')}
     </div>
     <div class="filters-actions">
       <button class="filter-reset-btn" onclick="resetCanvas()">↩️ Сбросить</button>
     </div>
   `;
   
-  // 🔧 Вставляем В #panelsContainer (если есть)
+  // 🔧 Вставляем ВНУТРИ toolbar, ПОСЛЕ paletteGenerator
   setTimeout(() => {
-    const container = document.getElementById('panelsContainer');
-    if (container) {
-      container.appendChild(panel);
-      console.log('✅ Filters panel added to #panelsContainer');
+    const paletteGen = document.getElementById('paletteGenerator');
+    if (paletteGen && paletteGen.parentNode) {
+      paletteGen.parentNode.insertBefore(panel, paletteGen.nextSibling);
+      console.log('✅ Filters panel inserted in toolbar');
     } else {
-      // Фолбэк
-      const palette = document.getElementById('paletteGenerator');
-      if (palette?.parentNode) {
-        palette.parentNode.insertBefore(panel, palette.nextSibling);
-      } else {
-        document.body.appendChild(panel);
-      }
-      console.log('⚠️ Filters panel added via fallback');
+      console.error('❌ paletteGenerator not found');
     }
   }, 100);
 }
-
 // Переключить панель
 function toggleFiltersPanel() {
   const panel = document.getElementById('filtersPanel');
