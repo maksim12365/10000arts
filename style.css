@@ -2099,3 +2099,114 @@ header p {
   margin: 8px auto;
   max-width: 400px;
 }
+
+
+/* Паттерны - компактная панель */
+#patternPanel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 15px;
+  margin: 8px auto;
+  max-width: 400px;
+  transition: all 0.3s ease;
+  position: relative !important;
+  z-index: 1001 !important;
+}
+
+#patternPanel.collapsed {
+  padding: 10px 15px;
+}
+
+#patternPanel.collapsed .pattern-content,
+#patternPanel.collapsed .pattern-grid,
+#patternPanel.collapsed .pattern-preview {
+  display: none !important;  ← ВАЖНО!
+}
+
+.pattern-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.pattern-header span {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.pattern-toggle {
+  background: #f0f0f0;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.pattern-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pattern-btn:hover { transform: scale(1.1); }
+.pattern-btn.applied { animation: filterApplied 0.5s ease; }
+
+@keyframes filterApplied {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.pattern-preview {
+  text-align: center;
+  padding-top: 10px;
+  border-top: 2px solid #f0f0f0;
+}
+
+#patternPreview {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  image-rendering: pixelated;
+  margin-bottom: 8px;
+}
+
+.pattern-hint {
+  font-size: 0.7rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Телефон */
+@media (max-width: 600px) {
+  #patternPanel { margin: 8px; padding: 10px; }
+  .pattern-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .pattern-btn { width: 38px; height: 38px; font-size: 1.1rem; }
+}
+
+/* Все панели вертикально */
+#paletteGenerator, #filtersPanel, #patternPanel {
+  position: static !important;
+  display: block !important;
+  margin: 8px auto !important;
+  max-width: 400px !important;
+  clear: both !important;
+}
