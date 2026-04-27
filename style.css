@@ -2058,3 +2058,14 @@ header p {
     height: 45px;
   }
 }
+
+/* 🔧 СРОЧНОЕ ИСПРАВЛЕНИЕ */
+#patternPanel {
+  position: relative !important;
+  z-index: 1001 !important;
+}
+
+#filtersPanel {
+  position: relative !important;
+  z-index: 1000 !important;
+}
