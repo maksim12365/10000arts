@@ -109,7 +109,7 @@ const PATTERNS = {
 function createPatternPanel() {
   const panel = document.createElement('div');
   panel.id = 'patternPanel';
-  panel.className = 'pattern-panel collapsed';  // Свёрнута по умолчанию
+  panel.className = 'pattern-panel collapsed';
   
   panel.innerHTML = `
     <div class="pattern-header" onclick="togglePatternPanel()">
@@ -133,28 +133,27 @@ function createPatternPanel() {
     </div>
   `;
   
-  // 🔧 КРИТИЧЕСКИ ВАЖНО: Вставляем ПОСЛЕ фильтров!
-  const filtersPanel = document.getElementById('filtersPanel');
-  const paletteGen = document.getElementById('paletteGenerator');
-  
-  if (filtersPanel && filtersPanel.parentNode) {
-    // Вставляем ПОСЛЕ фильтров
-    filtersPanel.parentNode.insertBefore(panel, filtersPanel.nextSibling);
-  } else if (paletteGen && paletteGen.parentNode) {
-    // Если фильтров нет - после палитры
-    paletteGen.parentNode.insertBefore(panel, paletteGen.nextSibling);
-  } else {
-    // Если ничего нет - ищем toolbar
-    const toolbar = document.getElementById('toolbar');
-    if (toolbar && toolbar.parentNode) {
-      toolbar.parentNode.insertBefore(panel, toolbar);
+  // 🔧 КРИТИЧЕСКИ ВАЖНО: Ждём пока фильтры создадутся
+  setTimeout(() => {
+    const filtersPanel = document.getElementById('filtersPanel');
+    
+    if (filtersPanel) {
+      // Вставляем СТРОГО ПОСЛЕ фильтров
+      filtersPanel.parentNode.insertBefore(panel, filtersPanel.nextSibling);
+      console.log('✅ Pattern panel inserted after filters');
     } else {
-      // На крайний случай
-      document.body.appendChild(panel);
+      // Если фильтров нет - после палитры
+      const paletteGen = document.getElementById('paletteGenerator');
+      if (paletteGen) {
+        paletteGen.parentNode.insertBefore(panel, paletteGen.nextSibling);
+        console.log('✅ Pattern panel inserted after palette');
+      } else {
+        console.warn('⚠️ Could not find proper location for pattern panel');
+      }
     }
-  }
+  }, 100);  // Ждём 100мс пока фильтры создадутся
   
-  console.log('✅ Pattern panel created (correct position)');
+  console.log('🔄 Pattern panel creation initiated');
 }
 
 // Показать/скрыть панель
