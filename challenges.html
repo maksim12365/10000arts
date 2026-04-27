@@ -197,6 +197,7 @@
     let currentColor = '#000000';
     let isDrawing = false;
     let canvas, ctx;
+    let unlockTimers = [];
     
     function init() {
       canvas = document.getElementById('challengeCanvas');
@@ -212,11 +213,12 @@
     }
     
     function renderChallenges() {
+      // Очищаем старые таймеры
+      unlockTimers.forEach(t => clearInterval(t));
+      unlockTimers = [];
+      
       const { available, locked } = ChallengeManager.getAvailableChallenges();
       const container = document.getElementById('challengeList');
-      const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
-      const daysSinceFirst = (Date.now() - firstVisit) / (1000 * 60 * 60 * 24);
-      const currentWeek = Math.floor(daysSinceFirst / 7) + 1;
       
       let html = '<h2 style="margin:20px 0 10px 0;">📋 Доступные челленджи</h2>';
       
@@ -226,7 +228,7 @@
         html += available.map(c => {
           const completed = ChallengeSystem.isCompleted(c.id);
           return `
-            <div class="challenge-card difficulty-${c.difficulty} ${completed ? 'completed' : ''}" data-challenge="${c.id}">
+            <div class="challenge-card difficulty-${c.difficulty} ${completed ? 'completed' : ''}">
               <h3>${c.title}</h3>
               <p>${c.description}</p>
               <p>⏱️ ${c.timeLimit ? c.timeLimit + ' сек' : 'Без ограничений'}</p>
@@ -244,13 +246,16 @@
       if (locked.length > 0) {
         html += '<h2 style="margin:30px 0 10px 0;">🔒 Заблокировано</h2>';
         html += locked.map(c => {
-          const daysToWait = (c.week - currentWeek) * 7 - (daysSinceFirst % 7);
+          const firstVisit = parseInt(localStorage.getItem(`firstVisit_${userId}`));
+          const unlockWeek = c.week;
+          const unlockTime = firstVisit + (unlockWeek * 7 * 24 * 60 * 60 * 1000);
+          
           return `
-            <div class="challenge-card difficulty-${c.difficulty} locked" data-challenge="${c.id}" data-week="${c.week}">
+            <div class="challenge-card difficulty-${c.difficulty} locked">
               <h3>${c.title}</h3>
               <p>${c.description}</p>
-              <div class="unlock-info" data-week="${c.week}">
-                🔓 Неделя ${c.week} • <span class="unlock-timer">⏳ Загрузка...</span>
+              <div class="unlock-info">
+                🔓 Неделя ${unlockWeek} • <span class="unlock-timer" data-unlock="${unlockTime}">⏳ Загрузка...</span>
               </div>
             </div>
           `;
@@ -263,22 +268,19 @@
     }
     
     function startUnlockTimers() {
-      const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
-      const lockedCards = document.querySelectorAll('.challenge-card.locked .unlock-info');
+      const timerElements = document.querySelectorAll('.unlock-timer');
       
-      lockedCards.forEach(info => {
-        const week = parseInt(info.dataset.week);
-        const timerElement = info.querySelector('.unlock-timer');
-        const unlockTime = firstVisit + (week * 7 * 24 * 60 * 60 * 1000);
+      timerElements.forEach(timerEl => {
+        const unlockTime = parseInt(timerEl.dataset.unlock);
         
-        setInterval(() => {
+        const interval = setInterval(() => {
           const now = Date.now();
           const diff = unlockTime - now;
           
           if (diff <= 0) {
-            timerElement.textContent = '✅ Доступно!';
-            info.parentElement.classList.remove('locked');
-            info.parentElement.style.borderLeftColor = '#11998e';
+            timerEl.textContent = '✅ Доступно!';
+            clearInterval(interval);
+            setTimeout(() => renderChallenges(), 1000);
             return;
           }
           
@@ -287,8 +289,10 @@
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((diff % (1000 * 60)) / 1000);
           
-          timerElement.textContent = `⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с`;
+          timerEl.textContent = `⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с`;
         }, 1000);
+        
+        unlockTimers.push(interval);
       });
     }
     
