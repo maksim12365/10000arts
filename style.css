@@ -2282,3 +2282,288 @@ header p {
     width: 100% !important;
   }
 }
+
+/* ============================================ */
+/* 🔧 УНИВЕРСАЛЬНЫЙ ФИКС - ВСЕ УСТРОЙСТВА */
+/* ============================================ */
+
+/* Все панели инструментов */
+#paletteGenerator,
+#filtersPanel,
+#patternPanel {
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+  margin: 10px auto !important;
+  padding: 12px !important;
+  max-width: 450px !important;
+  width: 90% !important;  /* 90% ширины экрана */
+  box-sizing: border-box !important;
+  position: relative !important;
+  clear: both !important;
+  display: block !important;
+}
+
+/* Заголовки панелей - всегда видны */
+.filters-header,
+.pattern-header,
+.generator-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 10px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  min-width: 0 !important;
+}
+
+/* Текст заголовка */
+.filters-header span,
+.pattern-header span,
+.generator-header span {
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  color: #333 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 200px !important;
+}
+
+/* Кнопка закрытия - ВСЕГДА видна */
+.filters-toggle,
+.pattern-toggle,
+.generator-toggle {
+  background: #f0f0f0 !important;
+  border: none !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;  /* Не сжимается */
+  min-height: 28px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  flex-shrink: 0 !important;  /* Важно! */
+  margin-left: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.filters-toggle:hover,
+.pattern-toggle:hover,
+.generator-toggle:hover {
+  background: #e0e0e0 !important;
+}
+
+/* Свёрнутое состояние */
+#filtersPanel.collapsed .filters-grid,
+#filtersPanel.collapsed .filters-actions,
+#patternPanel.collapsed .pattern-content,
+#patternPanel.collapsed .pattern-grid,
+#patternPanel.collapsed .pattern-preview,
+#paletteGenerator.collapsed .generator-types,
+#paletteGenerator.collapsed .generated-palette,
+#paletteGenerator.collapsed .apply-palette-btn {
+  display: none !important;
+}
+
+/* Сетка кнопок - горизонтальный скролл если не влезает */
+.filters-grid,
+.pattern-grid,
+.generator-types {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  gap: 8px !important;
+  padding: 8px 0 !important;
+  margin-bottom: 10px !important;
+  -webkit-overflow-scrolling: touch !important;  /* iOS плавный скролл */
+  scrollbar-width: thin !important;  /* Firefox */
+}
+
+/* Скроллбар для Chrome/Safari */
+.filters-grid::-webkit-scrollbar,
+.pattern-grid::-webkit-scrollbar,
+.generator-types::-webkit-scrollbar {
+  height: 6px !important;
+}
+
+.filters-grid::-webkit-scrollbar-track,
+.pattern-grid::-webkit-scrollbar-track,
+.generator-types::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 3px !important;
+}
+
+.filters-grid::-webkit-scrollbar-thumb,
+.pattern-grid::-webkit-scrollbar-thumb,
+.generator-types::-webkit-scrollbar-thumb {
+  background: #667eea !important;
+  border-radius: 3px !important;
+}
+
+/* Кнопки в сетке - фиксированный размер */
+.filter-btn,
+.pattern-btn,
+.generated-color-btn,
+.gen-type-btn {
+  min-width: 45px !important;
+  max-width: 45px !important;
+  width: 45px !important;
+  min-height: 45px !important;
+  max-height: 45px !important;
+  height: 45px !important;
+  flex: 0 0 45px !important;  /* Не сжимается */
+  border-radius: 10px !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;  /* Важно! */
+}
+
+/* Кнопка сброса фильтров */
+.filter-reset-btn {
+  width: 100% !important;
+  padding: 10px !important;
+  border-radius: 10px !important;
+  font-size: 0.85rem !important;
+}
+
+/* Предпросмотр паттернов */
+.pattern-preview {
+  text-align: center !important;
+  padding-top: 10px !important;
+  border-top: 2px solid #f0f0f0 !important;
+  margin-top: 10px !important;
+}
+
+#patternPreview {
+  border: 2px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  image-rendering: pixelated !important;
+  margin-bottom: 8px !important;
+  max-width: 100px !important;
+}
+
+.pattern-hint {
+  font-size: 0.7rem !important;
+  color: #999 !important;
+  margin: 0 !important;
+}
+
+/* ============================================ */
+/* ТЕЛЕФОН (до 600px) */
+/* ============================================ */
+
+@media (max-width: 600px) {
+  #paletteGenerator,
+  #filtersPanel,
+  #patternPanel {
+    width: calc(100% - 20px) !important;  /* 100% - отступы */
+    max-width: calc(100% - 20px) !important;
+    margin: 8px 10px !important;
+    padding: 10px !important;
+  }
+  
+  .filters-header span,
+  .pattern-header span,
+  .generator-header span {
+    font-size: 0.85rem !important;
+    max-width: 150px !important;
+  }
+  
+  .filters-toggle,
+  .pattern-toggle,
+  .generator-toggle {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    font-size: 0.9rem !important;
+  }
+  
+  .filter-btn,
+  .pattern-btn,
+  .generated-color-btn,
+  .gen-type-btn {
+    min-width: 42px !important;
+    max-width: 42px !important;
+    width: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    height: 42px !important;
+    flex: 0 0 42px !important;
+    font-size: 1.1rem !important;
+  }
+  
+  .filter-reset-btn {
+    padding: 8px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* ============================================ */
+/* ОЧЕНЬ МАЛЕНЬКИЙ ЭКРАН (до 400px) */
+/* ============================================ */
+
+@media (max-width: 400px) {
+  #paletteGenerator,
+  #filtersPanel,
+  #patternPanel {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    margin: 6px 8px !important;
+    padding: 8px !important;
+  }
+  
+  .filters-header span,
+  .pattern-header span,
+  .generator-header span {
+    font-size: 0.8rem !important;
+    max-width: 120px !important;
+  }
+  
+  .filter-btn,
+  .pattern-btn,
+  .generated-color-btn,
+  .gen-type-btn {
+    min-width: 38px !important;
+    max-width: 38px !important;
+    width: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* ============================================ */
+/* ПК (больше 600px) */
+/* ============================================ */
+
+@media (min-width: 601px) {
+  #paletteGenerator,
+  #filtersPanel,
+  #patternPanel {
+    width: 400px !important;
+    max-width: 400px !important;
+  }
+  
+  .filter-btn,
+  .pattern-btn,
+  .generated-color-btn,
+  .gen-type-btn {
+    min-width: 50px !important;
+    max-width: 50px !important;
+    width: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    height: 50px !important;
+    flex: 0 0 50px !important;
+  }
+}
