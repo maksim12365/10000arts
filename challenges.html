@@ -15,7 +15,7 @@
     }
     
     header h1 {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       color: #333;
     }
     
@@ -93,7 +93,7 @@
       transition: transform 0.2s;
     }
     
-    .challenge-card button:hover {
+    .challenge-card button:hover:not(:disabled) {
       transform: translateY(-2px);
     }
     
@@ -101,6 +101,16 @@
       background: #11998e;
       cursor: not-allowed;
       transform: none;
+    }
+    
+    .challenge-card.locked {
+      border-left-color: #999;
+      opacity: 0.7;
+    }
+    
+    .challenge-card.locked button {
+      background: #999;
+      cursor: not-allowed;
     }
     
     .difficulty-easy { border-left-color: #11998e; }
@@ -111,6 +121,15 @@
     .challenge-card.completed {
       border-left-color: #11998e;
       opacity: 0.7;
+    }
+    
+    .unlock-info {
+      background: #fff3cd;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #856404;
     }
     
     #activeChallenge {
@@ -147,6 +166,7 @@
       display: block;
       margin: 20px auto;
       cursor: crosshair;
+      background: white;
     }
     
     #colorPicker {
@@ -168,6 +188,9 @@
       color: #666;
       font-size: 0.9rem;
       margin: 15px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
     }
     
     .action-buttons {
@@ -232,11 +255,11 @@
       <div id="timer" class="timer-display">00:00</div>
       <canvas id="challengeCanvas" width="256" height="256"></canvas>
       <div id="colorPicker">
-        <button onclick="setColor('#ff0000')" style="background:#ff0000;"></button>
-        <button onclick="setColor('#00ff00')" style="background:#00ff00;"></button>
-        <button onclick="setColor('#0000ff')" style="background:#0000ff;"></button>
-        <button onclick="setColor('#ffff00')" style="background:#ffff00;"></button>
-        <button onclick="setColor('#000000')" style="background:#000000;"></button>
+        <button onclick="setColor('#ff0000')" style="background:#ff0000;" title="Красный"></button>
+        <button onclick="setColor('#00ff00')" style="background:#00ff00;" title="Зелёный"></button>
+        <button onclick="setColor('#0000ff')" style="background:#0000ff;" title="Синий"></button>
+        <button onclick="setColor('#ffff00')" style="background:#ffff00;" title="Жёлтый"></button>
+        <button onclick="setColor('#000000')" style="background:#000000;" title="Чёрный"></button>
         <button onclick="clearCanvas()" style="background:#f0f0f0;width:auto;padding:0 15px;border-radius:5px;">🗑 Очистить</button>
       </div>
       <div class="attempts-left" id="attemptsInfo"></div>
@@ -247,9 +270,6 @@
     </div>
   </div>
   
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.0/dist/tesseract.min.js"></script>
   <script src="challenge-system.js"></script>
   <script>
     let currentChallenge = null;
@@ -258,21 +278,10 @@
     let isDrawing = false;
     let canvas, ctx;
     
-    // Инициализация
     function init() {
       console.log('🎯 Challenges page loaded');
-      console.log('ChallengeSystem:', typeof ChallengeSystem);
-      console.log('CHALLENGES:', typeof CHALLENGES);
-      
-      if (typeof ChallengeSystem === 'undefined') {
-        document.getElementById('challengeList').innerHTML = 
-          '<p style="text-align:center;color:red;padding:40px;">⚠️ Ошибка загрузки системы челленджей!<br>Проверь консоль (F12)</p>';
-        return;
-      }
-      
       canvas = document.getElementById('challengeCanvas');
       ctx = canvas.getContext('2d');
-      
       renderChallenges();
     }
     
@@ -284,31 +293,47 @@
     }
     
     function renderChallenges() {
-      const available = ChallengeSystem.getAvailableChallenges();
+      const { available, locked } = ChallengeManager.getAvailableChallenges();
       const container = document.getElementById('challengeList');
       
+      let html = '<h2 style="margin:20px 0 10px 0;">📋 Доступные челленджи</h2>';
+      
       if (available.length === 0) {
-        container.innerHTML = '<p style="text-align:center;padding:40px;">Челленджей пока нет. Заходи через неделю!</p>';
-        return;
+        html += '<p style="text-align:center;padding:40px;">Нет доступных челленджей</p>';
+      } else {
+        html += available.map(c => {
+          const completed = ChallengeSystem.isCompleted(c.id);
+          return `
+            <div class="challenge-card difficulty-${c.difficulty} ${completed ? 'completed' : ''}">
+              <h3>${c.title}</h3>
+              <p>${c.description}</p>
+              <p>⏱️ ${c.timeLimit ? c.timeLimit + ' сек' : 'Без ограничений'}</p>
+              <p>🎯 ${c.attempts === 1 ? '1 попытка' : 'Безлимит попыток'}</p>
+              <p>🏆 ${c.reward.points} очков</p>
+              ${completed 
+                ? '<button disabled>✅ Выполнено</button>' 
+                : `<button onclick="openChallenge('${c.id}')">▶️ Начать</button>`
+              }
+            </div>
+          `;
+        }).join('');
       }
       
-      container.innerHTML = available.map(c => {
-        const completed = ChallengeSystem.isCompleted(c.id);
-        return `
-          <div class="challenge-card difficulty-${c.difficulty} ${completed ? 'completed' : ''}">
+      if (locked.length > 0) {
+        const daysUntilNext = 7 - ((Date.now() - localStorage.getItem(`firstVisit_${userId}`)) / (1000 * 60 * 60 * 24) % 7);
+        html += '<h2 style="margin:30px 0 10px 0;">🔒 Заблокировано</h2>';
+        html += locked.map(c => `
+          <div class="challenge-card difficulty-${c.difficulty} locked">
             <h3>${c.title}</h3>
             <p>${c.description}</p>
-            <p>⏱️ ${c.timeLimit ? c.timeLimit + ' сек' : 'Без ограничений'}</p>
-            <p>🎯 ${c.attempts === 1 ? '1 попытка' : 'Безлимит попыток'}</p>
-            <p>🏆 ${c.reward.points} очков</p>
-            ${completed 
-              ? '<button disabled>✅ Выполнено</button>' 
-              : `<button onclick="openChallenge('${c.id}')">▶️ Начать</button>`
-            }
+            <div class="unlock-info">
+              🔓 Откроется через ${Math.ceil(daysUntilNext)} дн.
+            </div>
           </div>
-        `;
-      }).join('');
+        `).join('');
+      }
       
+      container.innerHTML = html;
       updateStats();
     }
     
@@ -323,7 +348,11 @@
       
       document.getElementById('activeChallenge').style.display = 'block';
       document.getElementById('activeTitle').textContent = currentChallenge.title;
-      document.getElementById('attemptsInfo').textContent = `Попыток осталось: ${currentChallenge.attempts}`;
+      
+      const key = `challenge_${userId}_${challengeId}`;
+      const data = JSON.parse(localStorage.getItem(key));
+      const attemptsLeft = currentChallenge.attempts - data.attemptsUsed;
+      document.getElementById('attemptsInfo').textContent = `Попыток осталось: ${attemptsLeft}`;
       
       if (currentChallenge.timeLimit) {
         let timeLeft = currentChallenge.timeLimit;
@@ -333,7 +362,7 @@
           document.getElementById('timer').textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
           if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            alert('Время вышло!');
+            alert('⏰ Время вышло! Попытка потрачена.');
             closeChallenge();
           }
         }, 1000);
@@ -386,7 +415,13 @@
       if (!currentChallenge) return;
       
       const result = await ChallengeSystem.completeChallenge(currentChallenge.id, canvas);
-      alert(result.reason);
+      
+      let message = result.reason;
+      if (result.attemptsLeft !== undefined) {
+        message += `\nОсталось попыток: ${result.attemptsLeft}`;
+      }
+      
+      alert(message);
       
       if (result.completed) {
         renderChallenges();
@@ -401,7 +436,6 @@
       currentChallenge = null;
     };
     
-    // Запуск
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {
