@@ -50,48 +50,39 @@ const ACHIEVEMENTS = [
 // 4. ПРОВЕРКИ РИСУНКОВ
 const Checker = {
   // Проверка линии - МАКСИМАЛЬНО МЯГКАЯ!
-  checkLine(canvas) {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    const points = [];
-    
-    for (let y = 0; y < canvas.height; y++) {
-      for (let x = 0; x < canvas.width; x++) {
-        const i = (y * canvas.width + x) * 4;
-        if (pixels[i + 3] > 128) points.push({ x, y });
-      }
+ // Проверка линии - ОЧЕНЬ ПРОСТАЯ!
+checkLine(canvas) {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  const points = [];
+  
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const i = (y * canvas.width + x) * 4;
+      if (pixels[i + 3] > 128) points.push({ x, y });
     }
-    
-    // Проверяем что есть хоть что-то
-    if (points.length < 20) return { success: false, reason: 'Нарисуй что-нибудь!' };
-    
-    // Находим границы
-    const xs = points.map(p => p.x);
-    const ys = points.map(p => p.y);
-    const minX = Math.min(...xs), maxX = Math.max(...xs);
-    const minY = Math.min(...ys), maxY = Math.max(...ys);
-    
-    // Проверяем длину - линия должна быть достаточно длинной
-    const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
-    if (length < 30) return { success: false, reason: 'Слишком коротко!' };
-    
-    // Проверяем что это не круг (у круга ширина ≈ высоте)
-    const width = maxX - minX;
-    const height = maxY - minY;
-    const aspectRatio = Math.max(width, height) / Math.min(width, height);
-    
-    // Если соотношение сторон < 1.5 - это скорее круг/квадрат, а не линия
-    if (aspectRatio < 1.5) {
-      return { success: false, reason: 'Это не линия, а круг/квадрат!' };
-    }
-    
-    // Всё остальное принимаем как линию!
-    return {
-      success: true,
-      reason: '✅ Отличная линия!'
-    };
-  },
+  }
+  
+  // Проверяем что есть хоть что-то
+  if (points.length < 20) return { success: false, reason: 'Нарисуй что-нибудь!' };
+  
+  // Находим границы
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  
+  // Проверяем длину - линия должна быть достаточно длинной
+  const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
+  if (length < 30) return { success: false, reason: 'Слишком коротко!' };
+  
+  // ВСЁ! Принимаем как линию!
+  return {
+    success: true,
+    reason: '✅ Отличная линия!'
+  };
+}
   
   // Проверка количества цветов
   checkColorCount(canvas, minColors) {
