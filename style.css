@@ -2567,10 +2567,30 @@ header p {
 #patternPanel .pattern-content,
 #patternPanel .pattern-grid,
 #patternPanel .pattern-preview {
-  display: block !important;
+  /* 🔧 ИСПРАВЛЕНИЕ: ГОРИЗОНТАЛЬНЫЙ СКРОЛЛ */
+
+/* Сетка кнопок - ГОРИЗОНТАЛЬНО */
+.filters-grid,
+.pattern-grid,
+.generator-types {
+  display: flex !important;
+  flex-direction: row !important;  /* ← Горизонтально! */
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  gap: 6px !important;
+  padding: 6px 0 !important;
 }
 
-/* Когда свёрнуто - скрываем контент */
+/* Кнопки не сжимаются */
+.filter-btn,
+.pattern-btn,
+.gen-type-btn {
+  flex: 0 0 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+}
+
+/* Свёрнутое состояние */
 #paletteGenerator.collapsed .generator-types,
 #paletteGenerator.collapsed .generated-palette,
 #paletteGenerator.collapsed .apply-palette-btn,
@@ -2580,13 +2600,4 @@ header p {
 #patternPanel.collapsed .pattern-grid,
 #patternPanel.collapsed .pattern-preview {
   display: none !important;
-}
-
-/* Убираем все конфликты */
-#paletteGenerator,
-#filtersPanel,
-#patternPanel {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
