@@ -51,49 +51,76 @@ const ACHIEVEMENTS = [
 // 4. ПРОВЕРКИ РИСУНКОВ
 const Checker = {
   // Проверка линии
-  checkLine(canvas) {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    const points = [];
-    
-    for (let y = 0; y < canvas.height; y++) {
-      for (let x = 0; x < canvas.width; x++) {
-        const i = (y * canvas.width + x) * 4;
-        if (pixels[i + 3] > 128) points.push({ x, y });
-      }
+  // Проверка линии (более мягкая)
+checkLine(canvas) {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  const points = [];
+  
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const i = (y * canvas.width + x) * 4;
+      if (pixels[i + 3] > 128) points.push({ x, y });
     }
-    
-    if (points.length < 50) return { success: false, reason: 'Слишком мало пикселей' };
-    
-    const sumX = points.reduce((s, p) => s + p.x, 0);
-    const sumY = points.reduce((s, p) => s + p.y, 0);
-    const avgX = sumX / points.length;
-    const avgY = sumY / points.length;
-    
-    let num = 0, den = 0;
-    for (const p of points) {
-      num += (p.x - avgX) * (p.y - avgY);
-      den += (p.x - avgX) ** 2;
-    }
-    
-    const slope = den === 0 ? 0 : num / den;
-    const intercept = avgY - slope * avgX;
-    
-    let totalDeviation = 0;
-    for (const p of points) {
-      const expectedY = slope * p.x + intercept;
-      totalDeviation += Math.abs(p.y - expectedY);
-    }
-    
-    const avgDeviation = totalDeviation / points.length;
-    const isLine = avgDeviation < 20;
-    
-    return {
-      success: isLine,
-      reason: isLine ? '✅ Прямая линия!' : '❌ Это не прямая линия (отклонение: ' + Math.round(avgDeviation) + 'px)'
-    };
-  },
+  }
+  
+  // Проверяем что есть хоть что-то нарисовано
+  if (points.length < 30) return { success: false, reason: 'Нарисуй что-нибудь!' };
+  
+  // Проверяем что это не просто точка — линия должна быть достаточно длинной
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
+  
+  if (length < 40) return { success: false, reason: 'Линия слишком короткая!' };
+  
+  // Проверяем если это линия (не каракули)
+  // Для линии отношение периметра к площади должно быть большим
+  const area = (maxX - minX) * (maxY - minY);
+  const perimeter = 2 * ((maxX - minX) + (maxY - minY));
+  
+  // Если это каракули — они займут много площади при маленьком периметре
+  // Если это линия — периметр будет большим относительно площади
+  if (area > 0 && perimeter / Math.sqrt(area) < 3) {
+    return { success: false, reason: 'Это не линия, а каракули!' };
+  }
+  
+  // Проверяем отклонение от прямой (более мягко — до 50px)
+  const sumX = points.reduce((s, p) => s + p.x, 0);
+  const sumY = points.reduce((s, p) => s + p.y, 0);
+  const avgX = sumX / points.length;
+  const avgY = sumY / points.length;
+  
+  let num = 0, den = 0;
+  for (const p of points) {
+    num += (p.x - avgX) * (p.y - avgY);
+    den += (p.x - avgX) ** 2;
+  }
+  
+  const slope = den === 0 ? 0 : num / den;
+  const intercept = avgY - slope * avgX;
+  
+  let totalDeviation = 0;
+  for (const p of points) {
+    const expectedY = slope * p.x + intercept;
+    totalDeviation += Math.abs(p.y - expectedY);
+  }
+  
+  const avgDeviation = totalDeviation / points.length;
+  
+  // Более мягкая проверка — до 50px отклонения (вместо 20)
+  const isLine = avgDeviation < 50;
+  
+  return {
+    success: isLine,
+    reason: isLine 
+      ? '✅ Отличная линия!' 
+      : `❌ Слишком кривая (отклонение: ${Math.round(avgDeviation)}px). Нарисуй более прямую линию!`
+  };
+}
   
   // Проверка количества цветов
   checkColorCount(canvas, minColors) {
