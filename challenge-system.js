@@ -49,7 +49,7 @@ const ACHIEVEMENTS = [
 
 // 4. ПРОВЕРКИ РИСУНКОВ
 const Checker = {
-  // Проверка линии (мягкая)
+  // Проверка линии - МАКСИМАЛЬНО МЯГКАЯ!
   checkLine(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -63,49 +63,33 @@ const Checker = {
       }
     }
     
-    if (points.length < 30) return { success: false, reason: 'Нарисуй что-нибудь!' };
+    // Проверяем что есть хоть что-то
+    if (points.length < 20) return { success: false, reason: 'Нарисуй что-нибудь!' };
     
+    // Находим границы
     const xs = points.map(p => p.x);
     const ys = points.map(p => p.y);
     const minX = Math.min(...xs), maxX = Math.max(...xs);
     const minY = Math.min(...ys), maxY = Math.max(...ys);
+    
+    // Проверяем длину - линия должна быть достаточно длинной
     const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
+    if (length < 30) return { success: false, reason: 'Слишком коротко!' };
     
-    if (length < 40) return { success: false, reason: 'Линия слишком короткая!' };
+    // Проверяем что это не круг (у круга ширина ≈ высоте)
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const aspectRatio = Math.max(width, height) / Math.min(width, height);
     
-    const area = (maxX - minX) * (maxY - minY);
-    const perimeter = 2 * ((maxX - minX) + (maxY - minY));
-    
-    if (area > 0 && perimeter / Math.sqrt(area) < 3) {
-      return { success: false, reason: 'Это не линия, а каракули!' };
+    // Если соотношение сторон < 1.5 - это скорее круг/квадрат, а не линия
+    if (aspectRatio < 1.5) {
+      return { success: false, reason: 'Это не линия, а круг/квадрат!' };
     }
     
-    const sumX = points.reduce((s, p) => s + p.x, 0);
-    const sumY = points.reduce((s, p) => s + p.y, 0);
-    const avgX = sumX / points.length;
-    const avgY = sumY / points.length;
-    
-    let num = 0, den = 0;
-    for (const p of points) {
-      num += (p.x - avgX) * (p.y - avgY);
-      den += (p.x - avgX) ** 2;
-    }
-    
-    const slope = den === 0 ? 0 : num / den;
-    const intercept = avgY - slope * avgX;
-    
-    let totalDeviation = 0;
-    for (const p of points) {
-      const expectedY = slope * p.x + intercept;
-      totalDeviation += Math.abs(p.y - expectedY);
-    }
-    
-    const avgDeviation = totalDeviation / points.length;
-    const isLine = avgDeviation < 50;
-    
+    // Всё остальное принимаем как линию!
     return {
-      success: isLine,
-      reason: isLine ? '✅ Отличная линия!' : `❌ Слишком кривая (отклонение: ${Math.round(avgDeviation)}px)`
+      success: true,
+      reason: '✅ Отличная линия!'
     };
   },
   
@@ -380,4 +364,4 @@ window.CHALLENGES = CHALLENGES;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
 window.Checker = Checker;
 
-console.log('🎯 Challenge System loaded with validations');
+console.log('🎯 Challenge System loaded with soft line check');
