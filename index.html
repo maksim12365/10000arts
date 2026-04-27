@@ -141,29 +141,38 @@
 <!-- Кнопки челленджей и достижений -->
 <!-- Кнопки челленджей и достижений -->
 <!-- Кнопки челленджей и достижений -->
-<!-- ДВЕ КНОПКИ ВНИЗУ -->
-<div style="display: flex; justify-content: center; gap: 10px; padding: 15px; flex-wrap: wrap;">
-  <a href="challenges.html" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; flex: 1; min-width: 140px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">🎯 Челленджи</a>
-  
-  <a href="achievements.html" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; flex: 1; min-width: 140px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">🏆 Достижения</a>
+<!-- КНОПКИ ЧЕЛЛЕНДЖИ И ДОСТИЖЕНИЯ -->
+<div style="display:flex;justify-content:center;gap:10px;padding:15px;flex-wrap:wrap">
+  <a href="challenges.html" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600;flex:1;min-width:140px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.1);white-space:nowrap">🎯 Челленджи</a>
+  <a href="achievements.html" style="background:linear-gradient(135deg,#11998e,#38ef7d);color:white;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600;flex:1;min-width:140px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.1);white-space:nowrap">🏆 Достижения</a>
 </div>
 
+<!-- Стили для телефона (работают сразу) -->
 <style>
 @media (max-width:600px){
-  div[style*="Кнопки челленджей"]{
+  div[style*="justify-content:center"]{
     flex-direction:row!important;
     flex-wrap:nowrap!important;
-    gap:10px!important;
-    padding:15px 10px!important;
-    margin:15px 10px!important;
+    gap:8px!important;
+    padding:10px 5px!important;
   }
-  div[style*="Кнопки челленджей"] a{
+  div[style*="justify-content:center"] a{
     flex:1!important;
-    max-width:calc(50% - 10px)!important;
-    padding:12px 8px!important;
+    min-width:0!important;
+    max-width:48%!important;
+    padding:10px 8px!important;
     font-size:0.85rem!important;
   }
 }
+@media (max-width:350px){
+  div[style*="justify-content:center"] a{
+    padding:8px 6px!important;
+    font-size:0.75rem!important;
+  }
+}
 </style>
+
+</body>
+</html>
 </body>
 </html>
