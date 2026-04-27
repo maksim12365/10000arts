@@ -24,7 +24,7 @@ function createPatternPanel() {
   panel.innerHTML = `
     <div class="pattern-header">
       <span>🎲 Паттерны</span>
-      <button class="pattern-toggle" onclick="togglePatternPanel()">−</button>  ← ВЫЗЫВАЕМ ФУНКЦИЮ!
+      <button class="pattern-toggle" onclick="togglePatternPanel()">−</button>
     </div>
     <div class="pattern-content">
       <div class="pattern-grid">
