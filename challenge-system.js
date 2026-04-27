@@ -1,5 +1,5 @@
 // ============================================
-// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (ИСПРАВЛЕНО)
+// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (ТОЧНЫЙ ПОДСЧЁТ ЦВЕТОВ)
 // ============================================
 
 // 1. USER ID
@@ -80,20 +80,20 @@ const Checker = {
       const b = pixels[i + 2];
       const a = pixels[i + 3];
       
+      // Пропускаем прозрачные и белые/светлые пиксели
       if (a < 128) continue;
       if (r > 240 && g > 240 && b > 240) continue;
       
-      const rRound = Math.floor(r / 64) * 64;
-      const gRound = Math.floor(g / 64) * 64;
-      const bRound = Math.floor(b / 64) * 64;
-      
-      uniqueColors.add(`${rRound},${gRound},${bRound}`);
+      // ТОЧНЫЙ цвет без округления!
+      uniqueColors.add(`${r},${g},${b}`);
     }
     
     const count = uniqueColors.size;
     return {
       success: count >= minColors,
-      reason: count >= minColors ? `✅ ${count} разных цветов!` : `❌ Нужно ${minColors} разных цветов, использовано ${count}`
+      reason: count >= minColors 
+        ? `✅ ${count} разных цветов!` 
+        : `❌ Нужно ${minColors} разных цветов, использовано ${count}`
     };
   },
   
@@ -342,4 +342,4 @@ window.CHALLENGES = CHALLENGES;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
 window.Checker = Checker;
 
-console.log('🎯 Challenge System loaded - FIXED COLOR CHECK');
+console.log('🎯 Challenge System loaded - EXACT COLOR COUNT');
