@@ -28,47 +28,25 @@ function createPatternPanel() {
     </div>
     <div class="pattern-content">
       <div class="pattern-grid">
-        ${Object.entries(PATTERNS).map(([key, p]) => 
-          `<button class="pattern-btn" onclick="applyPattern('${key}')" title="${p.name}">${p.icon}</button>`
-        ).join('')}
+        ${Object.entries(PATTERNS).map(([key, p]) => `<button class="pattern-btn" onclick="applyPattern('${key}')" title="${p.name}">${p.icon}</button>`).join('')}
       </div>
       <div class="pattern-preview">
-        <canvas id="patternPreview" width="100" height="100"></canvas>
+        <canvas id="patternPreview" width="80" height="80"></canvas>
         <p class="pattern-hint">Выбери → Нарисуй → Сохрани</p>
       </div>
     </div>
   `;
   
-  // 🔧 Вставляем В #panelsContainer (если есть)
+  // 🔧 Вставляем ВНУТРИ toolbar, ПОСЛЕ filtersPanel
   setTimeout(() => {
-    const container = document.getElementById('panelsContainer');
-    if (container) {
-      container.appendChild(panel);
-      console.log('✅ Pattern panel added to #panelsContainer');
+    const filtersPanel = document.getElementById('filtersPanel');
+    if (filtersPanel && filtersPanel.parentNode) {
+      filtersPanel.parentNode.insertBefore(panel, filtersPanel.nextSibling);
+      console.log('✅ Pattern panel inserted in toolbar');
     } else {
-      // Фолбэк: после фильтров или палитры
-      const filters = document.getElementById('filtersPanel');
-      const palette = document.getElementById('paletteGenerator');
-      if (filters?.parentNode) {
-        filters.parentNode.insertBefore(panel, filters.nextSibling);
-      } else if (palette?.parentNode) {
-        palette.parentNode.insertBefore(panel, palette.nextSibling);
-      } else {
-        document.body.appendChild(panel);
-      }
-      console.log('⚠️ Pattern panel added via fallback');
+      console.error('❌ filtersPanel not found');
     }
   }, 100);
-}
-
-// Переключить панель
-function togglePatternPanel() {
-  const panel = document.getElementById('patternPanel');
-  const btn = panel?.querySelector('.pattern-toggle');
-  if (panel) {
-    panel.classList.toggle('collapsed');
-    if (btn) btn.textContent = panel.classList.contains('collapsed') ? '+' : '−';
-  }
 }
 
 // Применить паттерн
