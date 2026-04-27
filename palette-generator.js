@@ -243,16 +243,18 @@ function displayGeneratedPalette(colors) {
   colors.forEach((color, index) => {
     const colorBtn = document.createElement('button');
     colorBtn.className = 'generated-color-btn';
-    colorBtn.style.backgroundColor = color;
+    colorBtn.style.backgroundColor = color;  /* ← ВАЖНО! */
     colorBtn.title = color;
     colorBtn.onclick = () => {
       currentColor = color;
-      // Визуальная обратная связь
       document.querySelectorAll('.generated-color-btn').forEach(b => b.classList.remove('active'));
       colorBtn.classList.add('active');
     };
     container.appendChild(colorBtn);
   });
+  
+  if (applyBtn) applyBtn.style.display = 'block';
+}
   
   // Показываем кнопку применения
   if (applyBtn) applyBtn.style.display = 'block';
