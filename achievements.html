@@ -4,32 +4,171 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🏆 Достижения - Полотно 10000</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    
+    header {
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    header h1 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    
+    .buttons a {
+      background: #667eea;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .buttons a:nth-child(2) {
+      background: #11998e;
+    }
+    
+    #progress {
+      text-align: center;
+      padding: 20px;
+      background: white;
+      margin: 20px auto;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    #progress .bar {
+      background: #ddd;
+      border-radius: 10px;
+      height: 20px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    #progress .fill {
+      background: linear-gradient(90deg,#667eea,#764ba2);
+      height: 100%;
+      transition: width 0.5s;
+    }
+    
+    .category {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .category h2 {
+      margin: 30px 0 20px 0;
+      color: #333;
+    }
+    
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+    
+    .achievement-item {
+      text-align: center;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    
+    .achievement-item:hover {
+      transform: translateY(-3px);
+    }
+    
+    .achievement-item.locked {
+      opacity: 0.5;
+      filter: grayscale(100%);
+    }
+    
+    .achievement-item .icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    .achievement-item h4 {
+      margin: 10px 0 5px 0;
+      font-size: 1rem;
+    }
+    
+    .achievement-item p {
+      font-size: 0.85rem;
+      color: #666;
+      margin: 5px 0;
+    }
+    
+    .achievement-item .status {
+      font-size: 0.8rem;
+      color: #11998e;
+    }
+    
+    .achievement-item.locked .status {
+      color: #999;
+    }
+    
+    @media (max-width: 600px) {
+      .buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .buttons a {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+      }
+      
+      .achievement-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏆 Достижения</h1>
+    <p>Твои награды за челленджи!</p>
+    <div class="buttons">
+      <a href="index.html">← На главную</a>
+      <a href="challenges.html">🎯 Челленджи</a>
+    </div>
+  </header>
+  
+  <div id="progress"></div>
+  
+  <div class="category">
+    <h2>🥉 Обычные</h2>
+    <div id="common" class="achievement-grid"></div>
+    
+    <h2>🥈 Редкие</h2>
+    <div id="rare" class="achievement-grid"></div>
+    
+    <h2>🥇 Легендарные</h2>
+    <div id="legendary" class="achievement-grid"></div>
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.0/dist/tesseract.min.js"></script>
-</head>
-<body>
-  <header style="text-align:center;padding:20px;">
-    <h1>🏆 Достижения</h1>
-    <p>Твои награды за челленджи!</p>
-    <a href="index.html" style="background:#667eea;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">← На главную</a>
-    <a href="challenges.html" style="background:#11998e;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;margin-left:10px;">🎯 Челленджи</a>
-  </header>
-  
-  <div id="progress" style="text-align:center;padding:20px;background:#f5f5f5;margin:20px auto;max-width:600px;border-radius:12px;"></div>
-  
-  <div style="max-width:800px;margin:0 auto;padding:20px;">
-    <h2>🥉 Обычные</h2>
-    <div id="common" class="achievement-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:15px;margin:20px 0;"></div>
-    
-    <h2>🥈 Редкие</h2>
-    <div id="rare" class="achievement-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:15px;margin:20px 0;"></div>
-    
-    <h2>🥇 Легендарные</h2>
-    <div id="legendary" class="achievement-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:15px;margin:20px 0;"></div>
-  </div>
-  
   <script src="challenge-system.js"></script>
   <script>
     function getAchievements() {
@@ -48,13 +187,13 @@
       function renderGrid(achievements, containerId) {
         const container = document.getElementById(containerId);
         container.innerHTML = achievements.map(a => {
-          const unlocked = unlockedIds.includes(a.id);
+          const isUnlocked = unlockedIds.includes(a.id);
           return `
-            <div style="text-align:center;padding:15px;background:white;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);${unlocked ? '' : 'opacity:0.5;filter:grayscale(100%);'}">
-              <div style="font-size:2.5rem;">${unlocked ? a.icon : '🔒'}</div>
-              <h4 style="margin:10px 0 5px 0;">${a.title}</h4>
-              <p style="font-size:0.8rem;color:#666;">${a.description}</p>
-              ${unlocked ? '<span style="color:#11998e;font-size:0.8rem;">✅ Получено</span>' : '<span style="color:#999;font-size:0.8rem;">🔒 Заблокировано</span>'}
+            <div class="achievement-item ${isUnlocked ? '' : 'locked'}">
+              <span class="icon">${isUnlocked ? a.icon : '🔒'}</span>
+              <h4>${a.title}</h4>
+              <p>${a.description}</p>
+              <span class="status">${isUnlocked ? '✅ Получено' : '🔒 Заблокировано'}</span>
             </div>
           `;
         }).join('');
@@ -64,19 +203,23 @@
       renderGrid(rare, 'rare');
       renderGrid(legendary, 'legendary');
       
-      // Прогресс
       const total = ACHIEVEMENTS.length;
-      const unlocked = unlockedIds.length;
-      const percent = Math.round((unlocked / total) * 100);
+      const unlockedCount = unlockedIds.length;
+      const percent = Math.round((unlockedCount / total) * 100);
+      
       document.getElementById('progress').innerHTML = `
-        <strong>Прогресс:</strong> ${unlocked}/${total} (${percent}%)<br>
-        <div style="background:#ddd;border-radius:10px;height:20px;margin:10px 0;overflow:hidden;">
-          <div style="background:linear-gradient(90deg,#667eea,#764ba2);height:100%;width:${percent}%;transition:width 0.5s;"></div>
+        <strong>Прогресс:</strong> ${unlockedCount}/${total} (${percent}%)<br>
+        <div class="bar">
+          <div class="fill" style="width: ${percent}%"></div>
         </div>
       `;
     }
     
-    renderAchievements();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', renderAchievements);
+    } else {
+      renderAchievements();
+    }
   </script>
 </body>
 </html>
