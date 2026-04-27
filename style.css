@@ -2555,3 +2555,38 @@ header p {
   border: 3px solid #667eea;
   transform: scale(1.1);
 }
+
+/* 🔧 ВОССТАНАВЛИВАЕМ СВЁРТЫВАНИЕ ПАНЕЛЕЙ */
+
+/* По умолчанию панели развёрнуты */
+#paletteGenerator .generator-types,
+#paletteGenerator .generated-palette,
+#paletteGenerator .apply-palette-btn,
+#filtersPanel .filters-grid,
+#filtersPanel .filters-actions,
+#patternPanel .pattern-content,
+#patternPanel .pattern-grid,
+#patternPanel .pattern-preview {
+  display: block !important;
+}
+
+/* Когда свёрнуто - скрываем контент */
+#paletteGenerator.collapsed .generator-types,
+#paletteGenerator.collapsed .generated-palette,
+#paletteGenerator.collapsed .apply-palette-btn,
+#filtersPanel.collapsed .filters-grid,
+#filtersPanel.collapsed .filters-actions,
+#patternPanel.collapsed .pattern-content,
+#patternPanel.collapsed .pattern-grid,
+#patternPanel.collapsed .pattern-preview {
+  display: none !important;
+}
+
+/* Убираем все конфликты */
+#paletteGenerator,
+#filtersPanel,
+#patternPanel {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
