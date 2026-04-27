@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 Достижения - Полотно 10000</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.0/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <header style="text-align:center;padding:20px;">
+    <h1>🏆 Достижения</h1>
+    <p>Твои награды за челленджи!</p>
+    <a href="index.html" style="background:#667eea;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">← На главную</a>
+    <a href="challenges.html" style="background:#11998e;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;margin-left:10px;">🎯 Челленджи</a>
+  </header>
+  
+  <div id="progress" style="text-align:center;padding:20px;background:#f5f5f5;margin:20px auto;max-width:600px;border-radius:12px;"></div>
+  
+  <div style="max-width:800px;margin:0 auto;padding:20px;">
+    <h2>🥉 Обычные</h2>
+    <div id="common" class="achievement-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:15px;margin:20px 0;"></div>
+    
+    <h2>🥈 Редкие</h2>
+    <div id="rare" class="achievement-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:15px;margin:20px 0;"></div>
+    
+    <h2>🥇 Легендарные</h2>
+    <div id="legendary" class="achievement-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:15px;margin:20px 0;"></div>
+  </div>
+  
+  <script src="challenge-system.js"></script>
+  <script>
+    function getAchievements() {
+      const key = `achievements_${userId}`;
+      return JSON.parse(localStorage.getItem(key) || '[]');
+    }
+    
+    function renderAchievements() {
+      const unlocked = getAchievements();
+      const unlockedIds = unlocked.map(a => a.id);
+      
+      const common = ACHIEVEMENTS.filter(a => a.rarity === 'common');
+      const rare = ACHIEVEMENTS.filter(a => a.rarity === 'rare');
+      const legendary = ACHIEVEMENTS.filter(a => a.rarity === 'legendary');
+      
+      function renderGrid(achievements, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = achievements.map(a => {
+          const unlocked = unlockedIds.includes(a.id);
+          return `
+            <div style="text-align:center;padding:15px;background:white;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);${unlocked ? '' : 'opacity:0.5;filter:grayscale(100%);'}">
+              <div style="font-size:2.5rem;">${unlocked ? a.icon : '🔒'}</div>
+              <h4 style="margin:10px 0 5px 0;">${a.title}</h4>
+              <p style="font-size:0.8rem;color:#666;">${a.description}</p>
+              ${unlocked ? '<span style="color:#11998e;font-size:0.8rem;">✅ Получено</span>' : '<span style="color:#999;font-size:0.8rem;">🔒 Заблокировано</span>'}
+            </div>
+          `;
+        }).join('');
+      }
+      
+      renderGrid(common, 'common');
+      renderGrid(rare, 'rare');
+      renderGrid(legendary, 'legendary');
+      
+      // Прогресс
+      const total = ACHIEVEMENTS.length;
+      const unlocked = unlockedIds.length;
+      const percent = Math.round((unlocked / total) * 100);
+      document.getElementById('progress').innerHTML = `
+        <strong>Прогресс:</strong> ${unlocked}/${total} (${percent}%)<br>
+        <div style="background:#ddd;border-radius:10px;height:20px;margin:10px 0;overflow:hidden;">
+          <div style="background:linear-gradient(90deg,#667eea,#764ba2);height:100%;width:${percent}%;transition:width 0.5s;"></div>
+        </div>
+      `;
+    }
+    
+    renderAchievements();
+  </script>
+</body>
+</html>
