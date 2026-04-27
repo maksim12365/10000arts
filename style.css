@@ -2089,3 +2089,13 @@ header p {
 .modal-overlay {
   z-index: 10000 !important;
 }
+
+/* Все панели инструментов в одном месте */
+#paletteGenerator,
+#filtersPanel,
+#patternPanel {
+  position: relative !important;
+  z-index: 100 !important;
+  margin: 8px auto;
+  max-width: 400px;
+}
