@@ -109,37 +109,52 @@ const PATTERNS = {
 function createPatternPanel() {
   const panel = document.createElement('div');
   panel.id = 'patternPanel';
-  panel.className = 'pattern-panel hidden';
+  panel.className = 'pattern-panel collapsed';  // Свёрнута по умолчанию
   
   panel.innerHTML = `
-    <div class="pattern-header">
-      <span>🎲 Генератор паттернов</span>
-      <button class="pattern-close" onclick="togglePatternPanel()">✕</button>
+    <div class="pattern-header" onclick="togglePatternPanel()">
+      <span>🎲 Паттерны</span>
+      <button class="pattern-toggle" onclick="event.stopPropagation()">−</button>
     </div>
-    <div class="pattern-grid">
-      ${Object.entries(PATTERNS).map(([key, pattern]) => `
-        <button class="pattern-btn" onclick="applyPattern('${key}')" title="${pattern.name}">
-          ${pattern.icon}
-        </button>
-      `).join('')}
-    </div>
-    <div class="pattern-preview">
-      <canvas id="patternPreview" width="100" height="100"></canvas>
-      <p class="pattern-hint">Выбери паттерн → Нарисуй на холсте → Сохрани</p>
+    
+    <div class="pattern-content">
+      <div class="pattern-grid">
+        ${Object.entries(PATTERNS).map(([key, pattern]) => `
+          <button class="pattern-btn" onclick="event.stopPropagation(); applyPattern('${key}')" title="${pattern.name}">
+            ${pattern.icon}
+          </button>
+        `).join('')}
+      </div>
+      
+      <div class="pattern-preview">
+        <canvas id="patternPreview" width="100" height="100"></canvas>
+        <p class="pattern-hint">Выбери паттерн → Нарисуй → Сохрани</p>
+      </div>
     </div>
   `;
   
-  document.body.appendChild(panel);
+  // 🔧 КРИТИЧЕСКИ ВАЖНО: Вставляем ПОСЛЕ фильтров!
+  const filtersPanel = document.getElementById('filtersPanel');
+  const paletteGen = document.getElementById('paletteGenerator');
   
-  // Предпросмотр при наведении
-  document.querySelectorAll('.pattern-btn').forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-      const patternKey = btn.onclick.toString().match(/'([^']+)'/)[1];
-      showPatternPreview(patternKey);
-    });
-  });
+  if (filtersPanel && filtersPanel.parentNode) {
+    // Вставляем ПОСЛЕ фильтров
+    filtersPanel.parentNode.insertBefore(panel, filtersPanel.nextSibling);
+  } else if (paletteGen && paletteGen.parentNode) {
+    // Если фильтров нет - после палитры
+    paletteGen.parentNode.insertBefore(panel, paletteGen.nextSibling);
+  } else {
+    // Если ничего нет - ищем toolbar
+    const toolbar = document.getElementById('toolbar');
+    if (toolbar && toolbar.parentNode) {
+      toolbar.parentNode.insertBefore(panel, toolbar);
+    } else {
+      // На крайний случай
+      document.body.appendChild(panel);
+    }
+  }
   
-  console.log('✅ Pattern panel created');
+  console.log('✅ Pattern panel created (correct position)');
 }
 
 // Показать/скрыть панель
