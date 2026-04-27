@@ -2037,16 +2037,24 @@ header p {
   }
 }
 
-/* Очень маленький экран */
-@media (max-width: 400px) {
+/* Горизонтальный скролл для фильтров на телефоне */
+@media (max-width: 600px) {
   .filters-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 3px;
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;  /* Плавный скролл на iOS */
+    scrollbar-width: none;  /* Скрыть скроллбар Firefox */
+  }
+  
+  .filters-grid::-webkit-scrollbar {
+    display: none;  /* Скрыть скроллбар Chrome/Safari */
   }
   
   .filter-btn {
-    width: 34px;  /* МАКСИМАЛЬНО КОМПАКТНО */
-    height: 34px;
-    font-size: 1rem;
+    flex: 0 0 45px;  /* Фиксированная ширина */
+    width: 45px;
+    height: 45px;
   }
 }
