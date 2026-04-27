@@ -293,49 +293,82 @@
     }
     
     function renderChallenges() {
-      const { available, locked } = ChallengeManager.getAvailableChallenges();
-      const container = document.getElementById('challengeList');
+  const { available, locked } = ChallengeManager.getAvailableChallenges();
+  const container = document.getElementById('challengeList');
+  
+  let html = '<h2 style="margin:20px 0 10px 0;">📋 Доступные челленджи</h2>';
+  
+  if (available.length === 0) {
+    html += '<p style="text-align:center;padding:40px;">Нет доступных челленджей</p>';
+  } else {
+    html += available.map(c => {
+      const completed = ChallengeSystem.isCompleted(c.id);
+      return `
+        <div class="challenge-card difficulty-${c.difficulty} ${completed ? 'completed' : ''}">
+          <h3>${c.title}</h3>
+          <p>${c.description}</p>
+          <p>⏱️ ${c.timeLimit ? c.timeLimit + ' сек' : 'Без ограничений'}</p>
+          <p>🎯 ${c.attempts === 1 ? '1 попытка' : 'Безлимит попыток'}</p>
+          <p>🏆 ${c.reward.points} очков</p>
+          ${completed 
+            ? '<button disabled>✅ Выполнено</button>' 
+            : `<button onclick="openChallenge('${c.id}')">▶️ Начать</button>`
+          }
+        </div>
+      `;
+    }).join('');
+  }
+  
+  if (locked.length > 0) {
+    const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
+    const daysSinceFirst = (Date.now() - firstVisit) / (1000 * 60 * 60 * 24);
+    const currentWeek = Math.floor(daysSinceFirst / 7) + 1;
+    
+    html += '<h2 style="margin:30px 0 10px 0;">🔒 Заблокировано</h2>';
+    html += locked.map(c => {
+      const weeksToWait = c.week - currentWeek;
+      const daysToWait = Math.ceil(7 - (daysSinceFirst % 7));
+      const unlockTime = firstVisit + (c.week * 7 * 24 * 60 * 60 * 1000);
       
-      let html = '<h2 style="margin:20px 0 10px 0;">📋 Доступные челленджи</h2>';
-      
-      if (available.length === 0) {
-        html += '<p style="text-align:center;padding:40px;">Нет доступных челленджей</p>';
-      } else {
-        html += available.map(c => {
-          const completed = ChallengeSystem.isCompleted(c.id);
-          return `
-            <div class="challenge-card difficulty-${c.difficulty} ${completed ? 'completed' : ''}">
-              <h3>${c.title}</h3>
-              <p>${c.description}</p>
-              <p>⏱️ ${c.timeLimit ? c.timeLimit + ' сек' : 'Без ограничений'}</p>
-              <p>🎯 ${c.attempts === 1 ? '1 попытка' : 'Безлимит попыток'}</p>
-              <p>🏆 ${c.reward.points} очков</p>
-              ${completed 
-                ? '<button disabled>✅ Выполнено</button>' 
-                : `<button onclick="openChallenge('${c.id}')">▶️ Начать</button>`
-              }
-            </div>
-          `;
-        }).join('');
-      }
-      
-      if (locked.length > 0) {
-        const daysUntilNext = 7 - ((Date.now() - localStorage.getItem(`firstVisit_${userId}`)) / (1000 * 60 * 60 * 24) % 7);
-        html += '<h2 style="margin:30px 0 10px 0;">🔒 Заблокировано</h2>';
-        html += locked.map(c => `
-          <div class="challenge-card difficulty-${c.difficulty} locked">
-            <h3>${c.title}</h3>
-            <p>${c.description}</p>
-            <div class="unlock-info">
-              🔓 Откроется через ${Math.ceil(daysUntilNext)} дн.
-            </div>
+      return `
+        <div class="challenge-card difficulty-${c.difficulty} locked">
+          <h3>${c.title}</h3>
+          <p>${c.description}</p>
+          <div class="unlock-info">
+            🔓 Неделя ${c.week} • 
+            <span id="timer-${c.id}">⏳ Загрузка...</span>
           </div>
-        `).join('');
-      }
-      
-      container.innerHTML = html;
-      updateStats();
-    }
+          <script>
+            (function() {
+              const unlockTime = ${unlockTime};
+              const timerId = 'timer-${c.id}';
+              setInterval(() => {
+                const now = Date.now();
+                const diff = unlockTime - now;
+                
+                if (diff <= 0) {
+                  document.getElementById(timerId).textContent = ' Доступно!';
+                  return;
+                }
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById(timerId).textContent = 
+                  ` + '`⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с` + `;
+              }, 1000);
+            })();
+          </script>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  container.innerHTML = html;
+  updateStats();
+}
     
     window.openChallenge = function(challengeId) {
       currentChallenge = CHALLENGES.find(c => c.id === challengeId);
