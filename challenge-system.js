@@ -1,5 +1,5 @@
 // ============================================
-// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (С ПРОВЕРКАМИ)
+// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (МАКСИМАЛЬНО ПРОСТАЯ)
 // ============================================
 
 // 1. USER ID
@@ -16,25 +16,18 @@ const userId = getUserId();
 
 // 2. СПИСОК ЧЕЛЛЕНДЖЕЙ (9 штук)
 const CHALLENGES = [
-  // НЕДЕЛЯ 1 - ОБЫЧНЫЕ
   { id: 'easy_line', title: '📏 Прямая линия', description: 'Нарисуй прямую линию', difficulty: 'easy', week: 1, checkType: 'line', timeLimit: null, attempts: 1, reward: { points: 10, achievement: 'first_line' } },
   { id: 'easy_colors', title: '🌈 5 цветов за 20 сек', description: 'Используй 5 разных цветов за 20 секунд', difficulty: 'easy', week: 1, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 20, attempts: 1, reward: { points: 20, achievement: 'color_master' } },
   { id: 'easy_smiley', title: '😊 Нарисуй смайлик', description: 'Нарисуй любой смайлик за 30 секунд', difficulty: 'easy', week: 1, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 30, achievement: 'smiley_artist' } },
-  
-  // НЕДЕЛЯ 2 - РЕДКИЕ
   { id: 'normal_shape', title: '🟠 Нарисуй круг', description: 'Нарисуй круг максимально точно', difficulty: 'normal', week: 2, checkType: 'circle', timeLimit: null, attempts: 999, reward: { points: 40, achievement: 'shape_master' } },
   { id: 'normal_rainbow', title: '🌈 Радуга за 15 сек', description: 'Нарисуй радугу в правильном порядке за 15 секунд', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 15, attempts: 1, reward: { points: 50, achievement: 'rainbow_creator' } },
   { id: 'normal_random', title: '🎲 Случайный объект', description: 'Нарисуй то, что покажет система за 30 сек', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 40, achievement: 'quick_draw' } },
-  
-  // НЕДЕЛЯ 3 - ЭПИЧЕСКИЕ
   { id: 'hard_word', title: '✏️ Нарисуй слово', description: 'Напиши слово за 10 секунд', difficulty: 'hard', week: 3, checkType: 'honor', timeLimit: 10, attempts: 1, reward: { points: 80, achievement: 'word_artist' } },
   { id: 'hard_red_dot', title: '🔴 Красная точка', description: 'Рисуй только когда горит красная точка (5 цветов)', difficulty: 'hard', week: 3, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 30, attempts: 1, reward: { points: 70, achievement: 'timing_master' } },
-  
-  // НЕДЕЛЯ 4 - ЛЕГЕНДАРНЫЕ
   { id: 'impossible_star', title: '⭐ Звезда за 5 сек', description: 'Нарисуй 5-конечную звезду за 5 секунд', difficulty: 'impossible', week: 4, checkType: 'star', timeLimit: 5, attempts: 1, reward: { points: 200, achievement: 'legend' } }
 ];
 
-// 3. ДОСТИЖЕНИЯ (9 штук - по одному на каждый челлендж)
+// 3. ДОСТИЖЕНИЯ (9 штук)
 const ACHIEVEMENTS = [
   { id: 'first_line', title: '📏 Первая линия', description: 'Нарисуй первую линию', icon: '📏', rarity: 'common' },
   { id: 'color_master', title: '🌈 Мастер цвета', description: 'Используй 5 цветов', icon: '🌈', rarity: 'common' },
@@ -49,40 +42,32 @@ const ACHIEVEMENTS = [
 
 // 4. ПРОВЕРКИ РИСУНКОВ
 const Checker = {
-  // Проверка линии - МАКСИМАЛЬНО МЯГКАЯ!
- // Проверка линии - ОЧЕНЬ ПРОСТАЯ!
-checkLine(canvas) {
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
-  const points = [];
-  
-  for (let y = 0; y < canvas.height; y++) {
-    for (let x = 0; x < canvas.width; x++) {
-      const i = (y * canvas.width + x) * 4;
-      if (pixels[i + 3] > 128) points.push({ x, y });
+  // Проверка линии - ОЧЕНЬ ПРОСТАЯ!
+  checkLine(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const points = [];
+    
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i + 3] > 128) points.push({ x, y });
+      }
     }
-  }
-  
-  // Проверяем что есть хоть что-то
-  if (points.length < 20) return { success: false, reason: 'Нарисуй что-нибудь!' };
-  
-  // Находим границы
-  const xs = points.map(p => p.x);
-  const ys = points.map(p => p.y);
-  const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const minY = Math.min(...ys), maxY = Math.max(...ys);
-  
-  // Проверяем длину - линия должна быть достаточно длинной
-  const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
-  if (length < 30) return { success: false, reason: 'Слишком коротко!' };
-  
-  // ВСЁ! Принимаем как линию!
-  return {
-    success: true,
-    reason: '✅ Отличная линия!'
-  };
-}
+    
+    if (points.length < 20) return { success: false, reason: 'Нарисуй что-нибудь!' };
+    
+    const xs = points.map(p => p.x);
+    const ys = points.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    
+    const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
+    if (length < 30) return { success: false, reason: 'Слишком коротко!' };
+    
+    return { success: true, reason: '✅ Отличная линия!' };
+  },
   
   // Проверка количества цветов
   checkColorCount(canvas, minColors) {
@@ -137,7 +122,7 @@ checkLine(canvas) {
     };
   },
   
-  // Проверка звезды (5 лучей)
+  // Проверка звезды
   checkStar(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -355,4 +340,4 @@ window.CHALLENGES = CHALLENGES;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
 window.Checker = Checker;
 
-console.log('🎯 Challenge System loaded with soft line check');
+console.log('🎯 Challenge System loaded - SIMPLE LINE CHECK');
