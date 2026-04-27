@@ -2284,38 +2284,49 @@ header p {
 }
 
 /* ============================================ */
-/* 🔥 УНИВЕРСАЛЬНЫЙ КОД - РАБОТАЕТ ВЕЗДЕ! */
+/* 🔥 МАКСИМАЛЬНО КОМПАКТНО - ДЛЯ ТЕЛЕФОНА! */
 /* ============================================ */
 
-/* ВСЕ ПАНЕЛИ - КОМПАКТНЫЕ */
+/* ВСЕ ПАНЕЛИ */
 #paletteGenerator,
 #filtersPanel,
 #patternPanel {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  margin: 8px auto;
-  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin: 4px auto;
+  padding: 6px 10px;
   width: 95%;
-  max-width: 400px;
+  max-width: 350px;
   box-sizing: border-box;
 }
 
-/* Заголовок панели */
+/* СВЁРНУТАЯ ПАНЕЛЬ - МИНИМАЛЬНЫЙ РАЗМЕР */
+#paletteGenerator.collapsed,
+#filtersPanel.collapsed,
+#patternPanel.collapsed {
+  padding: 4px 8px;
+  margin: 3px auto;
+}
+
+/* Заголовок */
 .filters-header,
 .pattern-header,
 .generator-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin: 0;
+  padding: 4px 0;
+  min-height: 32px;
 }
 
 .filters-header span,
 .pattern-header span,
 .generator-header span {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  margin: 0;
 }
 
 /* Кнопка закрыть - МАЛЕНЬКАЯ */
@@ -2324,29 +2335,103 @@ header p {
 .generator-toggle {
   background: #f0f0f0;
   border: none;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* СЕТКА КНОПОК - ГОРИЗОНТАЛЬНЫЙ СКРОЛЛ */
+/* СЕТКА КНОПОК */
 .filters-grid,
 .pattern-grid,
 .generator-types {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   overflow-x: auto;
-  padding: 5px 0;
-  margin-bottom: 8px;
+  padding: 6px 0;
+  margin: 6px 0;
+}
+
+/* КНОПКИ */
+.filter-btn,
+.pattern-btn,
+.gen-type-btn,
+.generated-color-btn {
+  min-width: 36px;
+  max-width: 36px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* Кнопка сброса */
+.filter-reset-btn {
+  width: 100%;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  color: white;
+  font-size: 0.75rem;
+  cursor: pointer;
+  margin: 4px 0;
+}
+
+/* Предпросмотр */
+.pattern-preview {
+  text-align: center;
+  padding: 6px 0 0 0;
+  margin: 6px 0 0 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+#patternPreview {
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  width: 60px;
+  height: 60px;
+}
+
+.pattern-hint {
+  font-size: 0.6rem;
+  color: #999;
+  margin: 4px 0 0 0;
+}
+
+/* СКРЫТЬ КОГДА СВЁРНУТО */
+#filtersPanel.collapsed .filters-grid,
+#filtersPanel.collapsed .filters-actions,
+#patternPanel.collapsed .pattern-content,
+#patternPanel.collapsed .pattern-grid,
+#patternPanel.collapsed .pattern-preview,
+#paletteGenerator.collapsed .generator-types,
+#paletteGenerator.collapsed .generated-palette,
+#paletteGenerator.collapsed .apply-palette-btn {
+  display: none !important;
 }
 
 /* Скроллбар */
 .filters-grid::-webkit-scrollbar,
 .pattern-grid::-webkit-scrollbar {
-  height: 4px;
+  height: 3px;
 }
 
 .filters-grid::-webkit-scrollbar-track,
@@ -2360,118 +2445,49 @@ header p {
   border-radius: 2px;
 }
 
-/* КНОПКИ - КОМПАКТНЫЕ */
-.filter-btn,
-.pattern-btn,
-.gen-type-btn,
-.generated-color-btn {
-  min-width: 40px;
-  max-width: 40px;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  border: none;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Кнопка сброса */
-.filter-reset-btn {
-  width: 100%;
-  padding: 8px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f093fb, #f5576c);
-  color: white;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-/* Предпросмотр */
-.pattern-preview {
-  text-align: center;
-  padding-top: 8px;
-  border-top: 1px solid #f0f0f0;
-}
-
-#patternPreview {
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  width: 80px;
-  height: 80px;
-}
-
-.pattern-hint {
-  font-size: 0.65rem;
-  color: #999;
-  margin: 5px 0 0 0;
-}
-
-/* Свёрнутое состояние */
-#filtersPanel.collapsed .filters-grid,
-#filtersPanel.collapsed .filters-actions,
-#patternPanel.collapsed .pattern-content,
-#paletteGenerator.collapsed .generator-types,
-#paletteGenerator.collapsed .generated-palette {
-  display: none;
-}
-
 /* ============================================ */
-/* ТЕЛЕФОН - ЕЩЁ КОМПАКТНЕЕ */
+/* ТЕЛЕФОН - МАКСИМАЛЬНО КОМПАКТНО */
 /* ============================================ */
 
 @media (max-width: 600px) {
   #paletteGenerator,
   #filtersPanel,
   #patternPanel {
-    width: 95%;
-    max-width: 95%;
-    padding: 8px;
-    margin: 6px auto;
+    width: 98%;
+    max-width: 98%;
+    padding: 4px 8px;
+    margin: 2px auto;
+  }
+  
+  /* СВЁРНУТАЯ - ЕЩЁ МЕНЬШЕ */
+  #paletteGenerator.collapsed,
+  #filtersPanel.collapsed,
+  #patternPanel.collapsed {
+    padding: 3px 6px;
+    margin: 2px auto;
+  }
+  
+  .filters-header,
+  .pattern-header,
+  .generator-header {
+    min-height: 28px;
+    padding: 2px 0;
   }
   
   .filters-header span,
-  .pattern-header span {
-    font-size: 0.8rem;
+  .pattern-header span,
+  .generator-header span {
+    font-size: 0.75rem;
   }
   
   .filters-toggle,
-  .pattern-toggle {
-    width: 22px;
-    height: 22px;
-    font-size: 0.75rem;
+  .pattern-toggle,
+  .generator-toggle {
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
   }
   
-  .filter-btn,
-  .pattern-btn,
-  .gen-type-btn {
-    min-width: 36px;
-    max-width: 36px;
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
-    font-size: 1rem;
-  }
-  
-  .filter-reset-btn {
-    padding: 6px;
-    font-size: 0.75rem;
-  }
-  
-  #patternPreview {
-    width: 70px;
-    height: 70px;
-  }
-}
-
-/* Очень маленький экран */
-@media (max-width: 400px) {
   .filter-btn,
   .pattern-btn,
   .gen-type-btn {
@@ -2481,5 +2497,39 @@ header p {
     height: 32px;
     flex: 0 0 32px;
     font-size: 0.9rem;
+  }
+  
+  .filter-reset-btn {
+    padding: 5px;
+    font-size: 0.7rem;
+    margin: 3px 0;
+  }
+  
+  #patternPreview {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .pattern-hint {
+    font-size: 0.55rem;
+  }
+}
+
+/* ОЧЕНЬ МАЛЕНЬКИЙ ЭКРАН */
+@media (max-width: 350px) {
+  .filter-btn,
+  .pattern-btn,
+  .gen-type-btn {
+    min-width: 28px;
+    max-width: 28px;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    font-size: 0.8rem;
+  }
+  
+  .filters-header span,
+  .pattern-header span {
+    font-size: 0.7rem;
   }
 }
