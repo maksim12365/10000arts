@@ -34,7 +34,9 @@ const ACHIEVEMENTS = [
   { id: 'smiley_artist', title: '😊 Художник смайлов', description: 'Нарисуй смайлик', icon: '😊', rarity: 'common' },
   { id: 'shape_master', title: '🟠 Мастер форм', description: 'Нарисуй идеальный круг', icon: '🟠', rarity: 'rare' },
   { id: 'rainbow_creator', title: '🌈 Создатель радуги', description: 'Нарисуй радугу', icon: '🌈', rarity: 'rare' },
-  { id: 'word_artist', title: '✏️ Словный художник', description: 'Напиши слово', icon: '✏️', rarity: 'epic' },
+  { id: 'quick_draw', title: '🎲 Быстрый рисунок', description: 'Нарисуй случайный объект', icon: '🎲', rarity: 'rare' },
+  { id: 'word_artist', title: '✏️ Словный художник', description: 'Напиши слово за 10 сек', icon: '✏️', rarity: 'epic' },
+  { id: 'timing_master', title: '🔴 Мастер тайминга', description: 'Рисуй когда горит красная точка', icon: '🔴', rarity: 'epic' },
   { id: 'legend', title: '⭐ Легенда', description: 'Нарисуй звезду за 5 сек', icon: '⭐', rarity: 'legendary' }
 ];
 
