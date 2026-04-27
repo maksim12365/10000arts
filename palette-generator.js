@@ -82,7 +82,7 @@ const PALETTE_TYPES = {
 function createPaletteGenerator() {
   const panel = document.createElement('div');
   panel.id = 'paletteGenerator';
-  panel.className = 'palette-generator collapsed';  // ← СВЁРНУТА ПО УМОЛЧАНИЮ
+  panel.className = 'palette-generator collapsed';
   
   panel.innerHTML = `
     <div class="generator-header">
@@ -90,36 +90,29 @@ function createPaletteGenerator() {
       <button class="generator-toggle" onclick="togglePaletteGenerator()">−</button>
     </div>
     <div class="generator-types">
-      <button class="gen-type-btn" onclick="generatePalette('random')" title="Случайная">🎲</button>
-      <button class="gen-type-btn" onclick="generatePalette('analogous')" title="Аналоговая">🔄</button>
-      <button class="gen-type-btn" onclick="generatePalette('complementary')" title="Комплементарная">⚖️</button>
-      <button class="gen-type-btn" onclick="generatePalette('triadic')" title="Триадная">🔺</button>
-      <button class="gen-type-btn" onclick="generatePalette('monochromatic')" title="Монохромная">⬛</button>
-      <button class="gen-type-btn" onclick="generatePalette('warm')" title="Тёплая">🔥</button>
-      <button class="gen-type-btn" onclick="generatePalette('cold')" title="Холодная">❄️</button>
-      <button class="gen-type-btn" onclick="generatePalette('pastel')" title="Пастельная">🌸</button>
+      <button class="gen-type-btn" onclick="generatePalette('random')">🎲</button>
+      <button class="gen-type-btn" onclick="generatePalette('analogous')">🔄</button>
+      <button class="gen-type-btn" onclick="generatePalette('complementary')">⚖️</button>
+      <button class="gen-type-btn" onclick="generatePalette('triadic')">🔺</button>
+      <button class="gen-type-btn" onclick="generatePalette('monochromatic')">⬛</button>
+      <button class="gen-type-btn" onclick="generatePalette('warm')">🔥</button>
+      <button class="gen-type-btn" onclick="generatePalette('cold')">❄️</button>
+      <button class="gen-type-btn" onclick="generatePalette('pastel')">🌸</button>
     </div>
     <div class="generated-palette" id="generatedPalette">
-      <p class="palette-hint">Нажми на тип палитры чтобы сгенерировать</p>
+      <p class="palette-hint">Нажми на тип палитры</p>
     </div>
-    <button class="apply-palette-btn" onclick="applyGeneratedPalette()" id="applyPaletteBtn" style="display:none;">✅ Применить палитру</button>
+    <button class="apply-palette-btn" onclick="applyGeneratedPalette()" id="applyPaletteBtn" style="display:none;">✅ Применить</button>
   `;
   
-  // 🔧 Вставляем В #panelsContainer (если есть)
+  // 🔧 Вставляем ВНУТРИ toolbar, ПОСЛЕ colorPalette
   setTimeout(() => {
-    const container = document.getElementById('panelsContainer');
-    if (container) {
-      container.appendChild(panel);
-      console.log('✅ Palette generator added to #panelsContainer');
+    const colorPalette = document.getElementById('colorPalette');
+    if (colorPalette && colorPalette.parentNode) {
+      colorPalette.parentNode.insertBefore(panel, colorPalette.nextSibling);
+      console.log('✅ Palette generator inserted in toolbar');
     } else {
-      // Фолбэк: после палитры цветов
-      const palette = document.getElementById('colorPalette');
-      if (palette?.parentNode) {
-        palette.parentNode.insertBefore(panel, palette.nextSibling);
-      } else {
-        document.body.appendChild(panel);
-      }
-      console.log('⚠️ Palette generator added via fallback');
+      console.error('❌ colorPalette not found');
     }
   }, 100);
 }
