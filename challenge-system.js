@@ -1,5 +1,5 @@
 // ============================================
-// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (МАКСИМАЛЬНО ПРОСТАЯ)
+// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (ИСПРАВЛЕНО)
 // ============================================
 
 // 1. USER ID
@@ -14,7 +14,7 @@ function getUserId() {
 
 const userId = getUserId();
 
-// 2. СПИСОК ЧЕЛЛЕНДЖЕЙ (9 штук)
+// 2. СПИСОК ЧЕЛЛЕНДЖЕЙ
 const CHALLENGES = [
   { id: 'easy_line', title: '📏 Прямая линия', description: 'Нарисуй прямую линию', difficulty: 'easy', week: 1, checkType: 'line', timeLimit: null, attempts: 1, reward: { points: 10, achievement: 'first_line' } },
   { id: 'easy_colors', title: '🌈 5 цветов за 20 сек', description: 'Используй 5 разных цветов за 20 секунд', difficulty: 'easy', week: 1, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 20, attempts: 1, reward: { points: 20, achievement: 'color_master' } },
@@ -27,7 +27,7 @@ const CHALLENGES = [
   { id: 'impossible_star', title: '⭐ Звезда за 5 сек', description: 'Нарисуй 5-конечную звезду за 5 секунд', difficulty: 'impossible', week: 4, checkType: 'star', timeLimit: 5, attempts: 1, reward: { points: 200, achievement: 'legend' } }
 ];
 
-// 3. ДОСТИЖЕНИЯ (9 штук)
+// 3. ДОСТИЖЕНИЯ
 const ACHIEVEMENTS = [
   { id: 'first_line', title: '📏 Первая линия', description: 'Нарисуй первую линию', icon: '📏', rarity: 'common' },
   { id: 'color_master', title: '🌈 Мастер цвета', description: 'Используй 5 цветов', icon: '🌈', rarity: 'common' },
@@ -40,9 +40,8 @@ const ACHIEVEMENTS = [
   { id: 'legend', title: '⭐ Легенда', description: 'Нарисуй звезду за 5 сек', icon: '⭐', rarity: 'legendary' }
 ];
 
-// 4. ПРОВЕРКИ РИСУНКОВ
+// 4. ПРОВЕРКИ
 const Checker = {
-  // Проверка линии - ОЧЕНЬ ПРОСТАЯ!
   checkLine(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -69,7 +68,6 @@ const Checker = {
     return { success: true, reason: '✅ Отличная линия!' };
   },
   
-  // Проверка количества цветов
   checkColorCount(canvas, minColors) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -77,22 +75,28 @@ const Checker = {
     const uniqueColors = new Set();
     
     for (let i = 0; i < pixels.length; i += 4) {
-      if (pixels[i + 3] > 128) {
-        const r = Math.round(pixels[i] / 50) * 50;
-        const g = Math.round(pixels[i + 1] / 50) * 50;
-        const b = Math.round(pixels[i + 2] / 50) * 50;
-        uniqueColors.add(`${r},${g},${b}`);
-      }
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const a = pixels[i + 3];
+      
+      if (a < 128) continue;
+      if (r > 240 && g > 240 && b > 240) continue;
+      
+      const rRound = Math.floor(r / 64) * 64;
+      const gRound = Math.floor(g / 64) * 64;
+      const bRound = Math.floor(b / 64) * 64;
+      
+      uniqueColors.add(`${rRound},${gRound},${bRound}`);
     }
     
     const count = uniqueColors.size;
     return {
       success: count >= minColors,
-      reason: count >= minColors ? `✅ ${count} цветов!` : `❌ Нужно ${minColors} цветов, использовано ${count}`
+      reason: count >= minColors ? `✅ ${count} разных цветов!` : `❌ Нужно ${minColors} разных цветов, использовано ${count}`
     };
   },
   
-  // Проверка круга
   checkCircle(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -122,7 +126,6 @@ const Checker = {
     };
   },
   
-  // Проверка звезды
   checkStar(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -170,7 +173,6 @@ const Checker = {
     };
   },
   
-  // Общая проверка
   checkChallenge(challengeId, canvas) {
     const challenge = CHALLENGES.find(c => c.id === challengeId);
     if (!challenge) return { success: false, reason: 'Челлендж не найден' };
@@ -340,4 +342,4 @@ window.CHALLENGES = CHALLENGES;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
 window.Checker = Checker;
 
-console.log('🎯 Challenge System loaded - SIMPLE LINE CHECK');
+console.log('🎯 Challenge System loaded - FIXED COLOR CHECK');
