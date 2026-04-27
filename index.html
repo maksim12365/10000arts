@@ -140,9 +140,28 @@
 
 <!-- Кнопки челленджей и достижений -->
 <!-- Кнопки челленджей и достижений -->
-<div class="bottom-nav-buttons">
-  <a href="challenges.html" class="bottom-nav-btn challenges">🎯 Челленджи</a>
-  <a href="achievements.html" class="bottom-nav-btn achievements">🏆 Достижения</a>
+<!-- Кнопки челленджей и достижений -->
+<div style="display:flex;justify-content:center;gap:15px;padding:20px;margin:20px 0;flex-wrap:wrap;">
+  <a href="challenges.html" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:14px 28px;border-radius:12px;text-decoration:none;font-size:1.05rem;font-weight:600;box-shadow:0 4px 15px rgba(0,0,0,0.1);white-space:nowrap;transition:all 0.3s;">🎯 Челленджи</a>
+  <a href="achievements.html" style="background:linear-gradient(135deg,#11998e,#38ef7d);color:white;padding:14px 28px;border-radius:12px;text-decoration:none;font-size:1.05rem;font-weight:600;box-shadow:0 4px 15px rgba(0,0,0,0.1);white-space:nowrap;transition:all 0.3s;">🏆 Достижения</a>
 </div>
+
+<style>
+@media (max-width:600px){
+  div[style*="Кнопки челленджей"]{
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    gap:10px!important;
+    padding:15px 10px!important;
+    margin:15px 10px!important;
+  }
+  div[style*="Кнопки челленджей"] a{
+    flex:1!important;
+    max-width:calc(50% - 10px)!important;
+    padding:12px 8px!important;
+    font-size:0.85rem!important;
+  }
+}
+</style>
 </body>
 </html>
