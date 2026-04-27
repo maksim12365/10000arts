@@ -1,5 +1,5 @@
 // ============================================
-// ГЕНЕРАТОР ПАТТЕРНОВ (ОБНОВЛЕНО)
+// ГЕНЕРАТОР ПАТТЕРНОВ
 // ============================================
 
 const PATTERNS = {
@@ -15,42 +15,21 @@ const PATTERNS = {
   star: { name: '⭐ Звезда', icon: '⭐', generate: (x, y, color) => { const X = x-50, Y = y-50, a = Math.atan2(Y, X), d = Math.sqrt(X*X + Y*Y); return d < (20 + 10*Math.sin(a*5)) ? color : null; }}
 };
 
-// Создаём панель паттернов
-function createPatternPanel() {
-  const panel = document.createElement('div');
-  panel.id = 'patternPanel';
-  panel.className = 'pattern-panel collapsed';
-  
-  panel.innerHTML = `
-    <div class="pattern-header">
-      <span>🎲 Паттерны</span>
-      <button class="pattern-toggle" onclick="togglePatternPanel()">−</button>
-    </div>
-    <div class="pattern-content">
-      <div class="pattern-grid">
-        ${Object.entries(PATTERNS).map(([key, p]) => `<button class="pattern-btn" onclick="applyPattern('${key}')" title="${p.name}">${p.icon}</button>`).join('')}
-      </div>
-      <div class="pattern-preview">
-        <canvas id="patternPreview" width="80" height="80"></canvas>
-        <p class="pattern-hint">Выбери → Нарисуй → Сохрани</p>
-      </div>
-    </div>
-  `;
-  
-  // 🔧 Вставляем ВНУТРИ toolbar, ПОСЛЕ filtersPanel
-  setTimeout(() => {
-    const filtersPanel = document.getElementById('filtersPanel');
-    if (filtersPanel && filtersPanel.parentNode) {
-      filtersPanel.parentNode.insertBefore(panel, filtersPanel.nextSibling);
-      console.log('✅ Pattern panel inserted in toolbar');
-    } else {
-      console.error('❌ filtersPanel not found');
+// Глобальная функция переключения
+window.togglePatternPanel = function() {
+  const panel = document.getElementById('patternPanel');
+  const btn = panel?.querySelector('.pattern-toggle');
+  if (panel) {
+    panel.classList.toggle('collapsed');
+    if (btn) {
+      btn.textContent = panel.classList.contains('collapsed') ? '+' : '−';
     }
-  }, 100);
-}
+    console.log('✅ Pattern panel toggled');
+  }
+};
 
-// Применить паттерн
-function applyPattern(key) {
+// Глобальная функция применения
+window.applyPattern = function(key) {
   const canvas = document.getElementById('drawCanvas');
   const ctx = canvas?.getContext('2d');
   if (!canvas || !ctx) { alert('❌ Холст не найден!'); return; }
@@ -59,7 +38,7 @@ function applyPattern(key) {
   if (!pattern) return;
   
   const size = canvas.width;
-  const color = currentColor || '#ff0000';
+  const color = window.currentColor || '#ff0000';
   const scale = size / 100;
   
   ctx.fillStyle = '#ffffff';
@@ -75,54 +54,59 @@ function applyPattern(key) {
     }
   }
   
-  // Анимация кнопки
   const btn = document.querySelector(`.pattern-btn[onclick*="${key}"]`);
   if (btn) { btn.classList.add('applied'); setTimeout(() => btn.classList.remove('applied'), 500); }
   
-  // Авто-закрытие
   setTimeout(() => {
     const panel = document.getElementById('patternPanel');
     if (panel && !panel.classList.contains('collapsed')) {
-      togglePatternPanel();
+      window.togglePatternPanel();
     }
   }, 300);
-}
+  
+  console.log('🎨 Pattern applied:', key);
+};
 
-// Предпросмотр
-function showPatternPreview(key) {
-  const preview = document.getElementById('patternPreview');
-  if (!preview) return;
-  const ctx = preview.getContext('2d');
-  const pattern = PATTERNS[key];
-  if (!pattern) return;
+// Создание панели
+function createPatternPanel() {
+  const panel = document.createElement('div');
+  panel.id = 'patternPanel';
+  panel.className = 'pattern-panel collapsed';
   
-  const color = currentColor || '#ff0000';
-  const size = preview.width;
-  const scale = size / 100;
+  panel.innerHTML = `
+    <div class="pattern-header" onclick="window.togglePatternPanel()">
+      <span>🎲 Паттерны</span>
+      <button class="pattern-toggle" onclick="event.stopPropagation(); window.togglePatternPanel()">−</button>
+    </div>
+    <div class="pattern-content">
+      <div class="pattern-grid">
+        ${Object.entries(PATTERNS).map(([key, p]) => 
+          `<button class="pattern-btn" onclick="event.stopPropagation(); window.applyPattern('${key}')" title="${p.name}">${p.icon}</button>`
+        ).join('')}
+      </div>
+      <div class="pattern-preview">
+        <canvas id="patternPreview" width="80" height="80"></canvas>
+        <p class="pattern-hint">Выбери → Нарисуй → Сохрани</p>
+      </div>
+    </div>
+  `;
   
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
-  
-  for (let py = 0; py < 100; py++) {
-    for (let px = 0; px < 100; px++) {
-      const result = pattern.generate(px, py, color);
-      if (result) {
-        ctx.fillStyle = result;
-        ctx.fillRect(Math.floor(px * scale), Math.floor(py * scale), Math.ceil(scale), Math.ceil(scale));
-      }
+  setTimeout(() => {
+    const filtersPanel = document.getElementById('filtersPanel');
+    if (filtersPanel && filtersPanel.parentNode) {
+      filtersPanel.parentNode.insertBefore(panel, filtersPanel.nextSibling);
+      console.log('✅ Pattern panel created');
+    } else {
+      console.error('❌ filtersPanel not found');
     }
-  }
+  }, 150);
 }
 
 // Инициализация
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', createPatternPanel);
 } else {
-  createPatternPanel();
+  setTimeout(createPatternPanel, 200);
 }
 
-// Глобальные функции
-window.togglePatternPanel = togglePatternPanel;
-window.applyPattern = applyPattern;
-window.showPatternPreview = showPatternPreview;
 window.PATTERNS = PATTERNS;
