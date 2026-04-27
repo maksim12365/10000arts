@@ -15,7 +15,7 @@
     }
     
     header h1 {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       color: #333;
     }
     
@@ -65,7 +65,7 @@
     }
     
     .category {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -73,12 +73,15 @@
     .category h2 {
       margin: 30px 0 20px 0;
       color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     
     .achievement-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
     }
     
     .achievement-item {
@@ -91,7 +94,7 @@
     }
     
     .achievement-item:hover {
-      transform: translateY(-3px);
+      transform: translateY(-5px);
     }
     
     .achievement-item.locked {
@@ -100,7 +103,7 @@
     }
     
     .achievement-item .icon {
-      font-size: 3rem;
+      font-size: 3.5rem;
       display: block;
       margin-bottom: 10px;
     }
@@ -119,27 +122,11 @@
     .achievement-item .status {
       font-size: 0.8rem;
       color: #11998e;
+      font-weight: bold;
     }
     
     .achievement-item.locked .status {
       color: #999;
-    }
-    
-    @media (max-width: 600px) {
-      .buttons {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .buttons a {
-        width: 100%;
-        max-width: 300px;
-        text-align: center;
-      }
-      
-      .achievement-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      }
     }
   </style>
 </head>
@@ -162,13 +149,13 @@
     <h2>🥈 Редкие</h2>
     <div id="rare" class="achievement-grid"></div>
     
+    <h2>💜 Эпические</h2>
+    <div id="epic" class="achievement-grid"></div>
+    
     <h2>🥇 Легендарные</h2>
     <div id="legendary" class="achievement-grid"></div>
   </div>
   
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.0/dist/tesseract.min.js"></script>
   <script src="challenge-system.js"></script>
   <script>
     function getAchievements() {
@@ -180,12 +167,28 @@
       const unlocked = getAchievements();
       const unlockedIds = unlocked.map(a => a.id);
       
+      console.log('🏆 Total achievements:', ACHIEVEMENTS.length);
+      console.log('📋 Achievements:', ACHIEVEMENTS);
+      console.log('🔓 Unlocked:', unlockedIds);
+      
       const common = ACHIEVEMENTS.filter(a => a.rarity === 'common');
       const rare = ACHIEVEMENTS.filter(a => a.rarity === 'rare');
+      const epic = ACHIEVEMENTS.filter(a => a.rarity === 'epic');
       const legendary = ACHIEVEMENTS.filter(a => a.rarity === 'legendary');
+      
+      console.log('Common:', common.length);
+      console.log('Rare:', rare.length);
+      console.log('Epic:', epic.length);
+      console.log('Legendary:', legendary.length);
       
       function renderGrid(achievements, containerId) {
         const container = document.getElementById(containerId);
+        
+        if (achievements.length === 0) {
+          container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Нет достижений</p>';
+          return;
+        }
+        
         container.innerHTML = achievements.map(a => {
           const isUnlocked = unlockedIds.includes(a.id);
           return `
@@ -201,11 +204,12 @@
       
       renderGrid(common, 'common');
       renderGrid(rare, 'rare');
+      renderGrid(epic, 'epic');
       renderGrid(legendary, 'legendary');
       
       const total = ACHIEVEMENTS.length;
       const unlockedCount = unlockedIds.length;
-      const percent = Math.round((unlockedCount / total) * 100);
+      const percent = total > 0 ? Math.round((unlockedCount / total) * 100) : 0;
       
       document.getElementById('progress').innerHTML = `
         <strong>Прогресс:</strong> ${unlockedCount}/${total} (${percent}%)<br>
@@ -218,7 +222,7 @@
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', renderAchievements);
     } else {
-      renderAchievements();
+      setTimeout(renderAchievements, 500);
     }
   </script>
 </body>
