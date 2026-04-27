@@ -14,7 +14,6 @@ function getUserId() {
 
 const userId = getUserId();
 
-// 2. СПИСОК ЧЕЛЛЕНДЖЕЙ
 // 2. СПИСОК ЧЕЛЛЕНДЖЕЙ (9 штук)
 const CHALLENGES = [
   // НЕДЕЛЯ 1 - ОБЫЧНЫЕ
@@ -35,7 +34,7 @@ const CHALLENGES = [
   { id: 'impossible_star', title: '⭐ Звезда за 5 сек', description: 'Нарисуй 5-конечную звезду за 5 секунд', difficulty: 'impossible', week: 4, checkType: 'star', timeLimit: 5, attempts: 1, reward: { points: 200, achievement: 'legend' } }
 ];
 
-// 3. ДОСТИЖЕНИЯ
+// 3. ДОСТИЖЕНИЯ (9 штук - по одному на каждый челлендж)
 const ACHIEVEMENTS = [
   { id: 'first_line', title: '📏 Первая линия', description: 'Нарисуй первую линию', icon: '📏', rarity: 'common' },
   { id: 'color_master', title: '🌈 Мастер цвета', description: 'Используй 5 цветов', icon: '🌈', rarity: 'common' },
@@ -50,77 +49,65 @@ const ACHIEVEMENTS = [
 
 // 4. ПРОВЕРКИ РИСУНКОВ
 const Checker = {
-  // Проверка линии
-  // Проверка линии (более мягкая)
-checkLine(canvas) {
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
-  const points = [];
-  
-  for (let y = 0; y < canvas.height; y++) {
-    for (let x = 0; x < canvas.width; x++) {
-      const i = (y * canvas.width + x) * 4;
-      if (pixels[i + 3] > 128) points.push({ x, y });
+  // Проверка линии (мягкая)
+  checkLine(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const points = [];
+    
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i + 3] > 128) points.push({ x, y });
+      }
     }
-  }
-  
-  // Проверяем что есть хоть что-то нарисовано
-  if (points.length < 30) return { success: false, reason: 'Нарисуй что-нибудь!' };
-  
-  // Проверяем что это не просто точка — линия должна быть достаточно длинной
-  const xs = points.map(p => p.x);
-  const ys = points.map(p => p.y);
-  const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const minY = Math.min(...ys), maxY = Math.max(...ys);
-  const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
-  
-  if (length < 40) return { success: false, reason: 'Линия слишком короткая!' };
-  
-  // Проверяем если это линия (не каракули)
-  // Для линии отношение периметра к площади должно быть большим
-  const area = (maxX - minX) * (maxY - minY);
-  const perimeter = 2 * ((maxX - minX) + (maxY - minY));
-  
-  // Если это каракули — они займут много площади при маленьком периметре
-  // Если это линия — периметр будет большим относительно площади
-  if (area > 0 && perimeter / Math.sqrt(area) < 3) {
-    return { success: false, reason: 'Это не линия, а каракули!' };
-  }
-  
-  // Проверяем отклонение от прямой (более мягко — до 50px)
-  const sumX = points.reduce((s, p) => s + p.x, 0);
-  const sumY = points.reduce((s, p) => s + p.y, 0);
-  const avgX = sumX / points.length;
-  const avgY = sumY / points.length;
-  
-  let num = 0, den = 0;
-  for (const p of points) {
-    num += (p.x - avgX) * (p.y - avgY);
-    den += (p.x - avgX) ** 2;
-  }
-  
-  const slope = den === 0 ? 0 : num / den;
-  const intercept = avgY - slope * avgX;
-  
-  let totalDeviation = 0;
-  for (const p of points) {
-    const expectedY = slope * p.x + intercept;
-    totalDeviation += Math.abs(p.y - expectedY);
-  }
-  
-  const avgDeviation = totalDeviation / points.length;
-  
-  // Более мягкая проверка — до 50px отклонения (вместо 20)
-  const isLine = avgDeviation < 50;
-  
-  return {
-    success: isLine,
-    reason: isLine 
-      ? '✅ Отличная линия!' 
-      : `❌ Слишком кривая (отклонение: ${Math.round(avgDeviation)}px). Нарисуй более прямую линию!`
-  };
-}
+    
+    if (points.length < 30) return { success: false, reason: 'Нарисуй что-нибудь!' };
+    
+    const xs = points.map(p => p.x);
+    const ys = points.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const length = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2);
+    
+    if (length < 40) return { success: false, reason: 'Линия слишком короткая!' };
+    
+    const area = (maxX - minX) * (maxY - minY);
+    const perimeter = 2 * ((maxX - minX) + (maxY - minY));
+    
+    if (area > 0 && perimeter / Math.sqrt(area) < 3) {
+      return { success: false, reason: 'Это не линия, а каракули!' };
+    }
+    
+    const sumX = points.reduce((s, p) => s + p.x, 0);
+    const sumY = points.reduce((s, p) => s + p.y, 0);
+    const avgX = sumX / points.length;
+    const avgY = sumY / points.length;
+    
+    let num = 0, den = 0;
+    for (const p of points) {
+      num += (p.x - avgX) * (p.y - avgY);
+      den += (p.x - avgX) ** 2;
+    }
+    
+    const slope = den === 0 ? 0 : num / den;
+    const intercept = avgY - slope * avgX;
+    
+    let totalDeviation = 0;
+    for (const p of points) {
+      const expectedY = slope * p.x + intercept;
+      totalDeviation += Math.abs(p.y - expectedY);
+    }
+    
+    const avgDeviation = totalDeviation / points.length;
+    const isLine = avgDeviation < 50;
+    
+    return {
+      success: isLine,
+      reason: isLine ? '✅ Отличная линия!' : `❌ Слишком кривая (отклонение: ${Math.round(avgDeviation)}px)`
+    };
+  },
   
   // Проверка количества цветов
   checkColorCount(canvas, minColors) {
@@ -233,9 +220,9 @@ checkLine(canvas) {
       case 'color_count': return this.checkColorCount(canvas, challenge.check.minColors);
       case 'circle': return this.checkCircle(canvas);
       case 'star': return this.checkStar(canvas);
-      case 'smiley': return { success: true, reason: '✅ Честная система -我们相信 тебе!' };
-      case 'rainbow': return { success: true, reason: '✅ Честная система -我们相信 тебе!' };
-      case 'word': return { success: true, reason: '✅ Честная система -我们相信 тебе!' };
+      case 'smiley': return { success: true, reason: '✅ Честная система - верим тебе!' };
+      case 'rainbow': return { success: true, reason: '✅ Честная система - верим тебе!' };
+      case 'word': return { success: true, reason: '✅ Честная система - верим тебе!' };
       case 'honor': return { success: true, reason: '✅ Честная система' };
       default: return { success: true, reason: 'OK' };
     }
@@ -296,12 +283,10 @@ const ChallengeManager = {
     const data = JSON.parse(existing);
     const challenge = CHALLENGES.find(c => c.id === challengeId);
     
-    // Проверяем попытки
     if (data.attemptsUsed >= challenge.attempts) {
       return { success: false, reason: '❌ Попытки закончились!' };
     }
     
-    // Проверяем время
     if (challenge.timeLimit) {
       const elapsed = (Date.now() - data.startTime) / 1000;
       if (elapsed > challenge.timeLimit) {
@@ -315,7 +300,6 @@ const ChallengeManager = {
       }
     }
     
-    // Проверяем рисунок
     const checkResult = Checker.checkChallenge(challengeId, canvas);
     
     data.attemptsUsed++;
