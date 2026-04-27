@@ -2942,80 +2942,64 @@ header p {
   background-image: none !important;
 }
 
-/* ============================================ */
-/* АНИМАЦИЯ — МОДАЛЬНОЕ ОКНО (ИСПРАВЛЕНО) */
-/* ============================================ */
-
-#animationModal {
+/* ========== АНИМАЦИЯ МОДАЛКА ========== */
+#animModal {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: rgba(0, 0, 0, 0.9) !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0,0,0,0.9) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   z-index: 999999 !important;
-  animation: modalFadeIn 0.3s ease !important;
 }
 
-@keyframes modalFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.animation-modal-content {
+.anim-box {
   background: white !important;
   border-radius: 16px !important;
   padding: 20px !important;
   max-width: 500px !important;
   width: 90% !important;
-  max-height: 90vh !important;
-  overflow: auto !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
-  position: relative !important;
-  z-index: 1000000 !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
 }
 
-.animation-modal-header {
+.anim-head {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
   margin-bottom: 15px !important;
   padding-bottom: 10px !important;
-  border-bottom: 2px solid #f0f0f0 !important;
+  border-bottom: 2px solid #eee !important;
 }
 
-.animation-modal-header h3 {
-  margin: 0 !important;
+.anim-head span {
+  font-weight: bold !important;
   font-size: 1.1rem !important;
-  color: #333 !important;
 }
 
-.animation-close-btn {
-  background: #f0f0f0 !important;
+.anim-head button {
+  background: #eee !important;
   border: none !important;
-  width: 32px !important;
-  height: 32px !important;
+  width: 30px !important;
+  height: 30px !important;
   border-radius: 50% !important;
   cursor: pointer !important;
   font-size: 1.2rem !important;
-  color: #333 !important;
 }
 
-.animation-canvas-wrapper {
+.anim-canvas-wrap {
   position: relative !important;
   width: 256px !important;
   height: 256px !important;
-  margin: 0 auto 15px auto !important;
-  border: 2px solid #e0e0e0 !important;
+  margin: 0 auto !important;
+  border: 2px solid #ddd !important;
   border-radius: 8px !important;
-  background: #fff !important;
+  background: white !important;
 }
 
-#animationCanvas,
-#onionSkinCanvas {
+#animCanvas, #onionCanvas {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -3024,36 +3008,23 @@ header p {
   border-radius: 8px !important;
 }
 
-#animationCanvas {
-  z-index: 5 !important;
-}
+#animCanvas { z-index: 5 !important; }
+#onionCanvas { z-index: 10 !important; pointer-events: none !important; opacity: 0 !important; }
 
-#onionSkinCanvas {
-  z-index: 10 !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-  transition: opacity 0.3s !important;
-}
-
-.animation-controls {
+.anim-info {
   text-align: center !important;
-  margin: 15px 0 !important;
-}
-
-.frame-info {
-  font-size: 0.9rem !important;
-  margin-bottom: 10px !important;
+  margin: 10px 0 !important;
   color: #666 !important;
 }
 
-.frame-nav-buttons {
+.anim-btns {
   display: flex !important;
   justify-content: center !important;
   gap: 10px !important;
   margin: 10px 0 !important;
 }
 
-.frame-nav-buttons button {
+.anim-btns button {
   background: linear-gradient(135deg, #667eea, #764ba2) !important;
   color: white !important;
   border: none !important;
@@ -3063,110 +3034,29 @@ header p {
   font-size: 1rem !important;
 }
 
-.frame-nav-buttons button:disabled {
+.anim-btns button:disabled {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
 }
 
-#addFrameBtn {
-  width: 100% !important;
-  padding: 10px !important;
-  margin: 10px 0 !important;
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 8px !important;
-  cursor: pointer !important;
-  font-weight: 600 !important;
-}
-
-#addFrameBtn:disabled {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
-}
-
-.onion-toggle {
+.anim-actions {
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  margin: 10px 0 !important;
-  cursor: pointer !important;
-  font-size: 0.9rem !important;
-  color: #666 !important;
-}
-
-.fps-slider {
-  display: flex !important;
-  align-items: center !important;
   justify-content: center !important;
   gap: 10px !important;
-  margin: 10px 0 !important;
-}
-
-.fps-slider input {
-  width: 150px !important;
-}
-
-.animation-modal-actions {
-  display: flex !important;
-  gap: 10px !important;
-  justify-content: center !important;
-  margin-top: 20px !important;
+  margin-top: 15px !important;
   padding-top: 15px !important;
-  border-top: 2px solid #f0f0f0 !important;
+  border-top: 2px solid #eee !important;
 }
 
-.animation-modal-actions button {
-  padding: 10px 20px !important;
-  border: none !important;
-  border-radius: 8px !important;
-  cursor: pointer !important;
-  font-weight: 600 !important;
-  color: white !important;
-}
-
-.animation-btn-secondary {
-  background: #999 !important;
-}
-
-.animation-btn-success {
-  background: linear-gradient(135deg, #11998e, #38ef7d) !important;
-}
-
-.animation-btn-info {
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
-}
-
-/* Анимированная клетка */
-.animated-cell {
+.anim-cell {
   border: 2px solid #667eea !important;
-  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5) !important;
+  box-shadow: 0 0 10px rgba(102,126,234,0.5) !important;
 }
 
-/* Телефон */
 @media (max-width: 600px) {
-  .animation-modal-content {
-    padding: 15px !important;
-    width: 95% !important;
-  }
-  
-  .animation-canvas-wrapper {
-    width: 100% !important;
-    max-width: 256px !important;
-  }
-  
-  #animationCanvas,
-  #onionSkinCanvas {
-    width: 100% !important;
-    height: auto !important;
-  }
-  
-  .animation-modal-actions {
-    flex-direction: column !important;
-  }
-  
-  .animation-modal-actions button {
-    width: 100% !important;
-  }
+  .anim-box { padding: 15px !important; width: 95% !important; }
+  .anim-canvas-wrap { width: 100% !important; max-width: 256px !important; }
+  #animCanvas, #onionCanvas { width: 100% !important; }
+  .anim-actions { flex-direction: column !important; }
+  .anim-actions button { width: 100% !important; }
 }
