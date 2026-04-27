@@ -2736,3 +2736,151 @@ header p {
 #patternPanel.collapsed .pattern-preview {
   display: none !important;
 }
+
+/* Панели внутри toolbar */
+#toolbar #paletteGenerator,
+#toolbar #filtersPanel,
+#toolbar #patternPanel {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  margin: 10px auto !important;
+  padding: 12px !important;
+  background: white !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+  width: 95% !important;
+  max-width: 400px !important;
+}
+
+/* Горизонтальный скролл */
+#toolbar .generator-types,
+#toolbar .filters-grid,
+#toolbar .pattern-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  gap: 6px !important;
+  padding: 8px 0 !important;
+}
+
+/* Кнопки */
+#toolbar .gen-type-btn,
+#toolbar .filter-btn,
+#toolbar .pattern-btn,
+#toolbar .generated-color-btn {
+  flex: 0 0 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+  font-size: 1.1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Заголовки */
+#toolbar .generator-header,
+#toolbar .filters-header,
+#toolbar .pattern-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
+}
+
+/* Кнопка закрыть */
+#toolbar .generator-toggle,
+#toolbar .filters-toggle,
+#toolbar .pattern-toggle {
+  background: #f0f0f0 !important;
+  border: none !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 0.8rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* Свёрнутое состояние */
+#toolbar #paletteGenerator.collapsed .generator-types,
+#toolbar #paletteGenerator.collapsed .generated-palette,
+#toolbar #paletteGenerator.collapsed .apply-palette-btn,
+#toolbar #filtersPanel.collapsed .filters-grid,
+#toolbar #filtersPanel.collapsed .filters-actions,
+#toolbar #patternPanel.collapsed .pattern-content {
+  display: none !important;
+}
+
+/* Кнопка сброса */
+#toolbar .filter-reset-btn {
+  width: 100% !important;
+  padding: 8px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #f093fb, #f5576c) !important;
+  color: white !important;
+  font-size: 0.8rem !important;
+  cursor: pointer !important;
+  margin-top: 8px !important;
+}
+
+/* Кнопка применить палитру */
+#toolbar .apply-palette-btn {
+  width: 100% !important;
+  padding: 10px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #11998e, #38ef7d) !important;
+  color: white !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  margin-top: 10px !important;
+}
+
+/* Предпросмотр */
+#toolbar .pattern-preview {
+  text-align: center !important;
+  padding: 10px 0 0 0 !important;
+  margin: 10px 0 0 0 !important;
+  border-top: 1px solid #f0f0f0 !important;
+}
+
+#toolbar #patternPreview {
+  border: 2px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  width: 80px !important;
+  height: 80px !important;
+}
+
+#toolbar .pattern-hint {
+  font-size: 0.7rem !important;
+  color: #999 !important;
+  margin: 5px 0 0 0 !important;
+}
+
+/* Телефон */
+@media (max-width: 600px) {
+  #toolbar #paletteGenerator,
+  #toolbar #filtersPanel,
+  #toolbar #patternPanel {
+    width: 98% !important;
+    padding: 10px !important;
+    margin: 8px auto !important;
+  }
+  
+  #toolbar .gen-type-btn,
+  #toolbar .filter-btn,
+  #toolbar .pattern-btn {
+    flex: 0 0 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+  }
+}
