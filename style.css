@@ -3298,3 +3298,92 @@ header p {
     padding: 20px;
   }
 }
+
+/* Кнопки Челленджи и Достижения */
+.challenges-button,
+.achievements-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.challenges-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.achievements-button {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+  color: white;
+}
+
+.challenges-button:hover,
+.achievements-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.challenges-button:active,
+.achievements-button:active {
+  transform: translateY(0);
+}
+
+/* Контейнер для кнопок */
+.navigation-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  flex-wrap: wrap;
+}
+
+/* МОБИЛЬНАЯ ВЕРСИЯ */
+@media (max-width: 600px) {
+  .navigation-buttons {
+    display: flex;
+    flex-direction: row;  /* В ряд на телефоне */
+    gap: 10px;
+    padding: 10px;
+    flex-wrap: nowrap;  /* Не переносить */
+  }
+  
+  .challenges-button,
+  .achievements-button {
+    flex: 1;  /* Растягиваются равномерно */
+    min-width: 0;  /* Разрешить сжиматься */
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    white-space: nowrap;  /* Не переносить текст */
+  }
+  
+  /* Иконки на мобильном меньше */
+  .challenges-button::before,
+  .achievements-button::before {
+    font-size: 1.2rem;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 350px) {
+  .challenges-button,
+  .achievements-button {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .navigation-buttons {
+    gap: 8px;
+    padding: 8px;
+  }
+}
