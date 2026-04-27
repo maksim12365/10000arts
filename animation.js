@@ -1,371 +1,294 @@
 // ============================================
-// АНИМАЦИЯ С ONION SKINNING (ИСПРАВЛЕНО)
+// АНИМАЦИЯ — ПРОСТАЯ ВЕРСИЯ
 // ============================================
 
-const ANIMATION_CONFIG = {
-  MAX_FRAMES: 3,
-  DEFAULT_FPS: 8,
+const ANIM = {
+  max: 3,
+  fps: 8,
   frames: [],
-  currentFrame: 0,
-  isOpen: false,
-  isPlaying: false,
-  playInterval: null,
-  onionSkinOpacity: 0.3
+  current: 0,
+  playing: false,
+  interval: null
 };
 
-// Открыть редактор
-window.openAnimationEditor = function() {
-  if (ANIMATION_CONFIG.isOpen) return;
-  
+// Открыть
+window.openAnim = function() {
   const toolbar = document.getElementById('toolbar');
   const x = toolbar?.dataset?.x;
   const y = toolbar?.dataset?.y;
   
   if (!x || !y) {
-    alert('❌ Сначала выбери клетку на полотне!');
+    alert('Выбери клетку сначала!');
     return;
   }
   
-  // Закрываем toolbar
-  const closeBtn = document.getElementById('btnCloseToolbar');
-  if (closeBtn) closeBtn.click();
+  // Закрыть toolbar
+  document.getElementById('btnCloseToolbar')?.click();
   
-  // Создаём модальное окно
+  // Создать модалку
   const modal = document.createElement('div');
-  modal.id = 'animationModal';
+  modal.id = 'animModal';
   modal.innerHTML = `
-    <div class="animation-modal-content">
-      <div class="animation-modal-header">
-        <h3>🎬 Анимация (макс. 3 кадра)</h3>
-        <button class="animation-close-btn" onclick="closeAnimationEditor()">✕</button>
+    <div class="anim-box">
+      <div class="anim-head">
+        <span>🎬 Анимация (3 кадра)</span>
+        <button onclick="closeAnim()">✕</button>
       </div>
       
-      <div class="animation-canvas-wrapper">
-        <canvas id="animationCanvas" width="256" height="256"></canvas>
-        <canvas id="onionSkinCanvas" width="256" height="256"></canvas>
+      <div class="anim-canvas-wrap">
+        <canvas id="animCanvas" width="256" height="256"></canvas>
+        <canvas id="onionCanvas" width="256" height="256"></canvas>
       </div>
       
-      <div class="animation-controls">
-        <div class="frame-info">
-          Кадр: <strong id="frameNum">1</strong> / 3
-        </div>
-        
-        <div class="frame-nav-buttons">
-          <button onclick="previousFrame()" id="prevBtn" disabled>⏮️</button>
-          <button onclick="togglePlay()" id="playBtn">▶️</button>
-          <button onclick="nextFrame()" id="nextBtn" disabled>⏭️</button>
-        </div>
-        
-        <button onclick="addFrame()" id="addFrameBtn" class="animation-btn-primary">
-          + Добавить кадр
-        </button>
-        
-        <label class="onion-toggle">
-          <input type="checkbox" id="onionSkinToggle" checked onchange="updateOnionSkin()">
-          🧅 Onion Skinning
-        </label>
-        
-        <div class="fps-slider">
-          <label>FPS: <input type="range" min="4" max="12" value="8" oninput="updateFPS(this.value)"></label>
-          <span id="fpsValue">8</span>
-        </div>
+      <div class="anim-info">Кадр: <b id="fNum">1</b> / 3</div>
+      
+      <div class="anim-btns">
+        <button onclick="prevFrame()" id="prevB">⏮️</button>
+        <button onclick="playAnim()" id="playB">▶️</button>
+        <button onclick="nextFrame()" id="nextB">⏭️</button>
       </div>
       
-      <div class="animation-modal-actions">
-        <button onclick="closeAnimationEditor()" class="animation-btn-secondary">❌ Отмена</button>
-        <button onclick="saveAnimation()" class="animation-btn-success">✅ Сохранить</button>
-        <button onclick="exportGIF()" class="animation-btn-info">💾 GIF</button>
+      <button onclick="addFrame()" id="addB" style="width:100%;margin:10px 0;padding:10px;background:#667eea;color:white;border:none;border-radius:8px;cursor:pointer;">+ Кадр</button>
+      
+      <label style="display:flex;align-items:center;justify-content:center;gap:5px;margin:10px 0;">
+        <input type="checkbox" id="onionCheck" checked onchange="updateOnion()">
+        🧅 Onion
+      </label>
+      
+      <div style="text-align:center;margin:10px 0;">
+        FPS: <input type="range" min="4" max="12" value="8" oninput="ANIM.fps=this.value;document.getElementById('fpsV').textContent=this.value">
+        <span id="fpsV">8</span>
+      </div>
+      
+      <div class="anim-actions">
+        <button onclick="closeAnim()" style="padding:10px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;">❌</button>
+        <button onclick="saveAnim()" style="padding:10px 20px;background:#11998e;color:white;border:none;border-radius:8px;cursor:pointer;">✅</button>
+        <button onclick="exportGIF()" style="padding:10px 20px;background:#667eea;color:white;border:none;border-radius:8px;cursor:pointer;">💾</button>
       </div>
     </div>
   `;
   
   document.body.appendChild(modal);
-  ANIMATION_CONFIG.isOpen = true;
-  ANIMATION_CONFIG.frames = [getCanvasSnapshot()];
-  ANIMATION_CONFIG.currentFrame = 0;
+  
+  ANIM.frames = [getSnap()];
+  ANIM.current = 0;
   
   setTimeout(() => {
-    copyToAnimationCanvas();
-    updateOnionSkin();
-    updateFrameUI();
+    copyCanvas();
+    updateOnion();
+    updateUI();
   }, 100);
-  
-  console.log('🎬 Animation opened');
 };
 
 // Закрыть
-window.closeAnimationEditor = function() {
-  if (ANIMATION_CONFIG.playInterval) {
-    clearInterval(ANIMATION_CONFIG.playInterval);
-    ANIMATION_CONFIG.playInterval = null;
+window.closeAnim = function() {
+  if (ANIM.interval) {
+    clearInterval(ANIM.interval);
+    ANIM.interval = null;
   }
-  
-  const modal = document.getElementById('animationModal');
-  if (modal) modal.remove();
-  
-  ANIMATION_CONFIG.isOpen = false;
-  ANIMATION_CONFIG.frames = [];
-  ANIMATION_CONFIG.currentFrame = 0;
-  ANIMATION_CONFIG.isPlaying = false;
-  
-  // Показываем toolbar обратно
-  const toolbar = document.getElementById('toolbar');
-  if (toolbar) toolbar.classList.remove('hidden');
+  document.getElementById('animModal')?.remove();
+  ANIM.frames = [];
+  ANIM.current = 0;
+  ANIM.playing = false;
 };
 
-// Снимок canvas
-function getCanvasSnapshot() {
-  const canvas = document.getElementById('drawCanvas');
-  if (!canvas) return null;
-  return canvas.toDataURL('image/jpeg', 0.6);
+// Снимок
+function getSnap() {
+  const c = document.getElementById('drawCanvas');
+  return c ? c.toDataURL('image/jpeg', 0.6) : null;
 }
 
-// Копировать на animation canvas
-function copyToAnimationCanvas() {
-  const source = document.getElementById('drawCanvas');
-  const target = document.getElementById('animationCanvas');
-  if (!source || !target) return;
+// Копировать
+function copyCanvas() {
+  const src = document.getElementById('drawCanvas');
+  const dst = document.getElementById('animCanvas');
+  if (!src || !dst) return;
   
-  const ctx = target.getContext('2d');
+  const ctx = dst.getContext('2d');
   const img = new Image();
   img.onload = () => {
-    ctx.clearRect(0, 0, target.width, target.height);
+    ctx.clearRect(0, 0, 256, 256);
     ctx.drawImage(img, 0, 0);
   };
-  img.src = source.toDataURL();
+  img.src = src.toDataURL();
 }
 
-// Восстановить кадр
-function restoreFrameToDrawCanvas(frameIndex) {
-  const drawCanvas = document.getElementById('drawCanvas');
-  if (!drawCanvas) return;
-  
-  const ctx = drawCanvas.getContext('2d');
+// Восстановить
+function restoreFrame(i) {
+  const c = document.getElementById('drawCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
   const img = new Image();
   img.onload = () => {
-    ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    ctx.clearRect(0, 0, 256, 256);
     ctx.drawImage(img, 0, 0);
   };
-  img.src = ANIMATION_CONFIG.frames[frameIndex];
+  img.src = ANIM.frames[i];
 }
 
-// Onion skin
-window.updateOnionSkin = function() {
-  const onionCanvas = document.getElementById('onionSkinCanvas');
-  const checkbox = document.getElementById('onionSkinToggle');
-  if (!onionCanvas || !checkbox) return;
+// Onion
+window.updateOnion = function() {
+  const c = document.getElementById('onionCanvas');
+  const check = document.getElementById('onionCheck');
+  if (!c || !check) return;
   
-  const ctx = onionCanvas.getContext('2d');
-  ctx.clearRect(0, 0, onionCanvas.width, onionCanvas.height);
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 256, 256);
   
-  if (!checkbox.checked || ANIMATION_CONFIG.currentFrame === 0) {
-    onionCanvas.style.opacity = '0';
+  if (!check.checked || ANIM.current === 0) {
+    c.style.opacity = '0';
     return;
   }
   
-  const prevFrame = ANIMATION_CONFIG.frames[ANIMATION_CONFIG.currentFrame - 1];
-  if (prevFrame) {
-    const img = new Image();
-    img.onload = () => {
-      ctx.globalAlpha = ANIMATION_CONFIG.onionSkinOpacity;
-      ctx.drawImage(img, 0, 0);
-      ctx.globalAlpha = 1.0;
-    };
-    img.src = prevFrame;
-    onionCanvas.style.opacity = '1';
-  }
+  const img = new Image();
+  img.onload = () => {
+    ctx.globalAlpha = 0.3;
+    ctx.drawImage(img, 0, 0);
+    ctx.globalAlpha = 1;
+  };
+  img.src = ANIM.frames[ANIM.current - 1];
+  c.style.opacity = '1';
 };
 
 // Добавить кадр
 window.addFrame = function() {
-  if (ANIMATION_CONFIG.frames.length >= ANIMATION_CONFIG.MAX_FRAMES) {
-    alert('❌ Максимум 3 кадра!');
+  if (ANIM.frames.length >= ANIM.max) {
+    alert('Максимум 3 кадра!');
     return;
   }
-  
-  ANIMATION_CONFIG.frames.push(getCanvasSnapshot());
-  ANIMATION_CONFIG.currentFrame = ANIMATION_CONFIG.frames.length - 1;
-  
-  updateFrameUI();
-  updateOnionSkin();
+  ANIM.frames.push(getSnap());
+  ANIM.current = ANIM.frames.length - 1;
+  updateUI();
+  updateOnion();
 };
 
 // Назад
-window.previousFrame = function() {
-  if (ANIMATION_CONFIG.currentFrame > 0) {
-    ANIMATION_CONFIG.currentFrame--;
-    restoreFrameToDrawCanvas(ANIMATION_CONFIG.currentFrame);
-    setTimeout(() => {
-      copyToAnimationCanvas();
-      updateFrameUI();
-      updateOnionSkin();
-    }, 100);
+window.prevFrame = function() {
+  if (ANIM.current > 0) {
+    ANIM.current--;
+    restoreFrame(ANIM.current);
+    setTimeout(() => { copyCanvas(); updateUI(); updateOnion(); }, 100);
   }
 };
 
 // Вперёд
 window.nextFrame = function() {
-  if (ANIMATION_CONFIG.currentFrame < ANIMATION_CONFIG.frames.length - 1) {
-    ANIMATION_CONFIG.currentFrame++;
-    restoreFrameToDrawCanvas(ANIMATION_CONFIG.currentFrame);
-    setTimeout(() => {
-      copyToAnimationCanvas();
-      updateFrameUI();
-      updateOnionSkin();
-    }, 100);
+  if (ANIM.current < ANIM.frames.length - 1) {
+    ANIM.current++;
+    restoreFrame(ANIM.current);
+    setTimeout(() => { copyCanvas(); updateUI(); updateOnion(); }, 100);
   }
 };
 
-function updateFrameUI() {
-  const frameNum = document.getElementById('frameNum');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const addBtn = document.getElementById('addFrameBtn');
-  
-  if (frameNum) frameNum.textContent = ANIMATION_CONFIG.currentFrame + 1;
-  if (prevBtn) prevBtn.disabled = ANIMATION_CONFIG.currentFrame === 0;
-  if (nextBtn) nextBtn.disabled = ANIMATION_CONFIG.currentFrame >= ANIMATION_CONFIG.frames.length - 1;
-  if (addBtn) addBtn.disabled = ANIMATION_CONFIG.frames.length >= ANIMATION_CONFIG.MAX_FRAMES;
+function updateUI() {
+  document.getElementById('fNum').textContent = ANIM.current + 1;
+  document.getElementById('prevB').disabled = ANIM.current === 0;
+  document.getElementById('nextB').disabled = ANIM.current >= ANIM.frames.length - 1;
+  document.getElementById('addB').disabled = ANIM.frames.length >= ANIM.max;
 }
 
 // Play
-window.togglePlay = function() {
-  const btn = document.getElementById('playBtn');
-  if (!btn) return;
-  
-  if (ANIMATION_CONFIG.isPlaying) {
-    clearInterval(ANIMATION_CONFIG.playInterval);
-    ANIMATION_CONFIG.playInterval = null;
-    ANIMATION_CONFIG.isPlaying = false;
+window.playAnim = function() {
+  const btn = document.getElementById('playB');
+  if (ANIM.playing) {
+    clearInterval(ANIM.interval);
+    ANIM.interval = null;
+    ANIM.playing = false;
     btn.textContent = '▶️';
-    restoreFrameToDrawCanvas(ANIMATION_CONFIG.currentFrame);
-    setTimeout(copyToAnimationCanvas, 100);
+    restoreFrame(ANIM.current);
+    setTimeout(copyCanvas, 100);
   } else {
-    ANIMATION_CONFIG.isPlaying = true;
-    let frame = 0;
-    ANIMATION_CONFIG.playInterval = setInterval(() => {
-      restoreFrameToDrawCanvas(frame);
-      setTimeout(copyToAnimationCanvas, 100);
-      frame = (frame + 1) % ANIMATION_CONFIG.frames.length;
-    }, 1000 / ANIMATION_CONFIG.DEFAULT_FPS);
+    ANIM.playing = true;
+    let f = 0;
+    ANIM.interval = setInterval(() => {
+      restoreFrame(f);
+      setTimeout(copyCanvas, 100);
+      f = (f + 1) % ANIM.frames.length;
+    }, 1000 / ANIM.fps);
     btn.textContent = '⏸️';
   }
 };
 
-// FPS
-window.updateFPS = function(value) {
-  ANIMATION_CONFIG.DEFAULT_FPS = parseInt(value);
-  const fpsValue = document.getElementById('fpsValue');
-  if (fpsValue) fpsValue.textContent = value;
-};
-
 // Сохранить
-window.saveAnimation = function() {
-  if (ANIMATION_CONFIG.frames.length === 0) {
-    alert('❌ Нет кадров!');
-    return;
-  }
+window.saveAnim = function() {
+  if (ANIM.frames.length === 0) { alert('Нет кадров!'); return; }
   
   const toolbar = document.getElementById('toolbar');
   const x = toolbar?.dataset?.x;
   const y = toolbar?.dataset?.y;
   
-  if (!x || !y) {
-    alert('❌ Выбери клетку!');
-    return;
-  }
+  if (!x || !y) { alert('Выбери клетку!'); return; }
   
-  const animationData = {
+  const data = {
     type: 'animated',
-    frames: ANIMATION_CONFIG.frames,
-    fps: ANIMATION_CONFIG.DEFAULT_FPS,
-    timestamp: Date.now()
+    frames: ANIM.frames,
+    fps: ANIM.fps,
+    time: Date.now()
   };
   
-  localStorage.setItem(`cell_${x}_${y}`, JSON.stringify(animationData));
-  updateCellOnGrid(x, y, animationData);
+  localStorage.setItem(`cell_${x}_${y}`, JSON.stringify(data));
   
-  closeAnimationEditor();
-  alert('✅ Сохранено!');
+  const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+  if (cell) {
+    cell.classList.add('occupied', 'anim-cell');
+    cell.dataset.type = 'animated';
+    cell.dataset.animation = JSON.stringify(data);
+    animateCell(cell, data);
+  }
+  
+  closeAnim();
+  alert('Сохранено!');
 };
 
-function updateCellOnGrid(x, y, data) {
-  const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
-  if (!cell) return;
-  
-  cell.classList.add('occupied', 'animated-cell');
-  cell.dataset.type = 'animated';
-  cell.dataset.animation = JSON.stringify(data);
-  animateCell(cell, data);
-}
-
 function animateCell(cell, data) {
-  let frame = 0;
+  let f = 0;
   setInterval(() => {
     const img = new Image();
     img.onload = () => {
       cell.style.backgroundImage = `url(${img.src})`;
       cell.style.backgroundSize = 'contain';
       cell.style.backgroundPosition = 'center';
-      cell.style.backgroundRepeat = 'no-repeat';
     };
-    img.src = data.frames[frame];
-    frame = (frame + 1) % data.frames.length;
+    img.src = data.frames[f];
+    f = (f + 1) % data.frames.length;
   }, 1000 / data.fps);
 }
 
 // GIF
 window.exportGIF = function() {
-  if (ANIMATION_CONFIG.frames.length === 0) {
-    alert('❌ Нет кадров!');
-    return;
-  }
+  if (ANIM.frames.length === 0) { alert('Нет кадров!'); return; }
+  if (typeof GIF === 'undefined') { alert('GIF.js не загружен!'); return; }
   
-  if (typeof GIF === 'undefined') {
-    alert('❌ GIF.js не загружен!');
-    return;
-  }
-  
-  const gif = new GIF({
-    workers: 2,
-    quality: 10,
-    width: 256,
-    height: 256
-  });
-  
-  ANIMATION_CONFIG.frames.forEach(frame => {
+  const gif = new GIF({ workers: 2, quality: 10, width: 256, height: 256 });
+  ANIM.frames.forEach(f => {
     const img = new Image();
-    img.src = frame;
-    gif.addFrame(img, { delay: 1000 / ANIMATION_CONFIG.DEFAULT_FPS });
+    img.src = f;
+    gif.addFrame(img, { delay: 1000 / ANIM.fps });
   });
   
   gif.on('finished', blob => {
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `animation-${Date.now()}.gif`;
-    link.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `anim-${Date.now()}.gif`;
+    a.click();
     URL.revokeObjectURL(url);
   });
-  
   gif.render();
 };
 
-// Загрузка анимаций
-function loadAnimations() {
-  const cells = document.querySelectorAll('.cell[data-type="animated"]');
-  cells.forEach(cell => {
+// Загрузка
+function loadAnims() {
+  document.querySelectorAll('.cell[data-type="animated"]').forEach(cell => {
     try {
       const data = JSON.parse(cell.dataset.animation);
       animateCell(cell, data);
-    } catch (e) {
-      console.error('❌ Animation error:', e);
-    }
+    } catch(e) { console.error(e); }
   });
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadAnimations);
+  document.addEventListener('DOMContentLoaded', loadAnims);
 } else {
-  setTimeout(loadAnimations, 500);
+  setTimeout(loadAnims, 500);
 }
