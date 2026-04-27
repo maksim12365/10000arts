@@ -144,20 +144,30 @@ function displayGeneratedPalette(colors) {
   const container = document.getElementById('generatedPalette');
   const applyBtn = document.getElementById('applyPaletteBtn');
   if (!container) return;
+  
   container.innerHTML = '';
-  colors.forEach(color => {
+  
+  colors.forEach((color, index) => {
     const btn = document.createElement('button');
     btn.className = 'generated-color-btn';
-    btn.style.backgroundColor = color;  /* ← ВАЖНО: показываем цвет! */
+    // 🔧 ВАЖНО: Устанавливаем цвет ПРАВИЛЬНО
+    btn.style.setProperty('background-color', color, 'important');
+    btn.style.setProperty('background-image', 'none', 'important');
     btn.title = color;
     btn.onclick = () => {
-      currentColor = color;
+      if (window.currentColor !== undefined) {
+        window.currentColor = color;
+      } else {
+        currentColor = color;
+      }
       document.querySelectorAll('.generated-color-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     };
     container.appendChild(btn);
   });
+  
   if (applyBtn) applyBtn.style.display = 'block';
+  console.log('🎨 Colors displayed:', colors);
 }
 
 // Применить палитру
