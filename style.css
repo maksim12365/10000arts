@@ -2884,3 +2884,28 @@ header p {
     height: 36px !important;
   }
 }
+
+/* 🔧 ИСПРАВЛЕНИЕ: ЦВЕТА ПАЛИТРЫ ПОКАЗЫВАЮТСЯ ПРАВИЛЬНО */
+
+.generated-color-btn {
+  background: var(--color-bg, #fff) !important;  /* Убираем градиент */
+  border: 2px solid rgba(0,0,0,0.2) !important;
+}
+
+/* Когда цвет установлен через JS */
+.generated-color-btn[style*="background-color"] {
+  background: inherit !important;
+}
+
+/* Активная кнопка */
+.generated-color-btn.active {
+  border: 3px solid #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Убираем градиент с кнопок цветов */
+#toolbar .generated-color-btn {
+  background-image: none !important;
+  background-color: inherit !important;
+}
