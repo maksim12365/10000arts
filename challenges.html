@@ -244,12 +244,12 @@
       if (locked.length > 0) {
         html += '<h2 style="margin:30px 0 10px 0;">🔒 Заблокировано</h2>';
         html += locked.map(c => {
-          const unlockTime = firstVisit + (c.week * 7 * 24 * 60 * 60 * 1000);
+          const daysToWait = (c.week - currentWeek) * 7 - (daysSinceFirst % 7);
           return `
-            <div class="challenge-card difficulty-${c.difficulty} locked" data-challenge="${c.id}" data-unlock="${unlockTime}">
+            <div class="challenge-card difficulty-${c.difficulty} locked" data-challenge="${c.id}" data-week="${c.week}">
               <h3>${c.title}</h3>
               <p>${c.description}</p>
-              <div class="unlock-info">
+              <div class="unlock-info" data-week="${c.week}">
                 🔓 Неделя ${c.week} • <span class="unlock-timer">⏳ Загрузка...</span>
               </div>
             </div>
@@ -263,11 +263,13 @@
     }
     
     function startUnlockTimers() {
-      const lockedCards = document.querySelectorAll('.challenge-card.locked');
+      const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
+      const lockedCards = document.querySelectorAll('.challenge-card.locked .unlock-info');
       
-      lockedCards.forEach(card => {
-        const unlockTime = parseInt(card.dataset.unlock);
-        const timerElement = card.querySelector('.unlock-timer');
+      lockedCards.forEach(info => {
+        const week = parseInt(info.dataset.week);
+        const timerElement = info.querySelector('.unlock-timer');
+        const unlockTime = firstVisit + (week * 7 * 24 * 60 * 60 * 1000);
         
         setInterval(() => {
           const now = Date.now();
@@ -275,8 +277,8 @@
           
           if (diff <= 0) {
             timerElement.textContent = '✅ Доступно!';
-            card.classList.remove('locked');
-            card.style.borderLeftColor = '#11998e';
+            info.parentElement.classList.remove('locked');
+            info.parentElement.style.borderLeftColor = '#11998e';
             return;
           }
           
