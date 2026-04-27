@@ -3625,3 +3625,27 @@ header p {
     padding: 8px 5px !important;
   }
 }
+
+/* ИСПРАВЛЕНИЕ ДЛЯ ТЕЛЕФОНА */
+@media screen and (max-width: 600px) {
+  .bottom-nav {
+    flex-direction: row !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+  
+  .bottom-btn {
+    flex: 1 1 0 !important;
+    max-width: 48% !important;
+    padding: 10px 12px !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .bottom-btn {
+    font-size: 0.75rem !important;
+    padding: 8px 10px !important;
+  }
+}
