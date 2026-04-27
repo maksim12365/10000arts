@@ -2210,3 +2210,75 @@ header p {
   max-width: 400px !important;
   clear: both !important;
 }
+
+/* 🔧 СРОЧНЫЙ ФИКС ДЛЯ ТЕЛЕФОНА */
+@media (max-width: 600px) {
+  
+  /* Все панели по ширине экрана */
+  #paletteGenerator,
+  #filtersPanel,
+  #patternPanel {
+    width: calc(100% - 16px) !important;  /* Чуть меньше 100% */
+    max-width: calc(100% - 16px) !important;
+    margin: 8px !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;  /* Важно! */
+  }
+  
+  /* Заголовок панели не сжимается */
+  .filters-header,
+  .pattern-header,
+  .generator-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;  /* Позволяет сжиматься */
+  }
+  
+  /* Кнопка закрытия всегда видна */
+  .filters-toggle,
+  .pattern-toggle,
+  .generator-toggle {
+    min-width: 26px !important;
+    min-height: 26px !important;
+    margin-left: auto !important;  /* Прижимает вправо */
+    flex-shrink: 0 !important;  /* Не сжимается */
+  }
+  
+  /* Текст заголовка не вылезает */
+  .filters-header span,
+  .pattern-header span,
+  .generator-header span {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 200px !important;
+  }
+  
+  /* Сетка фильтров - скролл если не влезает */
+  .filters-grid,
+  .pattern-grid,
+  .generator-types {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;  /* Горизонтальный скролл */
+    gap: 6px !important;
+    padding-bottom: 8px !important;
+    -webkit-overflow-scrolling: touch !important;  /* Плавный скролл iOS */
+  }
+  
+  /* Кнопки в сетке не сжимаются */
+  .filter-btn,
+  .pattern-btn,
+  .gen-type-btn {
+    min-width: 45px !important;
+    max-width: 45px !important;
+    flex: 0 0 45px !important;  /* Фиксированная ширина */
+  }
+  
+  /* Кнопка сброса на всю ширину */
+  .filter-reset-btn {
+    width: 100% !important;
+  }
+}
