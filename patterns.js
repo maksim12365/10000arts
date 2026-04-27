@@ -1,5 +1,5 @@
 // ============================================
-// ГЕНЕРАТОР ПАТТЕРНОВ (ИСПРАВЛЕНО)
+// ГЕНЕРАТОР ПАТТЕРНОВ (ОБНОВЛЕНО)
 // ============================================
 
 const PATTERNS = {
@@ -19,7 +19,7 @@ const PATTERNS = {
 function createPatternPanel() {
   const panel = document.createElement('div');
   panel.id = 'patternPanel';
-  panel.className = 'pattern-panel collapsed';  // ← используем 'collapsed'
+  panel.className = 'pattern-panel collapsed';
   
   panel.innerHTML = `
     <div class="pattern-header">
@@ -39,32 +39,39 @@ function createPatternPanel() {
     </div>
   `;
   
-  // Вставляем после фильтров
+  // 🔧 Вставляем В #panelsContainer (если есть)
   setTimeout(() => {
-    const filters = document.getElementById('filtersPanel');
-    const palette = document.getElementById('paletteGenerator');
-    
-    if (filters?.parentNode) {
-      filters.parentNode.insertBefore(panel, filters.nextSibling);
-    } else if (palette?.parentNode) {
-      palette.parentNode.insertBefore(panel, palette.nextSibling);
+    const container = document.getElementById('panelsContainer');
+    if (container) {
+      container.appendChild(panel);
+      console.log('✅ Pattern panel added to #panelsContainer');
     } else {
-      document.body.appendChild(panel);
+      // Фолбэк: после фильтров или палитры
+      const filters = document.getElementById('filtersPanel');
+      const palette = document.getElementById('paletteGenerator');
+      if (filters?.parentNode) {
+        filters.parentNode.insertBefore(panel, filters.nextSibling);
+      } else if (palette?.parentNode) {
+        palette.parentNode.insertBefore(panel, palette.nextSibling);
+      } else {
+        document.body.appendChild(panel);
+      }
+      console.log('⚠️ Pattern panel added via fallback');
     }
   }, 100);
 }
 
-// 🔧 ИСПРАВЛЕНО: переключает 'collapsed' (как в CSS)
+// Переключить панель
 function togglePatternPanel() {
   const panel = document.getElementById('patternPanel');
   const btn = panel?.querySelector('.pattern-toggle');
-  
   if (panel) {
-    panel.classList.toggle('collapsed');  // ← 'collapsed' как в CSS!
+    panel.classList.toggle('collapsed');
     if (btn) btn.textContent = panel.classList.contains('collapsed') ? '+' : '−';
   }
 }
 
+// Применить паттерн
 function applyPattern(key) {
   const canvas = document.getElementById('drawCanvas');
   const ctx = canvas?.getContext('2d');
@@ -90,11 +97,11 @@ function applyPattern(key) {
     }
   }
   
-  // Анимация
+  // Анимация кнопки
   const btn = document.querySelector(`.pattern-btn[onclick*="${key}"]`);
   if (btn) { btn.classList.add('applied'); setTimeout(() => btn.classList.remove('applied'), 500); }
   
-  // Авто-закрытие после применения
+  // Авто-закрытие
   setTimeout(() => {
     const panel = document.getElementById('patternPanel');
     if (panel && !panel.classList.contains('collapsed')) {
@@ -103,10 +110,10 @@ function applyPattern(key) {
   }, 300);
 }
 
+// Предпросмотр
 function showPatternPreview(key) {
   const preview = document.getElementById('patternPreview');
   if (!preview) return;
-  
   const ctx = preview.getContext('2d');
   const pattern = PATTERNS[key];
   if (!pattern) return;
