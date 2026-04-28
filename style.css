@@ -3387,3 +3387,71 @@ header p {
     padding: 8px;
   }
 }
+
+/* ============================================ */
+/* 🔥 ФИНАЛЬНЫЕ КНОПКИ - ЧЕЛЛЕНДЖИ + ДОСТИЖЕНИЯ */
+/* ============================================ */
+
+.nav-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 20px 15px !important;
+  margin: 20px auto !important;
+  max-width: 500px !important;
+}
+
+.nav-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 14px 24px !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+  transition: transform 0.2s !important;
+  white-space: nowrap !important;
+}
+
+.nav-btn.challenges {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+.nav-btn.achievements {
+  background: linear-gradient(135deg, #11998e, #38ef7d) !important;
+}
+
+.nav-btn:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* ТЕЛЕФОН - ИСПРАВЛЕНИЕ */
+@media screen and (max-width: 600px) {
+  .nav-container {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    padding: 15px 10px !important;
+    width: 95% !important;
+  }
+  
+  .nav-btn {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: 48% !important;
+    padding: 12px 10px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+@media screen and (max-width: 350px) {
+  .nav-btn {
+    padding: 10px 8px !important;
+    font-size: 0.75rem !important;
+  }
+}
