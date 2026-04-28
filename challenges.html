@@ -414,5 +414,25 @@
       init();
     }
   </script>
+<!-- Tesseract.js для распознавания текста -->
+<script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+<script>
+// Распознавание текста
+async function recognizeText(canvas) {
+  try {
+    const result = await Tesseract.recognize(
+      canvas,
+      'rus',
+      { logger: m => console.log(m) }
+    );
+    
+    console.log('📝 Распознанный текст:', result.data.text);
+    return result.data.text.toLowerCase().trim();
+  } catch (e) {
+    console.error('❌ Ошибка распознавания текста:', e);
+    return '';
+  }
+}
+</script>
 </body>
 </html>
