@@ -8,181 +8,50 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
     
-    header {
-      text-align: center;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    
+    header { text-align: center; padding: 20px; margin-bottom: 20px; }
     header h1 { margin-bottom: 10px; color: #333; }
     
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin-top: 15px;
-    }
-    
-    .buttons a {
-      background: #667eea;
-      color: white;
-      padding: 12px 25px;
-      border-radius: 8px;
-      text-decoration: none;
-      display: inline-block;
-    }
-    
+    .buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
+    .buttons a { background: #667eea; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; display: inline-block; }
     .buttons a:nth-child(2) { background: #11998e; }
     
-    #stats {
-      text-align: center;
-      padding: 20px;
-      background: white;
-      margin: 20px auto;
-      max-width: 600px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      font-size: 1.1rem;
-    }
-    
+    #stats { text-align: center; padding: 20px; background: white; margin: 20px auto; max-width: 600px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 1.1rem; }
     #challengeList { max-width: 800px; margin: 0 auto; padding: 20px; }
     
-    .challenge-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 15px 0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      border-left: 4px solid #667eea;
-    }
-    
+    .challenge-card { background: white; border-radius: 12px; padding: 20px; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 4px solid #667eea; }
     .challenge-card h3 { margin-bottom: 10px; color: #333; }
     .challenge-card p { margin: 5px 0; color: #666; }
     
-    .challenge-card button {
-      background: #667eea;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      margin-top: 15px;
-    }
-    
+    .challenge-card button { background: #667eea; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 1rem; margin-top: 15px; }
     .challenge-card button:hover:not(:disabled) { transform: translateY(-2px); }
     .challenge-card button:disabled { background: #11998e; cursor: not-allowed; }
     
     .challenge-card.locked { border-left-color: #999; opacity: 0.7; }
     .challenge-card.completed { border-left-color: #11998e; opacity: 0.7; }
     
-    .unlock-info {
-      background: #fff3cd;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color: #856404;
-    }
+    .unlock-info { background: #fff3cd; padding: 8px 12px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; color: #856404; }
     
-    #activeChallenge {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 100000;
-      overflow-y: auto;
-    }
+    #activeChallenge { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100000; overflow-y: auto; }
+    #activeChallenge > div { background: white; max-width: 600px; margin: 50px auto; padding: 20px; border-radius: 16px; }
     
-    #activeChallenge > div {
-      background: white;
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-      border-radius: 16px;
-    }
+    .timer-display { font-size: 2.5rem; font-weight: bold; color: #FF4444; text-align: center; margin: 15px 0; }
     
-    .timer-display {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #FF4444;
-      text-align: center;
-      margin: 15px 0;
-    }
+    .prompt-box { background: #f0f0f0; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0; font-size: 1.1rem; font-weight: 600; color: #333; }
     
-    .prompt-box {
-      background: #f0f0f0;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: center;
-      margin: 15px 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
-    }
+    .red-dot-indicator { width: 60px; height: 60px; border-radius: 50%; background: #ff0000; margin: 10px auto; transition: background 0.3s; border: 3px solid #333; }
+    .red-dot-indicator.ready { background: #00ff00; animation: pulse 0.5s infinite; }
     
-    .red-dot-indicator {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #ff0000;
-      margin: 10px auto;
-      transition: background 0.3s;
-      border: 3px solid #333;
-    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     
-    .red-dot-indicator.ready {
-      background: #00ff00;
-      animation: pulse 0.5s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-    
-    #challengeCanvas {
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      display: block;
-      margin: 20px auto;
-      cursor: crosshair;
-      background: white;
-    }
+    #challengeCanvas { border: 2px solid #ddd; border-radius: 8px; display: block; margin: 20px auto; cursor: crosshair; background: white; }
     
     #colorPicker { text-align: center; margin: 15px 0; }
-    #colorPicker button {
-      width: 35px;
-      height: 35px;
-      border: 2px solid #333;
-      border-radius: 50%;
-      cursor: pointer;
-      margin: 0 5px;
-    }
+    #colorPicker button { width: 35px; height: 35px; border: 2px solid #333; border-radius: 50%; cursor: pointer; margin: 0 5px; }
     
-    .attempts-left {
-      text-align: center;
-      color: #666;
-      font-size: 0.9rem;
-      margin: 15px 0;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 6px;
-    }
+    .attempts-left { text-align: center; color: #666; font-size: 0.9rem; margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 6px; }
     
     .action-buttons { text-align: center; margin-top: 20px; }
-    .action-buttons button {
-      padding: 15px 30px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      margin: 0 10px;
-    }
+    .action-buttons button { padding: 15px 30px; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; margin: 0 10px; }
     .action-buttons button:first-child { background: #11998e; color: white; }
     .action-buttons button:last-child { background: #999; color: white; }
   </style>
@@ -203,28 +72,23 @@
   <div id="activeChallenge">
     <div>
       <h2 id="activeTitle">Челлендж</h2>
-      
-      <!-- Подсказка что рисовать -->
       <div id="promptBox" class="prompt-box" style="display:none;"></div>
-      
-      <!-- Индикатор красной точки -->
       <div id="redDotIndicator" class="red-dot-indicator" style="display:none;"></div>
-      
       <div id="timer" class="timer-display">00:00</div>
       <canvas id="challengeCanvas" width="256" height="256"></canvas>
       
       <div id="colorPicker">
-  <button onclick="setColor('#ff0000')" style="background:#ff0000;" title="Красный"></button>
-  <button onclick="setColor('#ff7f00')" style="background:#ff7f00;" title="Оранжевый"></button>
-  <button onclick="setColor('#ffff00')" style="background:#ffff00;" title="Жёлтый"></button>
-  <button onclick="setColor('#00ff00')" style="background:#00ff00;" title="Зелёный"></button>
-  <button onclick="setColor('#0000ff')" style="background:#0000ff;" title="Синий"></button>
-  <button onclick="setColor('#4b0082')" style="background:#4b0082;" title="Индиго"></button>
-  <button onclick="setColor('#9400d3')" style="background:#9400d3;" title="Фиолетовый"></button>
-  <button onclick="setColor('#000000')" style="background:#000000;" title="Чёрный"></button>
-  <button onclick="setColor('#ffffff')" style="background:#ffffff;" title="Белый"></button>
-  <button onclick="clearCanvas()" style="background:#f0f0f0;width:auto;padding:0 15px;border-radius:5px;">🗑 Очистить</button>
-</div>
+        <button onclick="setColor('#ff0000')" style="background:#ff0000;" title="Красный"></button>
+        <button onclick="setColor('#ff7f00')" style="background:#ff7f00;" title="Оранжевый"></button>
+        <button onclick="setColor('#ffff00')" style="background:#ffff00;" title="Жёлтый"></button>
+        <button onclick="setColor('#00ff00')" style="background:#00ff00;" title="Зелёный"></button>
+        <button onclick="setColor('#0000ff')" style="background:#0000ff;" title="Синий"></button>
+        <button onclick="setColor('#4b0082')" style="background:#4b0082;" title="Индиго"></button>
+        <button onclick="setColor('#9400d3')" style="background:#9400d3;" title="Фиолетовый"></button>
+        <button onclick="setColor('#000000')" style="background:#000000;" title="Чёрный"></button>
+        <button onclick="setColor('#ffffff')" style="background:#ffffff;" title="Белый"></button>
+        <button onclick="clearCanvas()" style="background:#f0f0f0;width:auto;padding:0 15px;border-radius:5px;">🗑 Очистить</button>
+      </div>
       
       <div class="attempts-left" id="attemptsInfo"></div>
       <div class="action-buttons">
@@ -238,7 +102,7 @@
   <script>
     let currentChallenge = null;
     let timerInterval = null;
-    let redDotInterval = null;
+    let redDotTimeout = null;
     let currentColor = '#000000';
     let isDrawing = false;
     let canvas, ctx;
@@ -253,16 +117,12 @@
     function updateStats() {
       const stats = ChallengeSystem.getStats();
       const completed = ChallengeSystem.getCompletedCount();
-      document.getElementById('stats').innerHTML = 
-        `<strong>🏆 Очки:</strong> ${stats.points} | <strong>✅ Выполнено:</strong> ${completed}/${CHALLENGES.length}`;
+      document.getElementById('stats').innerHTML = `<strong>🏆 Очки:</strong> ${stats.points} | <strong>✅ Выполнено:</strong> ${completed}/${CHALLENGES.length}`;
     }
     
     function renderChallenges() {
       const { available, locked } = ChallengeManager.getAvailableChallenges();
       const container = document.getElementById('challengeList');
-      const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
-      const daysSinceFirst = (Date.now() - firstVisit) / (1000 * 60 * 60 * 24);
-      const currentWeek = Math.floor(daysSinceFirst / 7) + 1;
       
       let html = '<h2 style="margin:20px 0 10px 0;">📋 Доступные челленджи</h2>';
       
@@ -278,10 +138,7 @@
               <p>⏱️ ${c.timeLimit ? c.timeLimit + ' сек' : 'Без ограничений'}</p>
               <p>🎯 ${c.attempts === 1 ? '1 попытка' : 'Безлимит попыток'}</p>
               <p>🏆 ${c.reward.points} очков</p>
-              ${completed 
-                ? '<button disabled>✅ Выполнено</button>' 
-                : `<button onclick="openChallenge('${c.id}')">▶️ Начать</button>`
-              }
+              ${completed ? '<button disabled>✅ Выполнено</button>' : `<button onclick="openChallenge('${c.id}')">▶️ Начать</button>`}
             </div>
           `;
         }).join('');
@@ -290,13 +147,13 @@
       if (locked.length > 0) {
         html += '<h2 style="margin:30px 0 10px 0;">🔒 Заблокировано</h2>';
         html += locked.map(c => {
-          const unlockTime = firstVisit + (c.week * 7 * 24 * 60 * 60 * 1000);
+          const unlockWeek = c.week;
           return `
-            <div class="challenge-card difficulty-${c.difficulty} locked" data-challenge="${c.id}" data-unlock="${unlockTime}">
+            <div class="challenge-card difficulty-${c.difficulty} locked" data-week="${unlockWeek}">
               <h3>${c.title}</h3>
               <p>${c.description}</p>
-              <div class="unlock-info">
-                🔓 Неделя ${c.week} • <span class="unlock-timer">⏳ Загрузка...</span>
+              <div class="unlock-info" data-week="${unlockWeek}">
+                🔓 Неделя ${unlockWeek} • <span class="unlock-timer">⏳ Загрузка...</span>
               </div>
             </div>
           `;
@@ -308,39 +165,44 @@
       startUnlockTimers();
     }
     
- function startUnlockTimers() {
-  const lockedCards = document.querySelectorAll('.challenge-card.locked');
-  
-  lockedCards.forEach(card => {
-    const unlockTime = parseInt(card.dataset.unlock);
-    const timerEl = card.querySelector('.unlock-timer');
-    
-    if (!unlockTime || isNaN(unlockTime)) {
-      timerEl.textContent = '⏳ Загрузка...';
-      return;
+    function startUnlockTimers() {
+      const timerElements = document.querySelectorAll('.unlock-info');
+      
+      timerElements.forEach(info => {
+        const week = parseInt(info.dataset.week);
+        const timerEl = info.querySelector('.unlock-timer');
+        
+        if (!week || isNaN(week)) {
+          timerEl.textContent = '⏳ Ошибка';
+          return;
+        }
+        
+        const firstVisit = parseInt(localStorage.getItem(`firstVisit_${userId}`));
+        const unlockTime = firstVisit + (week * 7 * 24 * 60 * 60 * 1000);
+        
+        const updateTimer = () => {
+          const now = Date.now();
+          const diff = unlockTime - now;
+          
+          if (diff <= 0) {
+            timerEl.textContent = '✅ Доступно!';
+            info.parentElement.classList.remove('locked');
+            info.parentElement.style.borderLeftColor = '#11998e';
+            return;
+          }
+          
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          
+          timerEl.textContent = `⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с`;
+        };
+        
+        updateTimer();
+        setInterval(updateTimer, 1000);
+      });
     }
-    
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const diff = unlockTime - now;
-      
-      if (diff <= 0) {
-        timerEl.textContent = '✅ Доступно!';
-        card.classList.remove('locked');
-        card.style.borderLeftColor = '#11998e';
-        clearInterval(interval);
-        return;
-      }
-      
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      
-      timerEl.textContent = `⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с`;
-    }, 1000);
-  });
-}
     
     window.openChallenge = function(challengeId) {
       currentChallenge = CHALLENGES.find(c => c.id === challengeId);
@@ -354,7 +216,6 @@
       document.getElementById('activeChallenge').style.display = 'block';
       document.getElementById('activeTitle').textContent = currentChallenge.title;
       
-      // Показываем подсказку что рисовать
       const promptBox = document.getElementById('promptBox');
       const redDotIndicator = document.getElementById('redDotIndicator');
       
@@ -374,16 +235,14 @@
         promptBox.style.display = 'none';
       }
       
-      // Красная точка
       if (currentChallenge.redDot) {
         redDotIndicator.style.display = 'block';
         redDotReady = false;
         redDotIndicator.classList.remove('ready');
         
-        // Точка загорается случайно от 3 до 10 секунд
         const randomDelay = Math.floor(Math.random() * 7000) + 3000;
         
-        redDotInterval = setTimeout(() => {
+        redDotTimeout = setTimeout(() => {
           redDotReady = true;
           redDotIndicator.classList.add('ready');
         }, randomDelay);
@@ -396,29 +255,29 @@
       const attemptsLeft = currentChallenge.attempts - data.attemptsUsed;
       document.getElementById('attemptsInfo').textContent = `Попыток осталось: ${attemptsLeft}`;
       
-   if (currentChallenge.timeLimit) {
-  let timeLeft = currentChallenge.timeLimit;
-  document.getElementById('timer').textContent = `00:${timeLeft}`;
-  
-  // Сбрасываем startTime при открытии
-  const key = `challenge_${userId}_${challengeId}`;
-  localStorage.setItem(key, JSON.stringify({ 
-    started: true, 
-    startTime: Date.now(), 
-    attemptsUsed: data.attemptsUsed, 
-    completed: false 
-  }));
-  
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    document.getElementById('timer').textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      alert('⏰ Время вышло! Попытка потрачена.');
-      closeChallenge();
-    }
-  }, 1000);
-}
+      if (currentChallenge.timeLimit) {
+        let timeLeft = currentChallenge.timeLimit;
+        document.getElementById('timer').textContent = `00:${timeLeft}`;
+        
+        localStorage.setItem(key, JSON.stringify({ 
+          started: true, 
+          startTime: Date.now(), 
+          attemptsUsed: data.attemptsUsed, 
+          completed: false 
+        }));
+        
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          document.getElementById('timer').textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            alert('⏰ Время вышло! Попытка потрачена.');
+            closeChallenge();
+          }
+        }, 1000);
+      } else {
+        document.getElementById('timer').textContent = '∞';
+      }
       
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -432,10 +291,7 @@
       canvas.addEventListener('touchend', stopDraw);
     };
     
-    function startDraw(e) {
-      isDrawing = true;
-      draw(e);
-    }
+    function startDraw(e) { isDrawing = true; draw(e); }
     
     function draw(e) {
       if (!isDrawing) return;
@@ -443,18 +299,13 @@
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX || e.touches[0].clientX) - rect.left;
       const y = (e.clientY || e.touches[0].clientY) - rect.top;
-      
       ctx.fillStyle = currentColor;
       ctx.fillRect(x, y, 3, 3);
     }
     
-    function stopDraw() {
-      isDrawing = false;
-    }
+    function stopDraw() { isDrawing = false; }
     
-    window.setColor = function(color) {
-      currentColor = color;
-    };
+    window.setColor = function(color) { currentColor = color; };
     
     window.clearCanvas = function() {
       ctx.fillStyle = '#ffffff';
@@ -464,7 +315,6 @@
     window.submitChallenge = async function() {
       if (!currentChallenge) return;
       
-      // Проверка красной точки
       if (currentChallenge.redDot && !redDotReady) {
         alert('⚠️ Жди зелёной точки!');
         return;
@@ -489,7 +339,7 @@
     window.closeChallenge = function() {
       document.getElementById('activeChallenge').style.display = 'none';
       if (timerInterval) clearInterval(timerInterval);
-      if (redDotInterval) clearTimeout(redDotInterval);
+      if (redDotTimeout) clearTimeout(redDotTimeout);
       currentChallenge = null;
     };
     
