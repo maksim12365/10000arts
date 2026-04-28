@@ -214,13 +214,17 @@
       <canvas id="challengeCanvas" width="256" height="256"></canvas>
       
       <div id="colorPicker">
-        <button onclick="setColor('#ff0000')" style="background:#ff0000;" title="Красный"></button>
-        <button onclick="setColor('#00ff00')" style="background:#00ff00;" title="Зелёный"></button>
-        <button onclick="setColor('#0000ff')" style="background:#0000ff;" title="Синий"></button>
-        <button onclick="setColor('#ffff00')" style="background:#ffff00;" title="Жёлтый"></button>
-        <button onclick="setColor('#000000')" style="background:#000000;" title="Чёрный"></button>
-        <button onclick="clearCanvas()" style="background:#f0f0f0;width:auto;padding:0 15px;border-radius:5px;">🗑 Очистить</button>
-      </div>
+  <button onclick="setColor('#ff0000')" style="background:#ff0000;" title="Красный"></button>
+  <button onclick="setColor('#ff7f00')" style="background:#ff7f00;" title="Оранжевый"></button>
+  <button onclick="setColor('#ffff00')" style="background:#ffff00;" title="Жёлтый"></button>
+  <button onclick="setColor('#00ff00')" style="background:#00ff00;" title="Зелёный"></button>
+  <button onclick="setColor('#0000ff')" style="background:#0000ff;" title="Синий"></button>
+  <button onclick="setColor('#4b0082')" style="background:#4b0082;" title="Индиго"></button>
+  <button onclick="setColor('#9400d3')" style="background:#9400d3;" title="Фиолетовый"></button>
+  <button onclick="setColor('#000000')" style="background:#000000;" title="Чёрный"></button>
+  <button onclick="setColor('#ffffff')" style="background:#ffffff;" title="Белый"></button>
+  <button onclick="clearCanvas()" style="background:#f0f0f0;width:auto;padding:0 15px;border-radius:5px;">🗑 Очистить</button>
+</div>
       
       <div class="attempts-left" id="attemptsInfo"></div>
       <div class="action-buttons">
@@ -304,32 +308,39 @@
       startUnlockTimers();
     }
     
-    function startUnlockTimers() {
-      const timerElements = document.querySelectorAll('.unlock-timer');
-      
-      timerElements.forEach(timerEl => {
-        const unlockTime = parseInt(timerEl.parentElement.dataset.unlock);
-        
-        const interval = setInterval(() => {
-          const now = Date.now();
-          const diff = unlockTime - now;
-          
-          if (diff <= 0) {
-            timerEl.textContent = '✅ Доступно!';
-            clearInterval(interval);
-            setTimeout(() => renderChallenges(), 1000);
-            return;
-          }
-          
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-          
-          timerEl.textContent = `⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с`;
-        }, 1000);
-      });
+ function startUnlockTimers() {
+  const lockedCards = document.querySelectorAll('.challenge-card.locked');
+  
+  lockedCards.forEach(card => {
+    const unlockTime = parseInt(card.dataset.unlock);
+    const timerEl = card.querySelector('.unlock-timer');
+    
+    if (!unlockTime || isNaN(unlockTime)) {
+      timerEl.textContent = '⏳ Загрузка...';
+      return;
     }
+    
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const diff = unlockTime - now;
+      
+      if (diff <= 0) {
+        timerEl.textContent = '✅ Доступно!';
+        card.classList.remove('locked');
+        card.style.borderLeftColor = '#11998e';
+        clearInterval(interval);
+        return;
+      }
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      timerEl.textContent = `⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с`;
+    }, 1000);
+  });
+}
     
     window.openChallenge = function(challengeId) {
       currentChallenge = CHALLENGES.find(c => c.id === challengeId);
