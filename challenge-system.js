@@ -284,9 +284,10 @@ const ChallengeManager = {
       return { success: false, reason: '❌ Попытки закончились!' };
     }
     
-    if (challenge.timeLimit) {
-      const elapsed = (Date.now() - data.startTime) / 1000;
-      if (elapsed > challenge.timeLimit) {
+   if (challenge.timeLimit) {
+  const elapsed = (Date.now() - data.startTime) / 1000;
+  console.log(`⏱️ Прошло времени: ${elapsed} сек (лимит: ${challenge.timeLimit})`);
+  if (elapsed > challenge.timeLimit) {
         data.attemptsUsed++;
         localStorage.setItem(key, JSON.stringify(data));
         return { 
