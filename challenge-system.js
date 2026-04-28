@@ -1,5 +1,5 @@
 // ============================================
-// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (ГРУППИРОВКА ЦВЕТОВ)
+// СИСТЕМА ЧЕЛЛЕНДЖЕЙ (РАБОЧАЯ ВЕРСИЯ)
 // ============================================
 
 // 1. USER ID
@@ -16,15 +16,22 @@ const userId = getUserId();
 
 // 2. СПИСОК ЧЕЛЛЕНДЖЕЙ
 const CHALLENGES = [
+  // НЕДЕЛЯ 1 - ОБЫЧНЫЕ
   { id: 'easy_line', title: '📏 Прямая линия', description: 'Нарисуй прямую линию', difficulty: 'easy', week: 1, checkType: 'line', timeLimit: null, attempts: 1, reward: { points: 10, achievement: 'first_line' } },
   { id: 'easy_colors', title: '🌈 5 цветов за 20 сек', description: 'Используй 5 разных цветов за 20 секунд', difficulty: 'easy', week: 1, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 20, attempts: 1, reward: { points: 20, achievement: 'color_master' } },
-  { id: 'easy_smiley', title: '😊 Нарисуй смайлик', description: 'Нарисуй любой смайлик за 30 секунд', difficulty: 'easy', week: 1, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 30, achievement: 'smiley_artist' } },
-  { id: 'normal_shape', title: '🟠 Нарисуй круг', description: 'Нарисуй круг максимально точно', difficulty: 'normal', week: 2, checkType: 'circle', timeLimit: null, attempts: 999, reward: { points: 40, achievement: 'shape_master' } },
-  { id: 'normal_rainbow', title: '🌈 Радуга за 15 сек', description: 'Нарисуй радугу в правильном порядке за 15 секунд', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 15, attempts: 1, reward: { points: 50, achievement: 'rainbow_creator' } },
-  { id: 'normal_random', title: '🎲 Случайный объект', description: 'Нарисуй то, что покажет система за 30 сек', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 40, achievement: 'quick_draw' } },
-  { id: 'hard_word', title: '✏️ Нарисуй слово', description: 'Напиши слово за 10 секунд', difficulty: 'hard', week: 3, checkType: 'honor', timeLimit: 10, attempts: 1, reward: { points: 80, achievement: 'word_artist' } },
-  { id: 'hard_red_dot', title: '🔴 Красная точка', description: 'Рисуй только когда горит красная точка (5 цветов)', difficulty: 'hard', week: 3, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 30, attempts: 1, reward: { points: 70, achievement: 'timing_master' } },
-  { id: 'impossible_star', title: '⭐ Звезда за 5 сек', description: 'Нарисуй 5-конечную звезду за 5 секунд', difficulty: 'impossible', week: 4, checkType: 'star', timeLimit: 5, attempts: 1, reward: { points: 200, achievement: 'legend' } }
+  { id: 'easy_smiley', title: '😊 Нарисуй смайлик', description: 'Нарисуй любой смайлик за 30 секунд', difficulty: 'easy', week: 1, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 30, achievement: 'smiley_artist' }, prompt: 'Нарисуй смайлик (круг с глазами и улыбкой)' },
+  
+  // НЕДЕЛЯ 2 - РЕДКИЕ
+  { id: 'normal_shape', title: '🟠 Нарисуй круг', description: 'Нарисуй круг максимально точно', difficulty: 'normal', week: 2, checkType: 'circle', timeLimit: null, attempts: 999, reward: { points: 40, achievement: 'shape_master' }, prompt: 'Нарисуй круг (замкнутая кривая)' },
+  { id: 'normal_rainbow', title: '🌈 Радуга за 15 сек', description: 'Нарисуй радугу за 15 секунд', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 15, attempts: 1, reward: { points: 50, achievement: 'rainbow_creator' }, prompt: 'Нарисуй радугу (дуги разными цветами)' },
+  { id: 'normal_random', title: '🎲 Случайный объект', description: 'Нарисуй то, что покажет система за 30 сек', difficulty: 'normal', week: 2, checkType: 'honor', timeLimit: 30, attempts: 1, reward: { points: 40, achievement: 'quick_draw' }, prompt: 'Нарисуй: ' },
+  
+  // НЕДЕЛЯ 3 - ЭПИЧЕСКИЕ
+  { id: 'hard_word', title: '✏️ Нарисуй слово', description: 'Напиши слово за 10 секунд', difficulty: 'hard', week: 3, checkType: 'honor', timeLimit: 10, attempts: 1, reward: { points: 80, achievement: 'word_artist' }, prompt: 'Напиши слово: ' },
+  { id: 'hard_red_dot', title: '🔴 Красная точка', description: 'Рисуй когда загорится красная точка (5 цветов)', difficulty: 'hard', week: 3, checkType: 'color_count', check: { minColors: 5 }, timeLimit: 30, attempts: 1, reward: { points: 70, achievement: 'timing_master' }, prompt: 'Рисуй когда точка станет зелёной!', redDot: true },
+  
+  // НЕДЕЛЯ 4 - ЛЕГЕНДАРНЫЕ
+  { id: 'impossible_star', title: '⭐ Звезда за 5 сек', description: 'Нарисуй звезду за 5 секунд', difficulty: 'impossible', week: 4, checkType: 'star', timeLimit: 5, attempts: 1, reward: { points: 200, achievement: 'legend' }, prompt: 'Нарисуй 5-конечную звезду' }
 ];
 
 // 3. ДОСТИЖЕНИЯ
@@ -32,16 +39,23 @@ const ACHIEVEMENTS = [
   { id: 'first_line', title: '📏 Первая линия', description: 'Нарисуй первую линию', icon: '📏', rarity: 'common' },
   { id: 'color_master', title: '🌈 Мастер цвета', description: 'Используй 5 цветов', icon: '🌈', rarity: 'common' },
   { id: 'smiley_artist', title: '😊 Художник смайлов', description: 'Нарисуй смайлик', icon: '😊', rarity: 'common' },
-  { id: 'shape_master', title: '🟠 Мастер форм', description: 'Нарисуй идеальный круг', icon: '🟠', rarity: 'rare' },
+  { id: 'shape_master', title: '🟠 Мастер форм', description: 'Нарисуй круг', icon: '🟠', rarity: 'rare' },
   { id: 'rainbow_creator', title: '🌈 Создатель радуги', description: 'Нарисуй радугу', icon: '🌈', rarity: 'rare' },
   { id: 'quick_draw', title: '🎲 Быстрый рисунок', description: 'Нарисуй случайный объект', icon: '🎲', rarity: 'rare' },
   { id: 'word_artist', title: '✏️ Словный художник', description: 'Напиши слово за 10 сек', icon: '✏️', rarity: 'epic' },
-  { id: 'timing_master', title: '🔴 Мастер тайминга', description: 'Рисуй когда горит красная точка', icon: '🔴', rarity: 'epic' },
+  { id: 'timing_master', title: '🔴 Мастер тайминга', description: 'Рисуй когда горит точка', icon: '🔴', rarity: 'epic' },
   { id: 'legend', title: '⭐ Легенда', description: 'Нарисуй звезду за 5 сек', icon: '⭐', rarity: 'legendary' }
 ];
 
-// 4. ПРОВЕРКИ
+// 4. СЛОВА ДЛЯ ЧЕЛЛЕНДЖЕЙ
+const WORDS_FOR_CHALLENGE = ['кот', 'дом', 'мир', 'лес', 'сок', 'мак', 'сон', 'лёд', 'дым', 'мед'];
+
+// 5. ОБЪЕКТЫ ДЛЯ СЛУЧАЙНОГО ЧЕЛЛЕНДЖА
+const RANDOM_OBJECTS = ['солнце', 'дерево', 'цветок', 'сердце', 'звезда', 'облако', 'гора', 'река'];
+
+// 6. ПРОВЕРКИ
 const Checker = {
+  // Линия - ОЧЕНЬ МЯГКАЯ
   checkLine(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -68,61 +82,7 @@ const Checker = {
     return { success: true, reason: '✅ Отличная линия!' };
   },
   
-  checkColorCount(canvas, minColors) {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    
-    // Основные цвета которые используем в палитре
-    const baseColors = [
-      { r: 255, g: 0, b: 0, name: 'red' },      // Красный
-      { r: 0, g: 255, b: 0, name: 'green' },    // Зелёный
-      { r: 0, g: 0, b: 255, name: 'blue' },     // Синий
-      { r: 255, g: 255, b: 0, name: 'yellow' }, // Жёлтый
-      { r: 0, g: 0, b: 0, name: 'black' },      // Чёрный
-      { r: 255, g: 0, b: 255, name: 'magenta' }, // Фиолетовый
-      { r: 0, g: 255, b: 255, name: 'cyan' },   // Голубой
-      { r: 255, g: 128, b: 0, name: 'orange' }  // Оранжевый
-    ];
-    
-    const foundColors = new Set();
-    
-    for (let i = 0; i < pixels.length; i += 4) {
-      const r = pixels[i];
-      const g = pixels[i + 1];
-      const b = pixels[i + 2];
-      const a = pixels[i + 3];
-      
-      // Пропускаем прозрачные и белые
-      if (a < 128) continue;
-      if (r > 240 && g > 240 && b > 240) continue;
-      
-      // Находим ближайший базовый цвет
-      let minDist = Infinity;
-      let closestColor = null;
-      
-      for (const base of baseColors) {
-        const dist = Math.sqrt((r - base.r) ** 2 + (g - base.g) ** 2 + (b - base.b) ** 2);
-        if (dist < minDist && dist < 100) { // В пределах 100 единиц
-          minDist = dist;
-          closestColor = base.name;
-        }
-      }
-      
-      if (closestColor) {
-        foundColors.add(closestColor);
-      }
-    }
-    
-    const count = foundColors.size;
-    return {
-      success: count >= minColors,
-      reason: count >= minColors 
-        ? `✅ ${count} разных цветов!` 
-        : `❌ Нужно ${minColors} разных цветов, использовано ${count}`
-    };
-  },
-  
+  // Круг - МЯГКАЯ ПРОВЕРКА
   checkCircle(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -136,22 +96,27 @@ const Checker = {
       }
     }
     
-    if (points.length < 100) return { success: false, reason: 'Слишком мало пикселей' };
+    if (points.length < 50) return { success: false, reason: 'Слишком мало пикселей' };
     
     const centerX = points.reduce((s, p) => s + p.x, 0) / points.length;
     const centerY = points.reduce((s, p) => s + p.y, 0) / points.length;
     const distances = points.map(p => Math.sqrt((p.x - centerX) ** 2 + (p.y - centerY) ** 2));
     const avgDistance = distances.reduce((s, d) => s + d, 0) / distances.length;
+    
+    if (avgDistance < 20) return { success: false, reason: 'Слишком мало' };
+    
     const variance = distances.reduce((s, d) => s + (d - avgDistance) ** 2, 0) / distances.length;
     const stdDev = Math.sqrt(variance);
     const circularity = 1 - (stdDev / avgDistance);
     
+    // ОЧЕНЬ МЯГКАЯ ПРОВЕРКА (40% вместо 65%)
     return {
-      success: circularity > 0.65,
-      reason: circularity > 0.65 ? `✅ Круг! (точность: ${Math.round(circularity * 100)}%)` : '❌ Не похоже на круг'
+      success: circularity > 0.4,
+      reason: circularity > 0.4 ? '✅ Похоже на круг!' : '❌ Не похоже на круг (рисуй ровнее)'
     };
   },
   
+  // Звезда - МЯГКАЯ ПРОВЕРКА
   checkStar(canvas) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -173,7 +138,7 @@ const Checker = {
       }
     }
     
-    if (edgePoints.length < 50) return { success: false, reason: 'Слишком мало пикселей' };
+    if (edgePoints.length < 30) return { success: false, reason: 'Слишком мало пикселей' };
     
     const centerX = edgePoints.reduce((s, p) => s + p.x, 0) / edgePoints.length;
     const centerY = edgePoints.reduce((s, p) => s + p.y, 0) / edgePoints.length;
@@ -190,34 +155,78 @@ const Checker = {
     
     let pointsCount = 0;
     for (const p of Object.values(angles)) {
-      if (p.dist > avgDist * 1.3) pointsCount++;
+      if (p.dist > avgDist * 1.2) pointsCount++;
     }
     
+    // МЯГКАЯ ПРОВЕРКА (3 луча вместо 5)
     return {
-      success: pointsCount >= 5,
-      reason: pointsCount >= 5 ? `✅ Звезда с ${pointsCount} лучами!` : `❌ Найдено ${pointsCount} лучей, нужно 5`
+      success: pointsCount >= 3,
+      reason: pointsCount >= 3 ? `✅ Звезда с ${pointsCount} лучами!` : `❌ Нужно больше лучей (нарисуй острее)`
     };
   },
   
+  // Цвета
+  checkColorCount(canvas, minColors) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    
+    const baseColors = [
+      { r: 255, g: 0, b: 0, name: 'red' },
+      { r: 0, g: 255, b: 0, name: 'green' },
+      { r: 0, g: 0, b: 255, name: 'blue' },
+      { r: 255, g: 255, b: 0, name: 'yellow' },
+      { r: 0, g: 0, b: 0, name: 'black' }
+    ];
+    
+    const foundColors = new Set();
+    
+    for (let i = 0; i < pixels.length; i += 4) {
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const a = pixels[i + 3];
+      
+      if (a < 128) continue;
+      if (r > 240 && g > 240 && b > 240) continue;
+      
+      for (const base of baseColors) {
+        const dist = Math.sqrt((r - base.r) ** 2 + (g - base.g) ** 2 + (b - base.b) ** 2);
+        if (dist < 100) {
+          foundColors.add(base.name);
+          break;
+        }
+      }
+    }
+    
+    const count = foundColors.size;
+    return {
+      success: count >= minColors,
+      reason: count >= minColors ? `✅ ${count} цветов!` : `❌ Нужно ${minColors} цветов, использовано ${count}`
+    };
+  },
+  
+  // Общая проверка
   checkChallenge(challengeId, canvas) {
     const challenge = CHALLENGES.find(c => c.id === challengeId);
     if (!challenge) return { success: false, reason: 'Челлендж не найден' };
+    
+    // Честная система для сложных проверок
+    if (['honor', 'smiley', 'rainbow', 'word', 'random'].includes(challenge.checkType)) {
+      return { success: true, reason: '✅ Принято!' };
+    }
     
     switch (challenge.checkType) {
       case 'line': return this.checkLine(canvas);
       case 'color_count': return this.checkColorCount(canvas, challenge.check.minColors);
       case 'circle': return this.checkCircle(canvas);
       case 'star': return this.checkStar(canvas);
-      case 'smiley': return { success: true, reason: '✅ Честная система - верим тебе!' };
-      case 'rainbow': return { success: true, reason: '✅ Честная система - верим тебе!' };
-      case 'word': return { success: true, reason: '✅ Честная система - верим тебе!' };
-      case 'honor': return { success: true, reason: '✅ Честная система' };
-      default: return { success: true, reason: 'OK' };
+      default: return { success: true, reason: '✅ Принято!' };
     }
   }
 };
 
-// 5. МЕНЕДЖЕР
+// 7. МЕНЕДЖЕР
 const ChallengeManager = {
   getAvailableChallenges() {
     const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
@@ -359,13 +368,21 @@ const ChallengeManager = {
     let count = 0;
     CHALLENGES.forEach(c => { if (this.isCompleted(c.id)) count++; });
     return count;
+  },
+  
+  getRandomWord() {
+    return WORDS_FOR_CHALLENGE[Math.floor(Math.random() * WORDS_FOR_CHALLENGE.length)];
+  },
+  
+  getRandomObject() {
+    return RANDOM_OBJECTS[Math.floor(Math.random() * RANDOM_OBJECTS.length)];
   }
 };
 
-// 6. ЭКСПОРТ
+// 8. ЭКСПОРТ
 window.ChallengeSystem = ChallengeManager;
 window.CHALLENGES = CHALLENGES;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
 window.Checker = Checker;
 
-console.log('🎯 Challenge System loaded - BASE COLOR GROUPING');
+console.log('🎯 Challenge System loaded - WORKING VERSION');
