@@ -9,7 +9,7 @@ const MUSIC_CONFIG = {
   track: 'In This Shirt',
   artist: 'The Irrepressibles',
   audioFile: 'https://archive.org/download/the-irrepressibles-in-this-shirt-60204968/The_Irrepressibles_-_In_This_Shirt_60204968.mp3',  // Файл в корне!
-  week: 1
+  week: 2
 };
 
 function initMusicWidget() {
