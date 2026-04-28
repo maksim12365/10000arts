@@ -341,43 +341,65 @@ const Checker = {
   },
   
   // ========== СЛУЧАЙНЫЙ ОБЪЕКТ (AI ПРОВЕРКА) ==========
-  async checkRandom(canvas, expectedObject) {
-    // Если AI не загружен — честная система
-    if (!window.aiModel || !window.aiModelLoaded) {
-      return { success: true, reason: '✅ Принято!' };
-    }
+  // ========== СЛУЧАЙНЫЙ ОБЪЕКТ (НАСТОЯЩИЙ ИИ) ==========
+async checkRandom(canvas, expectedObject) {
+  // Ждём загрузки ИИ
+  if (!window.doodleAI) {
+    console.log('⏳ ИИ ещё загружается...');
+    return { success: true, reason: '✅ Принято (ИИ загружается)' };
+  }
+  
+  try {
+    // Распознаём рисунок
+    const predictions = await window.doodleAI.classify(canvas);
+    console.log('🤖 ИИ распознал:', predictions);
     
-    try {
-      const predictions = await window.aiModel.classify(canvas);
-      
-      // Проверяем есть ли совпадение с ожидаемым объектом
-      const expectedKeywords = {
-        'солнце': ['sun', 'star', 'circle', 'yellow'],
-        'дерево': ['tree', 'plant', 'wood'],
-        'цветок': ['flower', 'plant'],
-        'сердце': ['heart', 'love'],
-        'звезда': ['star'],
-        'облако': ['cloud', 'sky'],
-        'гора': ['mountain', 'hill'],
-        'река': ['river', 'water', 'blue']
-      };
-      
-      const keywords = expectedKeywords[expectedObject] || [expectedObject];
-      
-      for (const pred of predictions) {
-        for (const keyword of keywords) {
-          if (pred.className.toLowerCase().includes(keyword.toLowerCase())) {
-            return { success: true, reason: `✅ ${expectedObject}!` };
-          }
+    // Проверяем совпадение
+    const expectedKeywords = {
+      'солнце': ['sun', 'star', 'circle', 'round', 'yellow'],
+      'дерево': ['tree', 'plant', 'wood', 'line'],
+      'цветок': ['flower', 'plant', 'circle'],
+      'сердце': ['heart', 'love', 'circle'],
+      'звезда': ['star', 'shape'],
+      'облако': ['cloud', 'round', 'circle'],
+      'гора': ['mountain', 'hill', 'line', 'triangle'],
+      'река': ['river', 'water', 'line', 'blue']
+    };
+    
+    const keywords = expectedKeywords[expectedObject] || [expectedObject];
+    
+    // Проверяем каждое предсказание
+    for (const pred of predictions) {
+      for (const keyword of keywords) {
+        if (pred.className.toLowerCase().includes(keyword.toLowerCase())) {
+          console.log(`✅ Найдено совпадение: ${pred.className} → ${expectedObject}`);
+          return { 
+            success: true, 
+            reason: `✅ ${expectedObject}! (ИИ распознал: ${pred.className})` 
+          };
         }
       }
-      
-      // Если AI не распознал — честная система (не блокируем)
-      return { success: true, reason: '✅ Принято!' };
-    } catch (e) {
-      return { success: true, reason: '✅ Принято!' };
     }
-  },
+    
+    // Если не нашли точное совпадение — проверяем сложность
+    const complexity = predictions[0]?.probability || 0;
+    if (complexity > 0.3) {
+      return { 
+        success: true, 
+        reason: `✅ Похоже на ${expectedObject}!` 
+      };
+    }
+    
+    return { 
+      success: false, 
+      reason: `❌ Не похоже на ${expectedObject}` 
+    };
+    
+  } catch (e) {
+    console.error('❌ Ошибка ИИ:', e);
+    return { success: true, reason: '✅ Принято (ошибка ИИ)' };
+  }
+}
   
   // ========== СЛОВО (ОСМЫСЛЕННОСТЬ) ==========
   async checkWord(canvas, expectedWord) {
