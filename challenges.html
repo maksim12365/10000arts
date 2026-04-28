@@ -114,6 +114,37 @@
       margin: 15px 0;
     }
     
+    .prompt-box {
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 15px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .red-dot-indicator {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #ff0000;
+      margin: 10px auto;
+      transition: background 0.3s;
+      border: 3px solid #333;
+    }
+    
+    .red-dot-indicator.ready {
+      background: #00ff00;
+      animation: pulse 0.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
     #challengeCanvas {
       border: 2px solid #ddd;
       border-radius: 8px;
@@ -172,16 +203,25 @@
   <div id="activeChallenge">
     <div>
       <h2 id="activeTitle">Челлендж</h2>
+      
+      <!-- Подсказка что рисовать -->
+      <div id="promptBox" class="prompt-box" style="display:none;"></div>
+      
+      <!-- Индикатор красной точки -->
+      <div id="redDotIndicator" class="red-dot-indicator" style="display:none;"></div>
+      
       <div id="timer" class="timer-display">00:00</div>
       <canvas id="challengeCanvas" width="256" height="256"></canvas>
+      
       <div id="colorPicker">
-        <button onclick="setColor('#ff0000')" style="background:#ff0000;"></button>
-        <button onclick="setColor('#00ff00')" style="background:#00ff00;"></button>
-        <button onclick="setColor('#0000ff')" style="background:#0000ff;"></button>
-        <button onclick="setColor('#ffff00')" style="background:#ffff00;"></button>
-        <button onclick="setColor('#000000')" style="background:#000000;"></button>
+        <button onclick="setColor('#ff0000')" style="background:#ff0000;" title="Красный"></button>
+        <button onclick="setColor('#00ff00')" style="background:#00ff00;" title="Зелёный"></button>
+        <button onclick="setColor('#0000ff')" style="background:#0000ff;" title="Синий"></button>
+        <button onclick="setColor('#ffff00')" style="background:#ffff00;" title="Жёлтый"></button>
+        <button onclick="setColor('#000000')" style="background:#000000;" title="Чёрный"></button>
         <button onclick="clearCanvas()" style="background:#f0f0f0;width:auto;padding:0 15px;border-radius:5px;">🗑 Очистить</button>
       </div>
+      
       <div class="attempts-left" id="attemptsInfo"></div>
       <div class="action-buttons">
         <button onclick="submitChallenge()">✅ Готово</button>
@@ -194,10 +234,11 @@
   <script>
     let currentChallenge = null;
     let timerInterval = null;
+    let redDotInterval = null;
     let currentColor = '#000000';
     let isDrawing = false;
     let canvas, ctx;
-    let unlockTimers = [];
+    let redDotReady = false;
     
     function init() {
       canvas = document.getElementById('challengeCanvas');
@@ -213,12 +254,11 @@
     }
     
     function renderChallenges() {
-      // Очищаем старые таймеры
-      unlockTimers.forEach(t => clearInterval(t));
-      unlockTimers = [];
-      
       const { available, locked } = ChallengeManager.getAvailableChallenges();
       const container = document.getElementById('challengeList');
+      const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
+      const daysSinceFirst = (Date.now() - firstVisit) / (1000 * 60 * 60 * 24);
+      const currentWeek = Math.floor(daysSinceFirst / 7) + 1;
       
       let html = '<h2 style="margin:20px 0 10px 0;">📋 Доступные челленджи</h2>';
       
@@ -246,16 +286,13 @@
       if (locked.length > 0) {
         html += '<h2 style="margin:30px 0 10px 0;">🔒 Заблокировано</h2>';
         html += locked.map(c => {
-          const firstVisit = parseInt(localStorage.getItem(`firstVisit_${userId}`));
-          const unlockWeek = c.week;
-          const unlockTime = firstVisit + (unlockWeek * 7 * 24 * 60 * 60 * 1000);
-          
+          const unlockTime = firstVisit + (c.week * 7 * 24 * 60 * 60 * 1000);
           return `
-            <div class="challenge-card difficulty-${c.difficulty} locked">
+            <div class="challenge-card difficulty-${c.difficulty} locked" data-challenge="${c.id}" data-unlock="${unlockTime}">
               <h3>${c.title}</h3>
               <p>${c.description}</p>
               <div class="unlock-info">
-                🔓 Неделя ${unlockWeek} • <span class="unlock-timer" data-unlock="${unlockTime}">⏳ Загрузка...</span>
+                🔓 Неделя ${c.week} • <span class="unlock-timer">⏳ Загрузка...</span>
               </div>
             </div>
           `;
@@ -271,7 +308,7 @@
       const timerElements = document.querySelectorAll('.unlock-timer');
       
       timerElements.forEach(timerEl => {
-        const unlockTime = parseInt(timerEl.dataset.unlock);
+        const unlockTime = parseInt(timerEl.parentElement.dataset.unlock);
         
         const interval = setInterval(() => {
           const now = Date.now();
@@ -291,8 +328,6 @@
           
           timerEl.textContent = `⏱️ ${days}д ${hours}ч ${minutes}м ${seconds}с`;
         }, 1000);
-        
-        unlockTimers.push(interval);
       });
     }
     
@@ -307,6 +342,43 @@
       
       document.getElementById('activeChallenge').style.display = 'block';
       document.getElementById('activeTitle').textContent = currentChallenge.title;
+      
+      // Показываем подсказку что рисовать
+      const promptBox = document.getElementById('promptBox');
+      const redDotIndicator = document.getElementById('redDotIndicator');
+      
+      if (currentChallenge.prompt) {
+        promptBox.style.display = 'block';
+        
+        if (currentChallenge.id === 'normal_random') {
+          const randomObject = ChallengeManager.getRandomObject();
+          promptBox.textContent = '🎲 Нарисуй: ' + randomObject;
+        } else if (currentChallenge.id === 'hard_word') {
+          const randomWord = ChallengeManager.getRandomWord();
+          promptBox.textContent = '✏️ Напиши слово: ' + randomWord;
+        } else {
+          promptBox.textContent = currentChallenge.prompt;
+        }
+      } else {
+        promptBox.style.display = 'none';
+      }
+      
+      // Красная точка
+      if (currentChallenge.redDot) {
+        redDotIndicator.style.display = 'block';
+        redDotReady = false;
+        redDotIndicator.classList.remove('ready');
+        
+        // Точка загорается случайно от 3 до 10 секунд
+        const randomDelay = Math.floor(Math.random() * 7000) + 3000;
+        
+        redDotInterval = setTimeout(() => {
+          redDotReady = true;
+          redDotIndicator.classList.add('ready');
+        }, randomDelay);
+      } else {
+        redDotIndicator.style.display = 'none';
+      }
       
       const key = `challenge_${userId}_${challengeId}`;
       const data = JSON.parse(localStorage.getItem(key));
@@ -373,6 +445,12 @@
     window.submitChallenge = async function() {
       if (!currentChallenge) return;
       
+      // Проверка красной точки
+      if (currentChallenge.redDot && !redDotReady) {
+        alert('⚠️ Жди зелёной точки!');
+        return;
+      }
+      
       const result = await ChallengeSystem.completeChallenge(currentChallenge.id, canvas);
       
       let message = result.reason;
@@ -392,6 +470,7 @@
     window.closeChallenge = function() {
       document.getElementById('activeChallenge').style.display = 'none';
       if (timerInterval) clearInterval(timerInterval);
+      if (redDotInterval) clearTimeout(redDotInterval);
       currentChallenge = null;
     };
     
