@@ -45,9 +45,11 @@
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     
     #challengeCanvas { border: 2px solid #ddd; border-radius: 8px; display: block; margin: 20px auto; cursor: crosshair; background: white; }
+    #challengeCanvas.disabled { opacity: 0.3; pointer-events: none; }
     
     #colorPicker { text-align: center; margin: 15px 0; }
     #colorPicker button { width: 40px; height: 40px; border: 2px solid #333; border-radius: 50%; cursor: pointer; margin: 3px; }
+    #colorPicker button.disabled { opacity: 0.3; pointer-events: none; }
     
     .attempts-left { text-align: center; color: #666; font-size: 0.9rem; margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 6px; }
     
@@ -113,6 +115,7 @@
     let isDrawing = false;
     let canvas, ctx;
     let redDotReady = false;
+    let canDraw = false;
     
     function init() {
       canvas = document.getElementById('challengeCanvas');
@@ -225,6 +228,7 @@
       }
       
       redDotReady = false;
+      canDraw = false;
       
       document.getElementById('activeChallenge').style.display = 'block';
       document.getElementById('activeTitle').textContent = currentChallenge.title;
@@ -232,8 +236,14 @@
       const promptBox = document.getElementById('promptBox');
       const redDotContainer = document.getElementById('redDotContainer');
       const redDotIndicator = document.getElementById('redDotIndicator');
+      const canvasEl = document.getElementById('challengeCanvas');
+      const colorButtons = document.querySelectorAll('#colorPicker button');
       
-      // Показываем подсказку для случайного объекта и слова
+      // БЛОКИРОВКА canvas и кнопок
+      canvasEl.classList.add('disabled');
+      colorButtons.forEach(btn => btn.classList.add('disabled'));
+      
+      // Показываем подсказку
       if (currentChallenge.id === 'normal_random') {
         const randomObject = ChallengeManager.getRandomObject();
         promptBox.style.display = 'block';
@@ -256,17 +266,27 @@
         redDotContainer.style.display = 'block';
         redDotIndicator.classList.remove('ready');
         redDotIndicator.textContent = 'ЖДИ';
+        canDraw = false;
         
         const randomDelay = Math.floor(Math.random() * 7000) + 3000;
         
         redDotTimeout = setTimeout(() => {
           redDotReady = true;
+          canDraw = true;
           redDotIndicator.classList.add('ready');
           redDotIndicator.textContent = 'РИСУЙ!';
+          
+          // РАЗБЛОКИРОВКА canvas и кнопок
+          canvasEl.classList.remove('disabled');
+          colorButtons.forEach(btn => btn.classList.remove('disabled'));
+          
           ChallengeManager.setRedDotReady(challengeId, true);
         }, randomDelay);
       } else {
         redDotContainer.style.display = 'none';
+        canDraw = true;
+        canvasEl.classList.remove('disabled');
+        colorButtons.forEach(btn => btn.classList.remove('disabled'));
       }
       
       const key = `challenge_${userId}_${challengeId}`;
@@ -311,10 +331,17 @@
       canvas.addEventListener('touchend', stopDraw);
     };
     
-    function startDraw(e) { isDrawing = true; draw(e); }
+    function startDraw(e) {
+      if (!canDraw) {
+        alert('⚠️ Жди зелёной точки!');
+        return;
+      }
+      isDrawing = true;
+      draw(e);
+    }
     
     function draw(e) {
-      if (!isDrawing) return;
+      if (!isDrawing || !canDraw) return;
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX || e.touches[0].clientX) - rect.left;
