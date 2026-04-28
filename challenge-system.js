@@ -148,43 +148,36 @@ const Checker = {
   },
   
   checkStar(canvas) {
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
-  const points = [];
-  
-  // Собираем ВСЕ закрашенные пиксели (не только края)
-  for (let y = 0; y < canvas.height; y++) {
-    for (let x = 0; x < canvas.width; x++) {
-      const i = (y * canvas.width + x) * 4;
-      if (pixels[i + 3] > 128) points.push({ x, y });
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const points = [];
+    
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i + 3] > 128) points.push({ x, y });
+      }
     }
-  }
-  
-  // УМЕНЬШИЛ с 15 до 5 пикселей!
-  if (points.length < 5) return { success: false, reason: 'Нарисуй что-нибудь!' };
-  
-  // Находим центр
-  const centerX = points.reduce((s, p) => s + p.x, 0) / points.length;
-  const centerY = points.reduce((s, p) => s + p.y, 0) / points.length;
-  
-  // Считаем расстояния от центра
-  const distances = points.map(p => Math.sqrt((p.x - centerX) ** 2 + (p.y - centerY) ** 2));
-  const avgDist = distances.reduce((s, d) => s + d, 0) / distances.length;
-  
-  // Считаем "выступающие" точки (лучи)
-  // УМЕНЬШИЛ порог с 1.2 до 1.1
-  let pointsCount = 0;
-  for (const dist of distances) {
-    if (dist > avgDist * 1.1) pointsCount++;
-  }
-  
-  // УМЕНЬШИЛ требование с 4 до 2 лучей!
-  return {
-    success: pointsCount >= 2,
-    reason: pointsCount >= 2 ? `✅ Звезда!` : `❌ Не похоже на звезду`
-  };
-}
+    
+    if (points.length < 5) return { success: false, reason: 'Нарисуй что-нибудь!' };
+    
+    const centerX = points.reduce((s, p) => s + p.x, 0) / points.length;
+    const centerY = points.reduce((s, p) => s + p.y, 0) / points.length;
+    
+    const distances = points.map(p => Math.sqrt((p.x - centerX) ** 2 + (p.y - centerY) ** 2));
+    const avgDist = distances.reduce((s, d) => s + d, 0) / distances.length;
+    
+    let pointsCount = 0;
+    for (const dist of distances) {
+      if (dist > avgDist * 1.1) pointsCount++;
+    }
+    
+    return {
+      success: pointsCount >= 2,
+      reason: pointsCount >= 2 ? '✅ Звезда!' : '❌ Не похоже на звезду'
+    };
+  },
   
   checkColorCount(canvas, minColors) {
     const ctx = canvas.getContext('2d');
