@@ -38,15 +38,16 @@
     
     .prompt-box { background: #f0f0f0; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0; font-size: 1.1rem; font-weight: 600; color: #333; }
     
-    .red-dot-indicator { width: 60px; height: 60px; border-radius: 50%; background: #ff0000; margin: 10px auto; transition: background 0.3s; border: 3px solid #333; }
+    .red-dot-container { text-align: center; margin: 15px 0; }
+    .red-dot-indicator { width: 80px; height: 80px; border-radius: 50%; background: #ff0000; margin: 10px auto; transition: background 0.3s; border: 4px solid #333; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; font-weight: bold; }
     .red-dot-indicator.ready { background: #00ff00; animation: pulse 0.5s infinite; }
     
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     
     #challengeCanvas { border: 2px solid #ddd; border-radius: 8px; display: block; margin: 20px auto; cursor: crosshair; background: white; }
     
-    #colorPicker { text-align: center; margin: 15px 0; }
-    #colorPicker button { width: 35px; height: 35px; border: 2px solid #333; border-radius: 50%; cursor: pointer; margin: 0 5px; }
+    #colorPicker { text-align: center; margin: 15px 0; flex-wrap: wrap; }
+    #colorPicker button { width: 40px; height: 40px; border: 2px solid #333; border-radius: 50%; cursor: pointer; margin: 3px; }
     
     .attempts-left { text-align: center; color: #666; font-size: 0.9rem; margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 6px; }
     
@@ -54,6 +55,8 @@
     .action-buttons button { padding: 15px 30px; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; margin: 0 10px; }
     .action-buttons button:first-child { background: #11998e; color: white; }
     .action-buttons button:last-child { background: #999; color: white; }
+    
+    .drawing-disabled { opacity: 0.5; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -73,7 +76,12 @@
     <div>
       <h2 id="activeTitle">Челлендж</h2>
       <div id="promptBox" class="prompt-box" style="display:none;"></div>
-      <div id="redDotIndicator" class="red-dot-indicator" style="display:none;"></div>
+      
+      <div class="red-dot-container" id="redDotContainer" style="display:none;">
+        <p style="color:#666;font-size:0.9rem;">Жди зелёного цвета!</p>
+        <div id="redDotIndicator" class="red-dot-indicator">ЖДИ</div>
+      </div>
+      
       <div id="timer" class="timer-display">00:00</div>
       <canvas id="challengeCanvas" width="256" height="256"></canvas>
       
@@ -107,6 +115,7 @@
     let isDrawing = false;
     let canvas, ctx;
     let redDotReady = false;
+    let canDraw = false;
     
     function init() {
       canvas = document.getElementById('challengeCanvas');
@@ -123,6 +132,7 @@
     function renderChallenges() {
       const { available, locked } = ChallengeManager.getAvailableChallenges();
       const container = document.getElementById('challengeList');
+      const firstVisit = localStorage.getItem(`firstVisit_${userId}`);
       
       let html = '<h2 style="margin:20px 0 10px 0;">📋 Доступные челленджи</h2>';
       
@@ -178,6 +188,11 @@
         }
         
         const firstVisit = parseInt(localStorage.getItem(`firstVisit_${userId}`));
+        if (!firstVisit) {
+          timerEl.textContent = '⏳ Загрузка...';
+          return;
+        }
+        
         const unlockTime = firstVisit + (week * 7 * 24 * 60 * 60 * 1000);
         
         const updateTimer = () => {
@@ -213,21 +228,30 @@
         return;
       }
       
+      // Сброс переменных
+      redDotReady = false;
+      canDraw = false;
+      
       document.getElementById('activeChallenge').style.display = 'block';
       document.getElementById('activeTitle').textContent = currentChallenge.title;
       
       const promptBox = document.getElementById('promptBox');
+      const redDotContainer = document.getElementById('redDotContainer');
       const redDotIndicator = document.getElementById('redDotIndicator');
+      const canvasEl = document.getElementById('challengeCanvas');
       
+      // Подсказка что рисовать
       if (currentChallenge.prompt) {
         promptBox.style.display = 'block';
         
         if (currentChallenge.id === 'normal_random') {
           const randomObject = ChallengeManager.getRandomObject();
           promptBox.textContent = '🎲 Нарисуй: ' + randomObject;
+          window.currentRandomObject = randomObject;
         } else if (currentChallenge.id === 'hard_word') {
           const randomWord = ChallengeManager.getRandomWord();
           promptBox.textContent = '✏️ Напиши слово: ' + randomWord;
+          window.currentExpectedWord = randomWord;
         } else {
           promptBox.textContent = currentChallenge.prompt;
         }
@@ -235,19 +259,31 @@
         promptBox.style.display = 'none';
       }
       
+      // Красная точка
       if (currentChallenge.redDot) {
-        redDotIndicator.style.display = 'block';
-        redDotReady = false;
+        redDotContainer.style.display = 'block';
+        redDotIndicator.style.display = 'flex';
+        redDotIndicator.textContent = 'ЖДИ';
         redDotIndicator.classList.remove('ready');
+        canDraw = false;
+        canvasEl.classList.add('drawing-disabled');
         
         const randomDelay = Math.floor(Math.random() * 7000) + 3000;
         
         redDotTimeout = setTimeout(() => {
           redDotReady = true;
           redDotIndicator.classList.add('ready');
+          redDotIndicator.textContent = 'РИСУЙ!';
+          canDraw = true;
+          canvasEl.classList.remove('drawing-disabled');
+          
+          // Сохраняем что точка готова
+          ChallengeManager.setRedDotReady(challengeId, true);
         }, randomDelay);
       } else {
-        redDotIndicator.style.display = 'none';
+        redDotContainer.style.display = 'none';
+        canDraw = true;
+        canvasEl.classList.remove('drawing-disabled');
       }
       
       const key = `challenge_${userId}_${challengeId}`;
@@ -255,6 +291,7 @@
       const attemptsLeft = currentChallenge.attempts - data.attemptsUsed;
       document.getElementById('attemptsInfo').textContent = `Попыток осталось: ${attemptsLeft}`;
       
+      // Таймер
       if (currentChallenge.timeLimit) {
         let timeLeft = currentChallenge.timeLimit;
         document.getElementById('timer').textContent = `00:${timeLeft}`;
@@ -263,7 +300,8 @@
           started: true, 
           startTime: Date.now(), 
           attemptsUsed: data.attemptsUsed, 
-          completed: false 
+          completed: false,
+          redDotReady: false
         }));
         
         timerInterval = setInterval(() => {
@@ -279,9 +317,11 @@
         document.getElementById('timer').textContent = '∞';
       }
       
+      // Очистка canvas
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
+      // События рисования
       canvas.addEventListener('mousedown', startDraw);
       canvas.addEventListener('mousemove', draw);
       canvas.addEventListener('mouseup', stopDraw);
@@ -291,10 +331,17 @@
       canvas.addEventListener('touchend', stopDraw);
     };
     
-    function startDraw(e) { isDrawing = true; draw(e); }
+    function startDraw(e) {
+      if (!canDraw) {
+        alert('⚠️ Жди сигнала!');
+        return;
+      }
+      isDrawing = true;
+      draw(e);
+    }
     
     function draw(e) {
-      if (!isDrawing) return;
+      if (!isDrawing || !canDraw) return;
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX || e.touches[0].clientX) - rect.left;
@@ -303,9 +350,15 @@
       ctx.fillRect(x, y, 3, 3);
     }
     
-    function stopDraw() { isDrawing = false; }
+    function stopDraw() {
+      isDrawing = false;
+    }
     
-    window.setColor = function(color) { currentColor = color; };
+    window.setColor = function(color) { 
+      currentColor = color; 
+      // Разрешаем рисовать если цвет выбран
+      if (!canDraw && !currentChallenge.redDot) canDraw = true;
+    };
     
     window.clearCanvas = function() {
       ctx.fillStyle = '#ffffff';
@@ -315,12 +368,22 @@
     window.submitChallenge = async function() {
       if (!currentChallenge) return;
       
+      // Проверка красной точки
       if (currentChallenge.redDot && !redDotReady) {
         alert('⚠️ Жди зелёной точки!');
         return;
       }
       
-      const result = await ChallengeSystem.completeChallenge(currentChallenge.id, canvas);
+      // Подготовка данных для проверки
+      const extraData = {};
+      if (currentChallenge.id === 'normal_random' && window.currentRandomObject) {
+        extraData.expectedObject = window.currentRandomObject;
+      }
+      if (currentChallenge.id === 'hard_word' && window.currentExpectedWord) {
+        extraData.expectedWord = window.currentExpectedWord;
+      }
+      
+      const result = await ChallengeSystem.completeChallenge(currentChallenge.id, canvas, extraData);
       
       let message = result.reason;
       if (result.attemptsLeft !== undefined) {
@@ -341,6 +404,8 @@
       if (timerInterval) clearInterval(timerInterval);
       if (redDotTimeout) clearTimeout(redDotTimeout);
       currentChallenge = null;
+      window.currentRandomObject = null;
+      window.currentExpectedWord = null;
     };
     
     if (document.readyState === 'loading') {
