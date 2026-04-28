@@ -242,22 +242,22 @@
       
       // Подсказка что рисовать
       if (currentChallenge.prompt) {
-        promptBox.style.display = 'block';
-        
-        if (currentChallenge.id === 'normal_random') {
-          const randomObject = ChallengeManager.getRandomObject();
-          promptBox.textContent = '🎲 Нарисуй: ' + randomObject;
-          window.currentRandomObject = randomObject;
-        } else if (currentChallenge.id === 'hard_word') {
-          const randomWord = ChallengeManager.getRandomWord();
-          promptBox.textContent = '✏️ Напиши слово: ' + randomWord;
-          window.currentExpectedWord = randomWord;
-        } else {
-          promptBox.textContent = currentChallenge.prompt;
-        }
-      } else {
-        promptBox.style.display = 'none';
-      }
+  promptBox.style.display = 'block';
+  
+  if (currentChallenge.id === 'normal_random') {
+    const randomObject = ChallengeManager.getRandomObject();
+    promptBox.textContent = '🎲 Нарисуй: ' + randomObject;
+    window.currentRandomObject = randomObject;
+  } else if (currentChallenge.id === 'hard_word') {
+    const randomWord = ChallengeManager.getRandomWord();
+    promptBox.textContent = '✏️ Напиши слово: ' + randomWord;
+    window.currentExpectedWord = randomWord;
+  } else {
+    promptBox.textContent = currentChallenge.prompt;
+  }
+} else {
+  promptBox.style.display = 'none';
+}
       
       // Красная точка
       if (currentChallenge.redDot) {
