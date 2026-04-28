@@ -240,7 +240,7 @@ const Checker = {
       }
     }
     
-    if (edgePoints.length < 30) return { success: false, reason: 'Слишком мало пикселей' };
+    if (edgePoints.length < 10) return { success: false, reason: 'Слишком мало пикселей' };
     
     const centerX = edgePoints.reduce((s, p) => s + p.x, 0) / edgePoints.length;
     const centerY = edgePoints.reduce((s, p) => s + p.y, 0) / edgePoints.length;
