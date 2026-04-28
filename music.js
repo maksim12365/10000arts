@@ -6,9 +6,9 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'Ava',
-  artist: 'Famy',
-  audioFile: 'https://archive.org/download/famy-ava-ost-teen-wolf-online-audio-converter.com/Famy%20-%20Ava%20%28OST%20_Оборотень_%20_%20_Teen%20Wolf_%29%20%28online-audio-converter.com%29.mp3',  // Файл в корне!
+  track: 'In This Shirt',
+  artist: 'The Irrepressibles',
+  audioFile: 'https://archive.org/download/the-irrepressibles-in-this-shirt-60204968/The_Irrepressibles_-_In_This_Shirt_60204968.mp3',  // Файл в корне!
   week: 1
 };
 
