@@ -3649,3 +3649,11 @@ header p {
     padding: 8px 10px !important;
   }
 }
+
+/* Поднять кнопки на телефоне */
+@media (max-width: 600px) {
+  .nav-buttons {
+    margin-bottom: 80px !important;
+    padding-bottom: 20px !important;
+  }
+}
