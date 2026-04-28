@@ -402,10 +402,24 @@ async checkRandom(canvas, expectedObject) {
 }
   
   // ========== СЛОВО (ОСМЫСЛЕННОСТЬ) ==========
-  async checkWord(canvas, expectedWord) {
-    // Честная система (OCR ненадёжен для рукописного)
+  // ========== СЛОВО (OCR РАСПОЗНАВАНИЕ) ==========
+async checkWord(canvas, expectedWord) {
+  // Пытаемся распознать текст
+  if (window.recognizeText) {
+    const recognized = await recognizeText(canvas);
+    console.log(`📝 Ожидалось: "${expectedWord}", распознано: "${recognized}"`);
+    
+    // Проверяем совпадение (нечёткое)
+    if (recognized.includes(expectedWord) || expectedWord.includes(recognized)) {
+      return { success: true, reason: `✅ "${expectedWord}" распознано!` };
+    }
+    
+    // Если не распозналось точно — честная система
     return { success: true, reason: '✅ Принято!' };
-  },
+  }
+  
+  return { success: true, reason: '✅ Принято!' };
+}
   
   // ========== ОБЩАЯ ПРОВЕРКА ==========
   async checkChallenge(challengeId, canvas, extraData = {}) {
