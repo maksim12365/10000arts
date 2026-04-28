@@ -240,21 +240,28 @@
       const redDotIndicator = document.getElementById('redDotIndicator');
       const canvasEl = document.getElementById('challengeCanvas');
       
-      // Подсказка что рисовать
-      if (currentChallenge.prompt) {
+ // Показываем подсказку ВСЕГДА для этих челленджей
+const promptBox = document.getElementById('promptBox');
+
+if (currentChallenge.id === 'normal_random') {
+  const randomObject = ChallengeManager.getRandomObject();
   promptBox.style.display = 'block';
-  
-  if (currentChallenge.id === 'normal_random') {
-    const randomObject = ChallengeManager.getRandomObject();
-    promptBox.textContent = '🎲 Нарисуй: ' + randomObject;
-    window.currentRandomObject = randomObject;
-  } else if (currentChallenge.id === 'hard_word') {
-    const randomWord = ChallengeManager.getRandomWord();
-    promptBox.textContent = '✏️ Напиши слово: ' + randomWord;
-    window.currentExpectedWord = randomWord;
-  } else {
-    promptBox.textContent = currentChallenge.prompt;
-  }
+  promptBox.textContent = '🎲 Нарисуй: ' + randomObject;
+  promptBox.style.fontSize = '1.5rem';
+  promptBox.style.fontWeight = 'bold';
+  window.currentRandomObject = randomObject;
+  console.log('🎲 Случайный объект:', randomObject);
+} else if (currentChallenge.id === 'hard_word') {
+  const randomWord = ChallengeManager.getRandomWord();
+  promptBox.style.display = 'block';
+  promptBox.textContent = '✏️ Напиши слово: ' + randomWord.toUpperCase();
+  promptBox.style.fontSize = '1.5rem';
+  promptBox.style.fontWeight = 'bold';
+  window.currentExpectedWord = randomWord;
+  console.log('✏️ Слово:', randomWord);
+} else if (currentChallenge.prompt) {
+  promptBox.style.display = 'block';
+  promptBox.textContent = currentChallenge.prompt;
 } else {
   promptBox.style.display = 'none';
 }
