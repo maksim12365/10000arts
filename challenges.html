@@ -396,21 +396,29 @@
       const attemptsLeft = currentChallenge.attempts - data.attemptsUsed;
       document.getElementById('attemptsInfo').textContent = `Попыток осталось: ${attemptsLeft}`;
       
-      if (currentChallenge.timeLimit) {
-        let timeLeft = currentChallenge.timeLimit;
-        document.getElementById('timer').textContent = `00:${timeLeft}`;
-        timerInterval = setInterval(() => {
-          timeLeft--;
-          document.getElementById('timer').textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
-          if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert('⏰ Время вышло! Попытка потрачена.');
-            closeChallenge();
-          }
-        }, 1000);
-      } else {
-        document.getElementById('timer').textContent = '∞';
-      }
+   if (currentChallenge.timeLimit) {
+  let timeLeft = currentChallenge.timeLimit;
+  document.getElementById('timer').textContent = `00:${timeLeft}`;
+  
+  // Сбрасываем startTime при открытии
+  const key = `challenge_${userId}_${challengeId}`;
+  localStorage.setItem(key, JSON.stringify({ 
+    started: true, 
+    startTime: Date.now(), 
+    attemptsUsed: data.attemptsUsed, 
+    completed: false 
+  }));
+  
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      alert('⏰ Время вышло! Попытка потрачена.');
+      closeChallenge();
+    }
+  }, 1000);
+}
       
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
