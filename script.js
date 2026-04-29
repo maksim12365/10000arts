@@ -621,3 +621,8 @@ function setupShare() {
     }
   });
 }
+
+// Автообновление страницы каждые 30 секунд
+setInterval(() => {
+  location.reload();
+}, 30000);
