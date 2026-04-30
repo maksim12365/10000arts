@@ -623,54 +623,60 @@ function setupShare() {
 }
 
 // ============================================
-// РЕАКЦИИ ПРЯМО НА КЛЕТКЕ (БЕЗ МОДАЛКИ)
+// РЕАКЦИИ ПРЯМО НА КЛЕТКЕ (ИСПРАВЛЕНО)
 // ============================================
 
 const REACTION_USER_ID = localStorage.getItem('userId') || 'anon_' + Date.now();
 
 // Получить реакции
 async function getReactions(x, y) {
-  const { data, error } = await supabase
-    .from('reactions')
-    .select('user_id')
-    .eq('drawing_x', x)
-    .eq('drawing_y', y);
-  
-  if (error) return 0;
-  return data ? data.length : 0;
+  try {
+    const { data, error } = await supabase
+      .from('reactions')
+      .select('user_id')
+      .eq('drawing_x', x)
+      .eq('drawing_y', y);
+    
+    if (error) return 0;
+    return data ? data.length : 0;
+  } catch (e) {
+    return 0;
+  }
 }
 
 // Поставить/убрать лайк
 async function toggleReaction(x, y, heartEl) {
-  const { data } = await supabase
-    .from('reactions')
-    .select('user_id')
-    .eq('drawing_x', x)
-    .eq('drawing_y', y)
-    .eq('user_id', REACTION_USER_ID);
-  
-  const hasLiked = data && data.length > 0;
-  
-  if (hasLiked) {
-    await supabase.from('reactions').delete()
+  try {
+    const { data } = await supabase
+      .from('reactions')
+      .select('user_id')
       .eq('drawing_x', x)
       .eq('drawing_y', y)
       .eq('user_id', REACTION_USER_ID);
-  } else {
-    await supabase.from('reactions').insert({
-      drawing_x: x,
-      drawing_y: y,
-      user_id: REACTION_USER_ID
-    });
+    
+    const hasLiked = data && data.length > 0;
+    
+    if (hasLiked) {
+      await supabase.from('reactions').delete()
+        .eq('drawing_x', x)
+        .eq('drawing_y', y)
+        .eq('user_id', REACTION_USER_ID);
+    } else {
+      await supabase.from('reactions').insert({
+        drawing_x: x,
+        drawing_y: y,
+        user_id: REACTION_USER_ID
+      });
+    }
+    
+    // Обновить счётчик
+    const count = await getReactions(x, y);
+    heartEl.textContent = count > 1 ? count : '';
+    heartEl.style.background = hasLiked ? '#ff4444' : 'rgba(255,255,255,0.9)';
+    
+  } catch (e) {
+    console.error('Ошибка реакции:', e);
   }
-  
-  // Обновить счётчик
-  const count = await getReactions(x, y);
-  heartEl.textContent = count > 0 ? `❤️ ${count}` : '❤️';
-  
-  // Анимация
-  heartEl.style.transform = 'scale(1.3)';
-  setTimeout(() => heartEl.style.transform = 'scale(1)', 200);
 }
 
 // Добавить сердечко на клетку
@@ -680,26 +686,28 @@ function addHeartToCell(cell, x, y) {
   
   const heart = document.createElement('div');
   heart.className = 'cell-heart';
-  heart.textContent = '❤️';
-  heart.style.cssText = `
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    z-index: 100;
-    background: rgba(255,255,255,0.9);
-    border-radius: 8px;
-    padding: 2px 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    transition: transform 0.2s;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  `;
+  heart.innerHTML = '❤️';
   
-  // Клик по сердечку — ТОЛЬКО лайк (не открывает модалку!)
+  // СТИЛИ ЧЕРЕЗ CSS (надёжнее!)
+  heart.style.position = 'absolute';
+  heart.style.top = '2px';
+  heart.style.right = '2px';
+  heart.style.width = '20px';
+  heart.style.height = '20px';
+  heart.style.fontSize = '12px';
+  heart.style.lineHeight = '20px';
+  heart.style.textAlign = 'center';
+  heart.style.cursor = 'pointer';
+  heart.style.zIndex = '100';
+  heart.style.background = 'rgba(255,255,255,0.9)';
+  heart.style.borderRadius = '50%';
+  heart.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+  heart.style.pointerEvents = 'auto';
+  heart.style.userSelect = 'none';
+  
+  // Клик по сердечку
   heart.onclick = async (e) => {
-    e.stopPropagation(); // ❌ Не передаём клик клетке!
+    e.stopPropagation();
     await toggleReaction(x, y, heart);
   };
   
@@ -708,22 +716,26 @@ function addHeartToCell(cell, x, y) {
   // Загружаем счётчик
   getReactions(x, y).then(count => {
     if (count > 0) {
-      heart.textContent = `❤️ ${count}`;
+      heart.textContent = count > 9 ? '9+' : count;
+      heart.style.fontSize = count > 9 ? '10px' : '12px';
     }
   });
 }
 
-// Инициализация на всех клетках
+// Инициализация
 function initReactions() {
+  console.log('🎨 Инициализация реакций...');
+  
   document.querySelectorAll('.cell.occupied').forEach(cell => {
     const x = parseInt(cell.dataset.x);
     const y = parseInt(cell.dataset.y);
     addHeartToCell(cell, x, y);
   });
+  
+  console.log('✅ Реакции добавлены!');
 }
 
 // Запуск
 setTimeout(() => {
   initReactions();
-  console.log('✅ Реакции добавлены на клетки!');
-}, 2000);
+}, 1000);
