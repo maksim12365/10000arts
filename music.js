@@ -6,9 +6,9 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'In This Shirt',
-  artist: 'The Irrepressibles',
-  audioFile: 'https://archive.org/download/the-irrepressibles-in-this-shirt-60204968/The_Irrepressibles_-_In_This_Shirt_60204968.mp3',  // Файл в корне!
+  track: 'Aria Math',
+  artist: 'C418',
+  audioFile: 'https://archive.org/download/c-418-aria-math-30921740/C418_-_Aria_Math_30921740.mp3',  // Файл в корне!
   week: 2
 };
 
