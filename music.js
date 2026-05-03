@@ -9,7 +9,7 @@ const MUSIC_CONFIG = {
   track: 'Aria Math',
   artist: 'C418',
   audioFile: 'https://archive.org/download/c-418-aria-math-30921740/C418_-_Aria_Math_30921740.mp3',  // Файл в корне!
-  week: 2
+  week: 3
 };
 
 function initMusicWidget() {
