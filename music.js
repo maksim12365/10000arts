@@ -6,9 +6,9 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'Aria Math',
-  artist: 'C418',
-  audioFile: 'https://archive.org/download/c-418-aria-math-30921740/C418_-_Aria_Math_30921740.mp3',  // Файл в корне!
+  track: 'День Победы (С 9 мая!)',
+  artist: 'Лев Ященко',
+  audioFile: 'https://archive.org/download/lev-leshhenko-den-pobedy-79068553/Lev_Leshhenko_-_Den_Pobedy_79068553.mp3',  // Файл в корне!
   week: 3
 };
 
