@@ -239,5 +239,27 @@ window.addEventListener('load', loadDoodleAI);
   <a href="challenges.html" style="flex: 1; max-width: 200px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 16px 24px; border-radius: 14px; text-decoration: none; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 1rem;">🎯 Челленджи</a>
   <a href="achievements.html" style="flex: 1; max-width: 200px; background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 16px 24px; border-radius: 14px; text-decoration: none; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 1rem;">🏆 Достижения</a>
 </div>
-</body>
+<!-- 9 МАЯ - ПАМЯТЬ (удалить после 10 мая) -->
+<div id="victoryDayBadge" style="position:fixed;bottom:15px;right:15px;z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;">
+  <!-- Свеча -->
+  <div style="width:30px;height:40px;background:linear-gradient(to bottom,#fff9e6,#ffd966);border-radius:4px 4px 8px 8px;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <!-- Огонёк -->
+    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:12px;height:18px;background:radial-gradient(ellipse at bottom,#ff6b35,#ffcc00,#fff);border-radius:50% 50% 20% 20%;animation:flicker 1.5s infinite;"></div>
+  </div>
+  <!-- Дата -->
+  <div style="background:rgba(0,0,0,0.7);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.5px;">9 МАЯ</div>
+</div>
+
+<style>
+@keyframes flicker {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.9; transform: translateX(-50%) scale(1.05); }
+}
+@media (max-width: 600px) {
+  #victoryDayBadge { bottom: 10px; right: 10px; }
+  #victoryDayBadge > div:first-child { width: 24px; height: 32px; }
+}
+</style>
+<!-- КОНЕЦ 9 МАЯ -->
+/body>
 </html>
