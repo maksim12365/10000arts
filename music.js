@@ -6,10 +6,10 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'День Победы (С 9 мая!)',
-  artist: 'Лев Ященко',
-  audioFile: 'https://archive.org/download/lev-leshhenko-den-pobedy-79068553/Lev_Leshhenko_-_Den_Pobedy_79068553.mp3',  // Файл в корне!
-  week: 3
+  track: 'Papaoutai',
+  artist: 'Stromae',
+  audioFile: 'https://archive.org/download/stromae-papaoutai-47912074/Stromae_-_Papaoutai_47912074.mp3',  // Файл в корне!
+  week: 4
 };
 
 function initMusicWidget() {
