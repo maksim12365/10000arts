@@ -1,5 +1,5 @@
 // ============================================
-// ИГРА "ЛОВИ СТРЕЛЫ" — ИСПРАВЛЕННАЯ ВЕРСИЯ
+// ИГРА "ЛОВИ СТРЕЛЫ" — ФИНАЛЬНАЯ ВЕРСИЯ
 // ============================================
 
 const canvas = document.getElementById('gameCanvas');
@@ -14,8 +14,8 @@ const finalBestEl = document.getElementById('finalBest');
 const bgMusic = document.getElementById('bgMusic');
 
 // Настройки
-const MAX_LINE_LENGTH = 100; // пикселей (~1.5 см)
-const MAX_ARROWS_ON_SCREEN = 4; // Максимум 4 стрелы одновременно!
+const MAX_LINE_LENGTH = 100;
+const MAX_ARROWS_ON_SCREEN = 4;
 const BASE_SPEED = 1.5;
 const FAST_SPEED = 3;
 const SUPER_FAST_SPEED = 5;
@@ -33,14 +33,11 @@ let gameRunning = false;
 let gameLoopId = null;
 let spawnIntervalId = null;
 
-// Инициализация canvas
-function initCanvas() {
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = 300;
-  canvas.height = 400;
-  
-  bestScoreEl.textContent = `Рекорд: ${bestScore}`;
-}
+// Фиксированный размер canvas
+canvas.width = 300;
+canvas.height = 400;
+
+bestScoreEl.textContent = `Рекорд: ${bestScore}`;
 
 // Получить позицию мыши/тача
 function getPos(e) {
@@ -49,8 +46,8 @@ function getPos(e) {
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
   
   return {
-    x: (clientX - rect.left) * (canvas.width / rect.width),
-    y: (clientY - rect.top) * (canvas.height / rect.height)
+    x: clientX - rect.left,
+    y: clientY - rect.top
   };
 }
 
@@ -75,7 +72,6 @@ function draw(e) {
   const pos = getPos(e);
   const dist = Math.hypot(pos.x - lastPos.x, pos.y - lastPos.y);
   
-  // Проверка максимальной длины
   if (currentLineLength + dist > MAX_LINE_LENGTH) {
     isDrawing = false;
     lineLimitEl.classList.add('visible');
@@ -109,22 +105,18 @@ function stopDrawing(e) {
 function spawnOneArrow() {
   if (!gameRunning) return;
   
-  // Проверяем сколько стрел на экране
   const activeArrows = arrows.filter(a => a.active).length;
   
   if (activeArrows >= MAX_ARROWS_ON_SCREEN) {
-    // Не спавним если уже 4 стрелы
     return;
   }
   
-  // Выбираем случайную скорость
   const rand = Math.random();
   let speed;
-  if (rand < 0.5) speed = BASE_SPEED;        // 50% медленная
-  else if (rand < 0.8) speed = FAST_SPEED;   // 30% средняя
-  else speed = SUPER_FAST_SPEED;             // 20% быстрая
+  if (rand < 0.5) speed = BASE_SPEED;
+  else if (rand < 0.8) speed = FAST_SPEED;
+  else speed = SUPER_FAST_SPEED;
   
-  // Случайная позиция X
   const x = Math.random() * (canvas.width - 40) + 20;
   
   arrows.push({
@@ -147,7 +139,7 @@ function checkCollision(arrow) {
       
       const dist = pointToLineDistance(arrow.x, arrow.y, p1.x, p1.y, p2.x, p2.y);
       
-      if (dist < 20) { // Попало!
+      if (dist < 20) {
         arrow.caught = true;
         arrow.active = false;
         score++;
@@ -159,7 +151,6 @@ function checkCollision(arrow) {
   return false;
 }
 
-// Математика: расстояние от точки до отрезка
 function pointToLineDistance(px, py, x1, y1, x2, y2) {
   const A = px - x1;
   const B = py - y1;
@@ -191,55 +182,45 @@ function pointToLineDistance(px, py, x1, y1, x2, y2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-// Обновление игры
 function update() {
   if (!gameRunning) return;
   
   let arrowMissed = false;
   
-  // Двигаем стрелы
   for (const arrow of arrows) {
     if (!arrow.active || arrow.caught) continue;
     
     arrow.y += arrow.speed;
     
-    // Проверка коллизии
     if (checkCollision(arrow)) {
       continue;
     }
     
-    // Проверка пропуска (улетела за экран)
     if (arrow.y > canvas.height + 50) {
       arrow.active = false;
       arrowMissed = true;
     }
   }
   
-  // Двигаем линии вниз
   for (const line of lines) {
     for (const point of line.points) {
       point.y += 1;
     }
   }
   
-  // Удаляем неактивные стрелы и линии за экраном
   arrows = arrows.filter(a => a.active || a.caught);
   lines = lines.filter(l => l.points.some(p => p.y < canvas.height + 100));
   
-  // Если пропустили стрелу — игра окончена
   if (arrowMissed) {
     gameOver();
     return;
   }
 }
 
-// Отрисовка
-function draw() {
-  // Очистка
+function drawGame() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Сетка
   ctx.strokeStyle = '#e5e5e5';
   ctx.lineWidth = 1;
   for (let x = 0; x < canvas.width; x += 30) {
@@ -255,7 +236,6 @@ function draw() {
     ctx.stroke();
   }
   
-  // Линии
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
@@ -271,7 +251,6 @@ function draw() {
     ctx.stroke();
   }
   
-  // Текущая линия
   if (currentLine && currentLine.points.length > 1) {
     ctx.beginPath();
     ctx.moveTo(currentLine.points[0].x, currentLine.points[0].y);
@@ -281,14 +260,12 @@ function draw() {
     ctx.stroke();
   }
   
-  // Стрелы
   for (const arrow of arrows) {
     if (!arrow.active || arrow.caught) continue;
     
     ctx.save();
     ctx.translate(arrow.x, arrow.y);
     
-    // Тело стрелы (треугольник)
     ctx.fillStyle = '#dc2626';
     ctx.beginPath();
     ctx.moveTo(0, 15);
@@ -300,7 +277,6 @@ function draw() {
     ctx.restore();
   }
   
-  // Индикатор длины линии
   if (isDrawing) {
     const ratio = currentLineLength / MAX_LINE_LENGTH;
     ctx.fillStyle = ratio > 0.8 ? '#dc2626' : '#10b981';
@@ -310,26 +286,22 @@ function draw() {
   }
 }
 
-// Игровой цикл
 function gameLoop() {
   if (!gameRunning) return;
   update();
-  draw();
+  drawGame();
   gameLoopId = requestAnimationFrame(gameLoop);
 }
 
-// Цикл спавна стрел
 function spawnLoop() {
   if (!gameRunning) return;
   
   spawnOneArrow();
   
-  // Спавним новую стрелу каждые 800-1500ms
   const delay = Math.random() * 700 + 800;
   spawnIntervalId = setTimeout(spawnLoop, delay);
 }
 
-// Старт игры
 function startGame() {
   startScreen.style.display = 'none';
   gameOverScreen.style.display = 'none';
@@ -340,47 +312,37 @@ function startGame() {
   scoreEl.textContent = '0';
   gameRunning = true;
   
-  // Запуск музыки
   bgMusic.volume = 0.3;
   bgMusic.play().catch(e => console.log('Music autoplay blocked'));
   
-  // Запускаем спавн стрел
   spawnLoop();
-  
-  // Игровой цикл
   gameLoop();
 }
 
-// Конец игры
 function gameOver() {
   gameRunning = false;
   clearTimeout(spawnIntervalId);
   cancelAnimationFrame(gameLoopId);
   
-  // Обновляем рекорд
   if (score > bestScore) {
     bestScore = score;
     localStorage.setItem('arrowGameBest', bestScore);
     bestScoreEl.textContent = `Рекорд: ${bestScore}`;
   }
   
-  // Показываем экран проигрыша
   finalScoreEl.textContent = score;
   finalBestEl.textContent = bestScore;
   gameOverScreen.style.display = 'flex';
   
-  // Останавливаем музыку
   bgMusic.pause();
   bgMusic.currentTime = 0;
 }
 
-// Перезапуск
 function restartGame() {
   gameOverScreen.style.display = 'none';
   startGame();
 }
 
-// Обработчики событий
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
@@ -390,10 +352,5 @@ canvas.addEventListener('touchstart', startDrawing, { passive: false });
 canvas.addEventListener('touchmove', draw, { passive: false });
 canvas.addEventListener('touchend', stopDrawing, { passive: false });
 
-// Инициализация
-initCanvas();
-window.addEventListener('resize', initCanvas);
-
-// Глобальные функции для кнопок
 window.startGame = startGame;
 window.restartGame = restartGame;
