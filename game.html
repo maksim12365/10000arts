@@ -62,6 +62,7 @@
     touch-action: none;
   }
   
+  /* ✅ ИСПРАВЛЕНО: убрано width: 90%, добавлен max-width для ПК */
   #gameOver, #startScreen {
     display: none;
     position: fixed;
@@ -69,14 +70,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    padding: 30px 25px;
+    padding: 40px 50px;
     border-radius: 20px;
     text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     z-index: 1000;
-    min-width: 280px;
-    max-width: 90%;
-    width: 90%;
+    min-width: 320px;
+    max-width: 420px;  /* ✅ Компактно на ПК */
   }
   
   #startScreen {
@@ -126,21 +126,21 @@
   #gameOver h1 {
     color: #dc2626;
     margin-bottom: 20px;
-    font-size: 1.8rem;
+    font-size: 2rem;
     line-height: 1.2;
   }
   
   #gameOver p {
     color: #4b5563;
     margin: 15px 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
   
   #gameOver strong {
     color: #2563eb;
     font-size: 1.5rem;
-    display: block;
-    margin-top: 5px;
+    display: inline-block;
+    margin-left: 10px;
   }
   
   .btn {
@@ -186,14 +186,16 @@
     background: rgba(255,255,255,0.3);
   }
   
-  /* Адаптив для телефона */
+  /* ✅ Адаптив ТОЛЬКО для телефона */
   @media (max-width: 600px) {
     #score { font-size: 2.5rem; }
     
+    /* ✅ На телефоне — ширина 90% */
     #gameOver, #startScreen {
-      padding: 25px 20px;
+      padding: 30px 25px;
       min-width: auto;
-      width: 85%;
+      max-width: 90%;
+      width: 90%;
     }
     
     #startScreen h1 { font-size: 1.5rem; }
@@ -211,13 +213,15 @@
     
     #gameOver strong {
       font-size: 1.3rem;
+      display: block;
+      margin-left: 0;
+      margin-top: 5px;
     }
     
     .btn {
       padding: 12px 30px;
       font-size: 1rem;
       width: 100%;
-      max-width: none;
     }
     
     #backBtn {
