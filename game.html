@@ -288,5 +288,12 @@
   </audio>
   
   <script src="game.js"></script>
+<script>
+// При загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('startScreen').style.display = 'flex';
+  document.getElementById('gameOver').style.display = 'none';
+});
+</script>
 </body>
 </html>
