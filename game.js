@@ -329,8 +329,6 @@ function gameOver() {
   finalBestEl.textContent = bestScore;
   gameOverScreen.style.display = 'flex';
   
-  bgMusic.pause();
-  bgMusic.currentTime = 0;
 }
 
 function restartGame() {
