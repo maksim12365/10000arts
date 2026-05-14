@@ -62,7 +62,6 @@
     touch-action: none;
   }
   
-  /* ✅ ИСПРАВЛЕНО: убрано width: 90%, добавлен max-width для ПК */
   #gameOver, #startScreen {
     display: none;
     position: fixed;
@@ -75,8 +74,8 @@
     text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     z-index: 1000;
-    min-width: 320px;
-    max-width: 420px;  /* ✅ Компактно на ПК */
+    min-width: 350px;
+    max-width: 450px;
   }
   
   #startScreen {
@@ -123,28 +122,35 @@
     left: 0;
   }
   
+  /* ✅ ИСПРАВЛЕНО: чёткая структура для game over */
   #gameOver h1 {
     color: #dc2626;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     font-size: 2rem;
     line-height: 1.2;
   }
   
-  #gameOver p {
-    color: #4b5563;
-    margin: 15px 0;
-    font-size: 1.1rem;
+  #gameOver .scores {
+    margin: 25px 0;
+    text-align: center;
   }
   
-  #gameOver strong {
+  #gameOver .score-row {
+    margin: 15px 0;
+    font-size: 1.2rem;
+    color: #4b5563;
+  }
+  
+  #gameOver .score-value {
     color: #2563eb;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
     display: inline-block;
     margin-left: 10px;
   }
   
   .btn {
-    margin-top: 25px;
+    margin-top: 30px;
     padding: 15px 40px;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
@@ -186,11 +192,9 @@
     background: rgba(255,255,255,0.3);
   }
   
-  /* ✅ Адаптив ТОЛЬКО для телефона */
   @media (max-width: 600px) {
     #score { font-size: 2.5rem; }
     
-    /* ✅ На телефоне — ширина 90% */
     #gameOver, #startScreen {
       padding: 30px 25px;
       min-width: auto;
@@ -203,19 +207,16 @@
     
     #gameOver h1 {
       font-size: 1.5rem;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     
-    #gameOver p {
-      margin: 10px 0;
-      font-size: 0.95rem;
+    #gameOver .score-row {
+      font-size: 1rem;
+      margin: 12px 0;
     }
     
-    #gameOver strong {
-      font-size: 1.3rem;
-      display: block;
-      margin-left: 0;
-      margin-top: 5px;
+    #gameOver .score-value {
+      font-size: 1.5rem;
     }
     
     .btn {
@@ -229,23 +230,19 @@
       font-size: 0.9rem;
     }
   }
-</style>
+  </style>
 </head>
 <body>
-  <!-- Кнопка назад -->
   <a href="index.html" id="backBtn">← На главную</a>
   
-  <!-- UI -->
   <div id="ui">
     <div id="score">0</div>
     <div id="bestScore">Рекорд: 0</div>
     <div id="lineLimit">⚠️ Максимальная длина!</div>
   </div>
   
-  <!-- Canvas -->
   <canvas id="gameCanvas"></canvas>
   
-  <!-- Экран старта -->
   <div id="startScreen" style="display: flex;">
     <h1>🏹 Лови Стрелы</h1>
     <div class="rules">
@@ -263,15 +260,22 @@
     <button class="btn" onclick="startGame()">🎮 Начать игру</button>
   </div>
   
-  <!-- Экран проигрыша -->
+  <!-- ✅ ИСПРАВЛЕННЫЙ GAME OVER -->
   <div id="gameOver">
     <h1>💀 Игра окончена!</h1>
-    <p>Твой счёт: <strong id="finalScore">0</strong></p>
-    <p>Рекорд: <strong id="finalBest">0</strong></p>
+    
+    <div class="scores">
+      <div class="score-row">
+        Твой счёт: <span id="finalScore" class="score-value">0</span>
+      </div>
+      <div class="score-row">
+        Рекорд: <span id="finalBest" class="score-value">0</span>
+      </div>
+    </div>
+    
     <button class="btn" onclick="restartGame()">🔄 Играть снова</button>
   </div>
   
-  <!-- Музыка -->
   <audio id="bgMusic" loop>
     <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
   </audio>
