@@ -1,5 +1,5 @@
 // ============================================
-// ИГРА "ЛОВИ СТРЕЛЫ" — ФИНАЛЬНАЯ ВЕРСИЯ
+// ИГРА "ЛОВИ СТРЕЛЫ" — ИСПРАВЛЕНАЯ КОЛЛИЗИЯ
 // ============================================
 
 const canvas = document.getElementById('gameCanvas');
@@ -13,14 +13,12 @@ const finalScoreEl = document.getElementById('finalScore');
 const finalBestEl = document.getElementById('finalBest');
 const bgMusic = document.getElementById('bgMusic');
 
-// Настройки
 const MAX_LINE_LENGTH = 100;
 const MAX_ARROWS_ON_SCREEN = 4;
 const BASE_SPEED = 1.5;
 const FAST_SPEED = 3;
 const SUPER_FAST_SPEED = 5;
 
-// Состояние игры
 let score = 0;
 let bestScore = parseInt(localStorage.getItem('arrowGameBest') || '0');
 let lines = [];
@@ -33,13 +31,11 @@ let gameRunning = false;
 let gameLoopId = null;
 let spawnIntervalId = null;
 
-// Фиксированный размер canvas
 canvas.width = 300;
 canvas.height = 400;
 
 bestScoreEl.textContent = `Рекорд: ${bestScore}`;
 
-// Получить позицию мыши/тача
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -51,7 +47,6 @@ function getPos(e) {
   };
 }
 
-// Начало рисования
 function startDrawing(e) {
   if (!gameRunning) return;
   e.preventDefault();
@@ -64,7 +59,6 @@ function startDrawing(e) {
   lineLimitEl.classList.remove('visible');
 }
 
-// Рисование
 function draw(e) {
   if (!isDrawing || !gameRunning) return;
   e.preventDefault();
@@ -84,7 +78,6 @@ function draw(e) {
   lastPos = pos;
 }
 
-// Конец рисования
 function stopDrawing(e) {
   if (!isDrawing) return;
   if (e) e.preventDefault();
@@ -101,7 +94,6 @@ function stopDrawing(e) {
   currentLineLength = 0;
 }
 
-// Спавн ОДНОЙ стрелы
 function spawnOneArrow() {
   if (!gameRunning) return;
   
@@ -130,7 +122,6 @@ function spawnOneArrow() {
   });
 }
 
-// Проверка коллизии
 function checkCollision(arrow) {
   for (const line of lines) {
     for (let i = 1; i < line.points.length; i++) {
@@ -139,7 +130,8 @@ function checkCollision(arrow) {
       
       const dist = pointToLineDistance(arrow.x, arrow.y, p1.x, p1.y, p2.x, p2.y);
       
-      if (dist < 20) {
+      // УВЕЛИЧЕН РАДИУС С 20 ДО 30
+      if (dist < 30) {
         arrow.caught = true;
         arrow.active = false;
         score++;
@@ -187,6 +179,14 @@ function update() {
   
   let arrowMissed = false;
   
+  // СНАЧАЛА двигаем ЛИНИИ
+  for (const line of lines) {
+    for (const point of line.points) {
+      point.y += 1;
+    }
+  }
+  
+  // ПОТОМ двигаем СТРЕЛЫ и проверяем коллизию
   for (const arrow of arrows) {
     if (!arrow.active || arrow.caught) continue;
     
@@ -199,12 +199,6 @@ function update() {
     if (arrow.y > canvas.height + 50) {
       arrow.active = false;
       arrowMissed = true;
-    }
-  }
-  
-  for (const line of lines) {
-    for (const point of line.points) {
-      point.y += 1;
     }
   }
   
@@ -236,8 +230,9 @@ function drawGame() {
     ctx.stroke();
   }
   
+  // УВЕЛИЧЕНА ТОЛЩИНА ЛИНИЙ С 3 ДО 5
   ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   
