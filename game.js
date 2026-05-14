@@ -1,5 +1,5 @@
 // ============================================
-// ИГРА "ЛОВИ СТРЕЛЫ"
+// ИГРА "ЛОВИ СТРЕЛЫ" — ИСПРАВЛЕННАЯ ВЕРСИЯ
 // ============================================
 
 const canvas = document.getElementById('gameCanvas');
@@ -14,13 +14,11 @@ const finalBestEl = document.getElementById('finalBest');
 const bgMusic = document.getElementById('bgMusic');
 
 // Настройки
-const CANVAS_WIDTH = 300;
-const CANVAS_HEIGHT = 400;
-const MAX_LINE_LENGTH = 120; // пикселей (~1.5 см)
-const ARROW_SPEEDS = [1, 2, 3.5]; // разная скорость
-const MAX_ARROWS = 4;
-const SPAWN_INTERVAL_MIN = 400;
-const SPAWN_INTERVAL_MAX = 1200;
+const MAX_LINE_LENGTH = 100; // пикселей (~1.5 см)
+const MAX_ARROWS_ON_SCREEN = 4; // Максимум 4 стрелы одновременно!
+const BASE_SPEED = 1.5;
+const FAST_SPEED = 3;
+const SUPER_FAST_SPEED = 5;
 
 // Состояние игры
 let score = 0;
@@ -30,20 +28,16 @@ let arrows = [];
 let isDrawing = false;
 let currentLine = null;
 let currentLineLength = 0;
-let lastPos = { x: 0, y: 0 };
+let lastPos = null;
 let gameRunning = false;
 let gameLoopId = null;
-let spawnTimeoutId = null;
-let canvasOffset = { x: 0, y: 0 };
+let spawnIntervalId = null;
 
 // Инициализация canvas
 function initCanvas() {
-  const isMobile = window.innerWidth < 600;
-  canvas.width = isMobile ? Math.min(280, window.innerWidth - 40) : CANVAS_WIDTH;
-  canvas.height = canvas.width * (CANVAS_HEIGHT / CANVAS_WIDTH);
-  
-  canvasOffset.x = canvas.getBoundingClientRect().left;
-  canvasOffset.y = canvas.getBoundingClientRect().top;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = 300;
+  canvas.height = 400;
   
   bestScoreEl.textContent = `Рекорд: ${bestScore}`;
 }
@@ -53,6 +47,7 @@ function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  
   return {
     x: (clientX - rect.left) * (canvas.width / rect.width),
     y: (clientY - rect.top) * (canvas.height / rect.height)
@@ -96,7 +91,7 @@ function draw(e) {
 // Конец рисования
 function stopDrawing(e) {
   if (!isDrawing) return;
-  e?.preventDefault();
+  if (e) e.preventDefault();
   
   if (currentLine && currentLine.points.length > 1) {
     lines.push({
@@ -110,44 +105,53 @@ function stopDrawing(e) {
   currentLineLength = 0;
 }
 
-// Спавн стрелы
-function spawnArrow() {
+// Спавн ОДНОЙ стрелы
+function spawnOneArrow() {
   if (!gameRunning) return;
   
-  const count = Math.floor(Math.random() * MAX_ARROWS) + 1;
+  // Проверяем сколько стрел на экране
+  const activeArrows = arrows.filter(a => a.active).length;
   
-  for (let i = 0; i < count; i++) {
-    const speed = ARROW_SPEEDS[Math.floor(Math.random() * ARROW_SPEEDS.length)];
-    arrows.push({
-      x: Math.random() * (canvas.width - 20) + 10,
-      y: -30,
-      speed: speed,
-      width: 20,
-      height: 30,
-      stuck: false,
-      active: true
-    });
+  if (activeArrows >= MAX_ARROWS_ON_SCREEN) {
+    // Не спавним если уже 4 стрелы
+    return;
   }
   
-  // Следующий спавн
-  const nextSpawn = Math.random() * (SPAWN_INTERVAL_MAX - SPAWN_INTERVAL_MIN) + SPAWN_INTERVAL_MIN;
-  spawnTimeoutId = setTimeout(spawnArrow, nextSpawn);
+  // Выбираем случайную скорость
+  const rand = Math.random();
+  let speed;
+  if (rand < 0.5) speed = BASE_SPEED;        // 50% медленная
+  else if (rand < 0.8) speed = FAST_SPEED;   // 30% средняя
+  else speed = SUPER_FAST_SPEED;             // 20% быстрая
+  
+  // Случайная позиция X
+  const x = Math.random() * (canvas.width - 40) + 20;
+  
+  arrows.push({
+    x: x,
+    y: -30,
+    speed: speed,
+    width: 20,
+    height: 30,
+    caught: false,
+    active: true
+  });
 }
 
 // Проверка коллизии
-function checkCollision(arrow, lines) {
+function checkCollision(arrow) {
   for (const line of lines) {
     for (let i = 1; i < line.points.length; i++) {
       const p1 = line.points[i - 1];
       const p2 = line.points[i];
       
-      // Расстояние от точки до отрезка
       const dist = pointToLineDistance(arrow.x, arrow.y, p1.x, p1.y, p2.x, p2.y);
       
-      if (dist < 15) { // 15px = попало!
-        arrow.stuck = true;
-        arrow.stuckX = arrow.x;
-        arrow.stuckY = arrow.y;
+      if (dist < 20) { // Попало!
+        arrow.caught = true;
+        arrow.active = false;
+        score++;
+        scoreEl.textContent = score;
         return true;
       }
     }
@@ -191,46 +195,42 @@ function pointToLineDistance(px, py, x1, y1, x2, y2) {
 function update() {
   if (!gameRunning) return;
   
+  let arrowMissed = false;
+  
   // Двигаем стрелы
   for (const arrow of arrows) {
-    if (!arrow.active) continue;
+    if (!arrow.active || arrow.caught) continue;
     
-    if (!arrow.stuck) {
-      arrow.y += arrow.speed;
-      
-      // Проверка коллизии
-      if (checkCollision(arrow, lines)) {
-        score++;
-        scoreEl.textContent = score;
-      }
-      
-      // Проверка пропуска
-      if (arrow.y > canvas.height && !arrow.stuck) {
-        gameOver();
-        return;
-      }
+    arrow.y += arrow.speed;
+    
+    // Проверка коллизии
+    if (checkCollision(arrow)) {
+      continue;
+    }
+    
+    // Проверка пропуска (улетела за экран)
+    if (arrow.y > canvas.height + 50) {
+      arrow.active = false;
+      arrowMissed = true;
     }
   }
   
   // Двигаем линии вниз
   for (const line of lines) {
     for (const point of line.points) {
-      point.y += 1.5;
+      point.y += 1;
     }
   }
   
-  // Двигаем застрявшие стрелы
-  for (const arrow of arrows) {
-    if (arrow.stuck) {
-      arrow.stuckY += 1.5;
-      arrow.x = arrow.stuckX;
-      arrow.y = arrow.stuckY;
-    }
-  }
+  // Удаляем неактивные стрелы и линии за экраном
+  arrows = arrows.filter(a => a.active || a.caught);
+  lines = lines.filter(l => l.points.some(p => p.y < canvas.height + 100));
   
-  // Удаляем что ушло за край
-  arrows = arrows.filter(a => a.y < canvas.height + 50 && a.active);
-  lines = lines.filter(l => l.points.some(p => p.y < canvas.height + 50));
+  // Если пропустили стрелу — игра окончена
+  if (arrowMissed) {
+    gameOver();
+    return;
+  }
 }
 
 // Отрисовка
@@ -239,8 +239,8 @@ function draw() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Сетка (для красоты)
-  ctx.strokeStyle = '#f0f0f0';
+  // Сетка
+  ctx.strokeStyle = '#e5e5e5';
   ctx.lineWidth = 1;
   for (let x = 0; x < canvas.width; x += 30) {
     ctx.beginPath();
@@ -271,8 +271,8 @@ function draw() {
     ctx.stroke();
   }
   
-  // Текущая линия (которую рисуем)
-  if (currentLine && currentLine.points.length > 0) {
+  // Текущая линия
+  if (currentLine && currentLine.points.length > 1) {
     ctx.beginPath();
     ctx.moveTo(currentLine.points[0].x, currentLine.points[0].y);
     for (let i = 1; i < currentLine.points.length; i++) {
@@ -283,30 +283,24 @@ function draw() {
   
   // Стрелы
   for (const arrow of arrows) {
-    if (!arrow.active) continue;
+    if (!arrow.active || arrow.caught) continue;
     
     ctx.save();
     ctx.translate(arrow.x, arrow.y);
-    ctx.rotate(Math.PI); // Стрела смотрит вниз
     
-    // Тело стрелы
+    // Тело стрелы (треугольник)
     ctx.fillStyle = '#dc2626';
     ctx.beginPath();
-    ctx.moveTo(0, -15);
-    ctx.lineTo(-8, 10);
-    ctx.lineTo(0, 5);
-    ctx.lineTo(8, 10);
+    ctx.moveTo(0, 15);
+    ctx.lineTo(-10, -10);
+    ctx.lineTo(10, -10);
     ctx.closePath();
     ctx.fill();
-    
-    // Оперение
-    ctx.fillStyle = '#991b1b';
-    ctx.fillRect(-6, 10, 12, 8);
     
     ctx.restore();
   }
   
-  // Индикатор максимальной длины
+  // Индикатор длины линии
   if (isDrawing) {
     const ratio = currentLineLength / MAX_LINE_LENGTH;
     ctx.fillStyle = ratio > 0.8 ? '#dc2626' : '#10b981';
@@ -324,6 +318,17 @@ function gameLoop() {
   gameLoopId = requestAnimationFrame(gameLoop);
 }
 
+// Цикл спавна стрел
+function spawnLoop() {
+  if (!gameRunning) return;
+  
+  spawnOneArrow();
+  
+  // Спавним новую стрелу каждые 800-1500ms
+  const delay = Math.random() * 700 + 800;
+  spawnIntervalId = setTimeout(spawnLoop, delay);
+}
+
 // Старт игры
 function startGame() {
   startScreen.style.display = 'none';
@@ -335,12 +340,12 @@ function startGame() {
   scoreEl.textContent = '0';
   gameRunning = true;
   
-  // Запуск музыки (после клика)
+  // Запуск музыки
   bgMusic.volume = 0.3;
-  bgMusic.play().catch(e => console.log('Музыка не запустилась:', e));
+  bgMusic.play().catch(e => console.log('Music autoplay blocked'));
   
-  // Первый спавн
-  spawnArrow();
+  // Запускаем спавн стрел
+  spawnLoop();
   
   // Игровой цикл
   gameLoop();
@@ -349,7 +354,7 @@ function startGame() {
 // Конец игры
 function gameOver() {
   gameRunning = false;
-  clearTimeout(spawnTimeoutId);
+  clearTimeout(spawnIntervalId);
   cancelAnimationFrame(gameLoopId);
   
   // Обновляем рекорд
@@ -362,7 +367,7 @@ function gameOver() {
   // Показываем экран проигрыша
   finalScoreEl.textContent = score;
   finalBestEl.textContent = bestScore;
-  gameOverScreen.style.display = 'block';
+  gameOverScreen.style.display = 'flex';
   
   // Останавливаем музыку
   bgMusic.pause();
@@ -385,12 +390,10 @@ canvas.addEventListener('touchstart', startDrawing, { passive: false });
 canvas.addEventListener('touchmove', draw, { passive: false });
 canvas.addEventListener('touchend', stopDrawing, { passive: false });
 
-// Ресайз окна
-window.addEventListener('resize', () => {
-  canvasOffset.x = canvas.getBoundingClientRect().left;
-  canvasOffset.y = canvas.getBoundingClientRect().top;
-});
-
 // Инициализация
 initCanvas();
-window.addEventListener('load', initCanvas);
+window.addEventListener('resize', initCanvas);
+
+// Глобальные функции для кнопок
+window.startGame = startGame;
+window.restartGame = restartGame;
