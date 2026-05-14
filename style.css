@@ -815,6 +815,41 @@ header p {
   }
 }
 
+.game-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.game-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(124, 58, 237, 0.4);
+}
+
+.game-btn:active {
+  transform: translateY(0);
+}
+
+/* Адаптив для телефона */
+@media (max-width: 600px) {
+  .game-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+  }
+}
+
 /* ============================================ */
 /* ПРЕДПРОСМОТР ПРИ НАВЕДЕНИИ */
 /* ============================================ */
