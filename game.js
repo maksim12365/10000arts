@@ -1,5 +1,5 @@
 // ============================================
-// ИГРА "ЛОВИ СТРЕЛЫ" - ПОЛНОСТЬЮ РАБОЧАЯ
+// ИГРА "ЛОВИ СТРЕЛЫ" - ИСПРАВЛЕНАЯ КОЛЛИЗИЯ
 // ============================================
 
 const canvas = document.getElementById('gameCanvas');
@@ -13,7 +13,6 @@ const finalScoreEl = document.getElementById('finalScore');
 const finalBestEl = document.getElementById('finalBest');
 const bgMusic = document.getElementById('bgMusic');
 
-// Настройки
 const MAX_LINE_LENGTH = 100;
 const MAX_ARROWS_ON_SCREEN = 4;
 const MAX_LIVES = 3;
@@ -21,7 +20,6 @@ const BASE_SPEED = 1.5;
 const FAST_SPEED = 3;
 const SUPER_FAST_SPEED = 5;
 
-// Состояние игры
 let score = 0;
 let lives = MAX_LIVES;
 let bestScore = parseInt(localStorage.getItem('arrowGameBest') || '0');
@@ -38,13 +36,11 @@ let gameLoopId = null;
 let spawnIntervalId = null;
 let bombSpawnIntervalId = null;
 
-// Размер canvas
 canvas.width = 300;
 canvas.height = 400;
 
 if (bestScoreEl) bestScoreEl.textContent = `Рекорд: ${bestScore}`;
 
-// Получить позицию
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -52,7 +48,6 @@ function getPos(e) {
   return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
-// Начало рисования
 function startDrawing(e) {
   if (!gameRunning) return;
   e.preventDefault();
@@ -64,7 +59,6 @@ function startDrawing(e) {
   if (lineLimitEl) lineLimitEl.classList.remove('visible');
 }
 
-// Рисование
 function draw(e) {
   if (!isDrawing || !gameRunning) return;
   e.preventDefault();
@@ -85,11 +79,9 @@ function draw(e) {
   currentLineLength += dist;
   lastPos = pos;
   
-  // Проверка бомб
   checkBombCollision();
 }
 
-// Конец рисования
 function stopDrawing(e) {
   if (!isDrawing) return;
   if (e) e.preventDefault();
@@ -103,12 +95,12 @@ function stopDrawing(e) {
   currentLineLength = 0;
 }
 
-// Проверка бомб
+// ✅ ИСПРАВЛЕННАЯ ФУНКЦИЯ
 function checkBombCollision() {
   if (!isDrawing || !currentLine) return;
   
   for (const bomb of bombs) {
-    if (!bomb.active || bomb.hitThisFrame) continue;
+    if (!bomb.active || bomb.hitThisLine) continue;  // ← 1 бомба = 1 попадание на линию
     
     for (let i = 1; i < currentLine.points.length; i++) {
       const p1 = currentLine.points[i - 1];
@@ -116,13 +108,13 @@ function checkBombCollision() {
       const dist = pointToLineDistance(bomb.x, bomb.y, p1.x, p1.y, p2.x, p2.y);
       
       if (dist < 25) {
-        bomb.hitCount++;
-        bomb.hitThisFrame = true;
-        lives--;
+        bomb.hitCount++;          // ← Считаем попадания (1, 2, 3)
+        bomb.hitThisLine = true;  // ← Больше не сработает для этой линии
+        lives--;                  // ← -1 жизнь
         updateLivesDisplay();
         createExplosion(bomb.x, bomb.y);
         
-        if (lives <= 0) {
+        if (lives <= 0) {         // ← ТОЛЬКО когда 0 жизней
           gameOver();
           return;
         }
@@ -132,10 +124,8 @@ function checkBombCollision() {
   }
 }
 
-// Спавн стрелы
 function spawnOneArrow() {
   if (!gameRunning) return;
-  
   const activeArrows = arrows.filter(a => a.active).length;
   if (activeArrows >= MAX_ARROWS_ON_SCREEN) return;
   
@@ -146,10 +136,8 @@ function spawnOneArrow() {
   arrows.push({ x, y: -30, speed, active: true, caught: false });
 }
 
-// Спавн бомбы
 function spawnOneBomb() {
   if (!gameRunning) return;
-  
   const activeBombs = bombs.filter(b => b.active).length;
   if (activeBombs >= 2) return;
   
@@ -157,14 +145,12 @@ function spawnOneBomb() {
   let speed = rand < 0.5 ? BASE_SPEED : rand < 0.8 ? FAST_SPEED : SUPER_FAST_SPEED;
   const x = Math.random() * (canvas.width - 40) + 20;
   
-  // Не спавнить близко к стрелам
   const tooClose = arrows.some(a => a.active && Math.abs(a.x - x) < 30 && a.y < 100);
   if (tooClose) return;
   
-  bombs.push({ x, y: -30, speed, active: true, hitCount: 0, hitThisFrame: false });
+  bombs.push({ x, y: -30, speed, active: true, hitCount: 0, hitThisLine: false });
 }
 
-// Проверка стрелы
 function checkArrowCollision(arrow) {
   for (const line of lines) {
     for (let i = 1; i < line.points.length; i++) {
@@ -184,12 +170,10 @@ function checkArrowCollision(arrow) {
   return false;
 }
 
-// Взрыв
 function createExplosion(x, y) {
   explosions.push({ x, y, radius: 10, maxRadius: 50, alpha: 1, active: true });
 }
 
-// Обновление взрывов
 function updateExplosions() {
   for (const exp of explosions) {
     if (!exp.active) continue;
@@ -200,7 +184,6 @@ function updateExplosions() {
   explosions = explosions.filter(e => e.active);
 }
 
-// Расстояние до линии
 function pointToLineDistance(px, py, x1, y1, x2, y2) {
   const A = px - x1;
   const B = py - y1;
@@ -218,20 +201,20 @@ function pointToLineDistance(px, py, x1, y1, x2, y2) {
   return Math.sqrt((px - xx) ** 2 + (py - yy) ** 2);
 }
 
-// Обновление
 function update() {
   if (!gameRunning) return;
   
   let arrowMissed = false;
   
-  for (const bomb of bombs) bomb.hitThisFrame = false;
+  // ✅ Сбрасываем hitThisLine когда игрок НЕ рисует
+  for (const bomb of bombs) {
+    if (!isDrawing) bomb.hitThisLine = false;
+  }
   
-  // Линии
   for (const line of lines) {
     for (const point of line.points) point.y += 1;
   }
   
-  // Стрелы
   for (const arrow of arrows) {
     if (!arrow.active || arrow.caught) continue;
     arrow.y += arrow.speed;
@@ -243,7 +226,6 @@ function update() {
     }
   }
   
-  // Бомбы
   for (const bomb of bombs) {
     if (!bomb.active) continue;
     bomb.y += bomb.speed;
@@ -259,12 +241,10 @@ function update() {
   if (arrowMissed) gameOver();
 }
 
-// Отрисовка
 function drawGame() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Сетка
   ctx.strokeStyle = '#e5e5e5';
   ctx.lineWidth = 1;
   for (let x = 0; x < canvas.width; x += 30) {
@@ -280,7 +260,6 @@ function drawGame() {
     ctx.stroke();
   }
   
-  // Линии
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 5;
   ctx.lineCap = 'round';
@@ -296,7 +275,6 @@ function drawGame() {
     ctx.stroke();
   }
   
-  // Текущая линия
   if (currentLine && currentLine.points.length > 1) {
     ctx.beginPath();
     ctx.moveTo(currentLine.points[0].x, currentLine.points[0].y);
@@ -306,7 +284,6 @@ function drawGame() {
     ctx.stroke();
   }
   
-  // Стрелы
   for (const arrow of arrows) {
     if (!arrow.active || arrow.caught) continue;
     ctx.save();
@@ -321,7 +298,6 @@ function drawGame() {
     ctx.restore();
   }
   
-  // Бомбы
   for (const bomb of bombs) {
     if (!bomb.active) continue;
     ctx.save();
@@ -337,7 +313,6 @@ function drawGame() {
     ctx.restore();
   }
   
-  // Взрывы
   for (const exp of explosions) {
     if (!exp.active) continue;
     ctx.save();
@@ -353,7 +328,6 @@ function drawGame() {
     ctx.restore();
   }
   
-  // Индикатор длины
   if (isDrawing) {
     const ratio = currentLineLength / MAX_LINE_LENGTH;
     ctx.fillStyle = ratio > 0.8 ? '#dc2626' : '#10b981';
@@ -363,7 +337,6 @@ function drawGame() {
   }
 }
 
-// Игровой цикл
 function gameLoop() {
   if (!gameRunning) return;
   update();
@@ -371,26 +344,22 @@ function gameLoop() {
   gameLoopId = requestAnimationFrame(gameLoop);
 }
 
-// Спавн стрел
 function spawnLoop() {
   if (!gameRunning) return;
   spawnOneArrow();
   spawnIntervalId = setTimeout(spawnLoop, Math.random() * 700 + 800);
 }
 
-// Спавн бомб
 function bombSpawnLoop() {
   if (!gameRunning) return;
   spawnOneBomb();
   bombSpawnIntervalId = setTimeout(bombSpawnLoop, Math.random() * 2000 + 2500);
 }
 
-// Обновление жизней
 function updateLivesDisplay() {
   if (scoreEl) scoreEl.textContent = `${score}  ${'❤️'.repeat(lives)}`;
 }
 
-// Старт
 function startGame() {
   if (startScreen) startScreen.style.display = 'none';
   if (gameOverScreen) gameOverScreen.style.display = 'none';
@@ -415,7 +384,6 @@ function startGame() {
   gameLoop();
 }
 
-// Конец игры
 function gameOver() {
   gameRunning = false;
   if (spawnIntervalId) clearTimeout(spawnIntervalId);
@@ -438,13 +406,11 @@ function gameOver() {
   }
 }
 
-// Перезапуск
 function restartGame() {
   if (gameOverScreen) gameOverScreen.style.display = 'none';
   startGame();
 }
 
-// Обработчики
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
