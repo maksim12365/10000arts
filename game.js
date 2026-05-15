@@ -1,5 +1,5 @@
 // ============================================
-// ИГРА "ЛОВИ СТРЕЛЫ" С БОМБАМИ
+// ИГРА "ЛОВИ СТРЕЛЫ" С БОМБАМИ (ИСПРАВЛЕНО)
 // ============================================
 
 const canvas = document.getElementById('gameCanvas');
@@ -13,7 +13,6 @@ const finalScoreEl = document.getElementById('finalScore');
 const finalBestEl = document.getElementById('finalBest');
 const bgMusic = document.getElementById('bgMusic');
 
-// Настройки
 const MAX_LINE_LENGTH = 100;
 const MAX_ARROWS_ON_SCREEN = 4;
 const BASE_SPEED = 1.5;
@@ -21,7 +20,6 @@ const FAST_SPEED = 3;
 const SUPER_FAST_SPEED = 5;
 const MAX_LIVES = 3;
 
-// Состояние игры
 let score = 0;
 let bestScore = parseInt(localStorage.getItem('arrowGameBest') || '0');
 let lines = [];
@@ -38,12 +36,14 @@ let gameLoopId = null;
 let spawnIntervalId = null;
 let bombSpawnIntervalId = null;
 
+// ⚠️ НОВОЕ: отслеживаем была ли коллизия в этом кадре рисования
+let bombHitThisFrame = false;
+
 canvas.width = 300;
 canvas.height = 400;
 
 bestScoreEl.textContent = `Рекорд: ${bestScore}`;
 
-// Получить позицию мыши/тача
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -55,20 +55,19 @@ function getPos(e) {
   };
 }
 
-// Начало рисования
 function startDrawing(e) {
   if (!gameRunning) return;
   e.preventDefault();
   
   const pos = getPos(e);
   isDrawing = true;
-  currentLine = { points: [pos], length: 0 };
+  currentLine = { points: [pos], length: 0, createdAt: Date.now() };
   currentLineLength = 0;
   lastPos = pos;
+  bombHitThisFrame = false;
   lineLimitEl.classList.remove('visible');
 }
 
-// Рисование
 function draw(e) {
   if (!isDrawing || !gameRunning) return;
   e.preventDefault();
@@ -86,9 +85,11 @@ function draw(e) {
   currentLine.points.push(pos);
   currentLineLength += dist;
   lastPos = pos;
+  
+  // ⚠️ ПРОВЕРЯЕМ коллизию с бомбами ТОЛЬКО во время рисования
+  checkBombCollisionDuringDraw();
 }
 
-// Конец рисования
 function stopDrawing(e) {
   if (!isDrawing) return;
   if (e) e.preventDefault();
@@ -96,7 +97,8 @@ function stopDrawing(e) {
   if (currentLine && currentLine.points.length > 1) {
     lines.push({
       points: [...currentLine.points],
-      length: currentLineLength
+      length: currentLineLength,
+      createdAt: Date.now()
     });
   }
   
@@ -105,7 +107,41 @@ function stopDrawing(e) {
   currentLineLength = 0;
 }
 
-// Спавн ОДНОЙ стрелы
+// ⚠️ НОВАЯ ФУНКЦИЯ: проверка коллизии ТОЛЬКО когда игрок рисует
+function checkBombCollisionDuringDraw() {
+  if (!isDrawing || !currentLine) return;
+  
+  for (const bomb of bombs) {
+    if (!bomb.active || bomb.hitThisLine) continue;
+    
+    // Проверяем расстояние от бомбы до ТЕКУЩЕЙ рисующейся линии
+    for (let i = 1; i < currentLine.points.length; i++) {
+      const p1 = currentLine.points[i - 1];
+      const p2 = currentLine.points[i];
+      
+      const dist = pointToLineDistance(bomb.x, bomb.y, p1.x, p1.y, p2.x, p2.y);
+      
+      if (dist < 25) {
+        // ⚠️ Бомба коснулась линии которую ты РИСУЕШЬ ПРЯМО СЕЙЧАС
+        bomb.hitCount++;
+        bomb.hitThisLine = true; // Чтобы не засчитывало повторно
+        
+        lives--;
+        updateLivesDisplay();
+        createExplosion(bomb.x, bomb.y, bomb.hitCount);
+        
+        // ⚠️ Только 3 попадания = смерть
+        if (lives <= 0) {
+          gameOver();
+          return;
+        }
+        
+        break;
+      }
+    }
+  }
+}
+
 function spawnOneArrow() {
   if (!gameRunning) return;
   
@@ -134,13 +170,11 @@ function spawnOneArrow() {
   });
 }
 
-// Спавн БОМБЫ (реже чем стрелы)
 function spawnOneBomb() {
   if (!gameRunning) return;
   
   const activeBombs = bombs.filter(b => b.active).length;
   
-  // Максимум 1-2 бомбы на экране
   if (activeBombs >= 2) {
     return;
   }
@@ -157,7 +191,7 @@ function spawnOneBomb() {
   const tooClose = arrows.some(a => a.active && Math.abs(a.x - x) < 30 && a.y < 100);
   
   if (tooClose) {
-    return; // Не спавним если слишком близко к стреле
+    return;
   }
   
   bombs.push({
@@ -166,11 +200,11 @@ function spawnOneBomb() {
     speed: speed,
     radius: 15,
     active: true,
-    hitCount: 0
+    hitCount: 0,
+    hitThisLine: false // ⚠️ Сбрасываем при спавне
   });
 }
 
-// Проверка коллизии со стрелой
 function checkArrowCollision(arrow) {
   for (const line of lines) {
     for (let i = 1; i < line.points.length; i++) {
@@ -191,36 +225,6 @@ function checkArrowCollision(arrow) {
   return false;
 }
 
-// Проверка коллизии с бомбой
-function checkBombCollision(bomb) {
-  for (const line of lines) {
-    for (let i = 1; i < line.points.length; i++) {
-      const p1 = line.points[i - 1];
-      const p2 = line.points[i];
-      
-      const dist = pointToLineDistance(bomb.x, bomb.y, p1.x, p1.y, p2.x, p2.y);
-      
-      if (dist < 25) {
-        bomb.hitCount++;
-        
-        // Создаём взрыв
-        createExplosion(bomb.x, bomb.y, bomb.hitCount);
-        
-        if (bomb.hitCount >= 3) {
-          bomb.active = false;
-          // 3 попадания = игра окончена
-          gameOver();
-          return true;
-        }
-        
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-// Создание взрыва
 function createExplosion(x, y, intensity) {
   explosions.push({
     x: x,
@@ -232,7 +236,6 @@ function createExplosion(x, y, intensity) {
   });
 }
 
-// Обновление взрывов
 function updateExplosions() {
   for (const exp of explosions) {
     if (!exp.active) continue;
@@ -248,30 +251,6 @@ function updateExplosions() {
   explosions = explosions.filter(e => e.active);
 }
 
-// Отрисовка взрывов
-function drawExplosions() {
-  for (const exp of explosions) {
-    if (!exp.active) continue;
-    
-    ctx.save();
-    ctx.translate(exp.x, exp.y);
-    
-    // Оранжево-красный взрыв
-    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, exp.radius);
-    gradient.addColorStop(0, `rgba(255, 255, 0, ${exp.alpha})`);
-    gradient.addColorStop(0.5, `rgba(255, 100, 0, ${exp.alpha})`);
-    gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
-    
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(0, 0, exp.radius, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.restore();
-  }
-}
-
-// Математика: расстояние от точки до отрезка
 function pointToLineDistance(px, py, x1, y1, x2, y2) {
   const A = px - x1;
   const B = py - y1;
@@ -303,11 +282,15 @@ function pointToLineDistance(px, py, x1, y1, x2, y2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-// Обновление игры
 function update() {
   if (!gameRunning) return;
   
   let arrowMissed = false;
+  
+  // Сбрасываем флаг попадания для каждой бомбы
+  for (const bomb of bombs) {
+    bomb.hitThisLine = false;
+  }
   
   // Двигаем линии
   for (const line of lines) {
@@ -332,25 +315,19 @@ function update() {
     }
   }
   
-  // Двигаем бомбы
+  // Двигаем бомбы (без коллизии - только во время рисования!)
   for (const bomb of bombs) {
     if (!bomb.active) continue;
     
     bomb.y += bomb.speed;
-    
-    if (checkBombCollision(bomb)) {
-      continue;
-    }
     
     if (bomb.y > canvas.height + 50) {
       bomb.active = false;
     }
   }
   
-  // Обновляем взрывы
   updateExplosions();
   
-  // Удаляем неактивные
   arrows = arrows.filter(a => a.active || a.caught);
   bombs = bombs.filter(b => b.active);
   lines = lines.filter(l => l.points.some(p => p.y < canvas.height + 100));
@@ -361,12 +338,10 @@ function update() {
   }
 }
 
-// Отрисовка
 function drawGame() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Сетка
   ctx.strokeStyle = '#e5e5e5';
   ctx.lineWidth = 1;
   for (let x = 0; x < canvas.width; x += 30) {
@@ -382,7 +357,6 @@ function drawGame() {
     ctx.stroke();
   }
   
-  // Линии
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 5;
   ctx.lineCap = 'round';
@@ -398,7 +372,6 @@ function drawGame() {
     ctx.stroke();
   }
   
-  // Текущая линия
   if (currentLine && currentLine.points.length > 1) {
     ctx.beginPath();
     ctx.moveTo(currentLine.points[0].x, currentLine.points[0].y);
@@ -408,7 +381,6 @@ function drawGame() {
     ctx.stroke();
   }
   
-  // Стрелы
   for (const arrow of arrows) {
     if (!arrow.active || arrow.caught) continue;
     
@@ -426,26 +398,23 @@ function drawGame() {
     ctx.restore();
   }
   
-  // Бомбы
   for (const bomb of bombs) {
     if (!bomb.active) continue;
     
     ctx.save();
     ctx.translate(bomb.x, bomb.y);
     
-    // Тело бомбы (чёрный круг)
     ctx.fillStyle = '#1f2937';
     ctx.beginPath();
     ctx.arc(0, 0, bomb.radius, 0, Math.PI * 2);
     ctx.fill();
     
-    // Блеск
     ctx.fillStyle = '#6b7280';
     ctx.beginPath();
     ctx.arc(-5, -5, 4, 0, Math.PI * 2);
     ctx.fill();
     
-    // Индикатор попаданий (маленькие точки)
+    // Индикатор попаданий
     for (let i = 0; i < bomb.hitCount; i++) {
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
@@ -456,10 +425,8 @@ function drawGame() {
     ctx.restore();
   }
   
-  // Взрывы
   drawExplosions();
   
-  // Индикатор длины линии
   if (isDrawing) {
     const ratio = currentLineLength / MAX_LINE_LENGTH;
     ctx.fillStyle = ratio > 0.8 ? '#dc2626' : '#10b981';
@@ -467,16 +434,8 @@ function drawGame() {
     ctx.strokeStyle = '#333';
     ctx.strokeRect(10, 10, 100, 5);
   }
-  
-  // Жизни (вверху справа)
-  ctx.fillStyle = '#ef4444';
-  ctx.font = '20px Arial';
-  ctx.textAlign = 'right';
-  let livesText = '❤️'.repeat(lives);
-  ctx.fillText(livesText, canvas.width - 15, 30);
 }
 
-// Игровой цикл
 function gameLoop() {
   if (!gameRunning) return;
   update();
@@ -484,7 +443,6 @@ function gameLoop() {
   gameLoopId = requestAnimationFrame(gameLoop);
 }
 
-// Цикл спавна стрел
 function spawnLoop() {
   if (!gameRunning) return;
   
@@ -494,18 +452,15 @@ function spawnLoop() {
   spawnIntervalId = setTimeout(spawnLoop, delay);
 }
 
-// Цикл спавна бомб (реже)
 function bombSpawnLoop() {
   if (!gameRunning) return;
   
   spawnOneBomb();
   
-  // Бомбы спавнятся в 3 раза реже стрел
   const delay = Math.random() * 2000 + 2500;
   bombSpawnIntervalId = setTimeout(bombSpawnLoop, delay);
 }
 
-// Старт игры
 function startGame() {
   startScreen.style.display = 'none';
   gameOverScreen.style.display = 'none';
@@ -519,7 +474,6 @@ function startGame() {
   scoreEl.textContent = '0';
   gameRunning = true;
   
-  // Обновляем отображение жизней в UI
   updateLivesDisplay();
   
   bgMusic.volume = 0.3;
@@ -532,13 +486,11 @@ function startGame() {
   gameLoop();
 }
 
-// Обновление жизней в UI
 function updateLivesDisplay() {
   let livesText = '❤️'.repeat(lives);
   scoreEl.textContent = `${score}  ${livesText}`;
 }
 
-// Конец игры
 function gameOver() {
   gameRunning = false;
   clearTimeout(spawnIntervalId);
@@ -559,13 +511,11 @@ function gameOver() {
   bgMusic.currentTime = 0;
 }
 
-// Перезапуск
 function restartGame() {
   gameOverScreen.style.display = 'none';
   startGame();
 }
 
-// Обработчики событий
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
