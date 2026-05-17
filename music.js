@@ -6,9 +6,9 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'Papaoutai',
-  artist: 'Stromae',
-  audioFile: 'https://archive.org/download/stromae-papaoutai-47912074/Stromae_-_Papaoutai_47912074.mp3',  // Файл в корне!
+  track: 'Полотно',
+  artist: 'M#X WEB',
+  audioFile: 'https://archive.org/download/m-x-web/M%23X%20WEB%20-%20Полотно.mp3',  // Файл в корне!
   week: 4
 };
 
