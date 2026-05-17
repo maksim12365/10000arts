@@ -9,7 +9,7 @@ const MUSIC_CONFIG = {
   track: 'Полотно',
   artist: 'M#X WEB',
   audioFile: 'https://archive.org/download/m-x-web/M%23X%20WEB%20-%20Полотно.mp3',  // Файл в корне!
-  week: 4
+  week: 5
 };
 
 function initMusicWidget() {
