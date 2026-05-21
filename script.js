@@ -621,3 +621,28 @@ function setupShare() {
     }
   });
 }
+
+// ========== СУП ХАРЧО ФУНКЦИИ ==========
+function openHarchoModal() {
+  const modal = document.getElementById('harchoModal');
+  if (modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeHarchoModal(event) {
+  if (!event || event.target.id === 'harchoModal' || event.target.classList.contains('harcho-close')) {
+    const modal = document.getElementById('harchoModal');
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeHarchoModal();
+  }
+});
