@@ -3684,3 +3684,73 @@ header p {
   }
 }
 /* ⬆️ КОНЕЦ CSS МЕМА ⬆️ */
+
+/* ========== СУП ХАРЧО МЕМ ========== */
+.music-widget {
+  position: relative !important; /* Чтобы позиционировать внутри */
+  padding-left: 180px !important; /* Место для мема слева */
+}
+
+.harcho-container {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 10;
+  width: 150px; /* Фиксированная ширина */
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.harcho-image {
+  width: 100%;
+  max-width: 140px;
+  height: auto;
+  border-radius: 12px;
+  border: 3px solid #ff0040;
+  box-shadow: 
+    0 0 10px #ff0040,
+    0 0 20px #ff0040,
+    0 0 30px rgba(255, 0, 64, 0.5),
+    0 4px 15px rgba(0, 0, 0, 0.3);
+  animation: harchoBreath 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.harcho-image:hover {
+  transform: scale(1.05);
+}
+
+@keyframes harchoBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Адаптив для телефона */
+@media (max-width: 768px) {
+  .music-widget {
+    padding-left: 120px !important;
+  }
+  
+  .harcho-container {
+    width: 100px;
+    left: 10px;
+  }
+  
+  .harcho-image {
+    max-width: 90px;
+  }
+}
+
+@media (max-width: 480px) {
+  .music-widget {
+    padding-left: 100px !important;
+  }
+  
+  .harcho-image {
+    max-width: 80px;
+  }
+}
