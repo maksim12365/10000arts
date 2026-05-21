@@ -422,3 +422,27 @@ canvas.addEventListener('touchend', stopDrawing, { passive: false });
 
 window.startGame = startGame;
 window.restartGame = restartGame;
+
+// ========== СУП ХАРЧО ФУНКЦИИ ==========
+function openHarchoModal() {
+  const modal = document.getElementById('harchoModal');
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+function closeHarchoModal(event) {
+  if (!event || event.target.id === 'harchoModal' || event.target.classList.contains('harcho-close')) {
+    const modal = document.getElementById('harchoModal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+}
+
+// Закрытие по ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeHarchoModal();
+  }
+});
