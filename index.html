@@ -149,14 +149,20 @@ window.addEventListener('load', loadDoodleAI);
     <!-- Виджет музыки -->
 <div id="musicWidget" class="music-widget"></div>
     <!-- Строка 150 -->
-<div id="musicWidget" class="music-widget"></div>
-
-<!-- ⬇️ ВСТАВИТЬ ВОТ СЮДА ⬇️ -->
-<!-- СУП ХАРЧО МЕМ -->
-<div id="harchoMeme" class="harcho-container" onclick="openHarchoModal()">
-  <img src="assets/harcho-meme.jpg" alt="СУП ХАРЧО" class="harcho-image">
+<div id="musicWidget" class="music-widget">
+  <!-- Виджет музыки -->
+<div id="musicWidget" class="music-widget">
+  <!-- СУП ХАРЧО МЕМ (внутри виджета) -->
+  <div id="harchoMeme" class="harcho-container" onclick="openHarchoModal()">
+    <img src="assets/harcho-meme.jpg" alt="СУП ХАРЧО" class="harcho-image">
+  </div>
+  
+  <h1>🎨 Полотно 10000</h1>
+  <p>Заполнено: <span id="counter">0</span> / 10000</p>
+  <!-- остальные кнопки -->
 </div>
 
+<!-- Popup (отдельно, после виджета) -->
 <div id="harchoModal" class="harcho-modal" onclick="closeHarchoModal(event)">
   <div class="harcho-modal-content" onclick="event.stopPropagation()">
     <button class="harcho-close" onclick="closeHarchoModal()">&times;</button>
@@ -168,7 +174,6 @@ window.addEventListener('load', loadDoodleAI);
     </a>
   </div>
 </div>
-<!-- ⬆️ КОНЕЦ МЕМА ⬆️ -->
 
     <h1>🎨 Полотно 10000</h1>
     <p>Заполнено: <span id="counter">0</span> / 10000</p>
