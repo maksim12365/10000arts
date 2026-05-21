@@ -3490,40 +3490,4 @@ header p {
     font-size: 0.75rem !important;
   }
 }
-
-/* ========== СУП ХАРЧО В ИГРЕ (КОМПАКТНЫЙ) ========== */
-.harcho-game-container {
-  width: 120px;
-  margin: 15px auto;
-  cursor: pointer;
-}
-
-.harcho-game-thumb {
-  width: 100%;
-  max-width: 120px;
-  height: auto;
-  border-radius: 8px;
-  border: 2px solid #ff0040;
-  box-shadow: 0 0 10px rgba(255, 0, 64, 0.5);
-  animation: harchoPulse 2s ease-in-out infinite;
-  display: block;
-}
-
-@keyframes harchoPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-.harcho-game-container:hover {
-  transform: scale(1.05);
-}
-
-/* Адаптив */
-@media (max-width: 600px) {
-  .harcho-game-container {
-    width: 100px;
-  }
-  .harcho-game-thumb {
-    max-width: 100px;
-  }
-}
+  
