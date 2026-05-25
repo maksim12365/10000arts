@@ -6,7 +6,7 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'Полотно',
+  track: 'DILATACAO HIPNOTICA DRAWING 6.0',
   artist: 'DJ MX 2006',
   audioFile: 'https://archive.org/download/dj-mx-2006-dilatacao-hipnotica-drawing-6.0/DJ%20MX%202006%20-%20DILATACAO%20HIPNOTICA%20DRAWING%206.0.mp3',  // Файл в корне!
   week: 6
