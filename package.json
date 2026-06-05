@@ -1,5 +1,7 @@
 {
   "name": "10000arts",
   "version": "1.0.0",
-  "description": "Collaborative art project"
+  "dependencies": {
+    "@vercel/postgres": "^0.8.0"
+  }
 }
