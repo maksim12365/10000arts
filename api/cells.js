@@ -1,44 +1,60 @@
+// /api/cells.js
+import { neon } from '@neondatabase/serverless';
+
 export default async function handler(req, res) {
-  const databaseUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  // Получаем строку подключения из переменных окружения
+  const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
   
-  if (!databaseUrl) {
-    return res.status(500).json({ error: 'No database URL' });
+  if (!connectionString) {
+    return res.status(500).json({ error: 'POSTGRES_URL not set' });
   }
 
   try {
+    // Создаём клиент Neon
+    const sql = neon(connectionString);
+
     if (req.method === 'GET') {
-      // Прямой запрос к PostgreSQL через HTTP
-      const response = await fetch(databaseUrl.replace('postgres://', 'https://') + '/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sql: "SELECT * FROM cells WHERE status = 'active' ORDER BY id ASC"
-        })
-      });
-      
-      const data = await response.json();
-      return res.status(200).json(data.rows || data);
+      // Загрузка ячеек
+      const rows = await sql`
+        SELECT * FROM cells 
+        WHERE status = 'active' 
+        ORDER BY id ASC
+      `;
+      return res.status(200).json(rows);
     }
     
     if (req.method === 'POST') {
       const { x, y, image_data } = req.body;
       
-      const response = await fetch(databaseUrl.replace('postgres://', 'https://') + '/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sql: "INSERT INTO cells (x, y, image_data, status, report_count) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-          params: [x, y, image_data, 'active', 0]
-        })
-      });
+      // Сохранение ячейки
+      const rows = await sql`
+        INSERT INTO cells (x, y, image_data, status, report_count)
+        VALUES (${x}, ${y}, ${image_data}, 'active', 0)
+        RETURNING *
+      `;
+      return res.status(201).json(rows[0]);
+    }
+    
+    if (req.method === 'PATCH') {
+      const { x, y } = req.query;
+      const { report_count } = req.body;
       
-      const data = await response.json();
-      return res.status(201).json(data.rows?.[0] || data);
+      const rows = await sql`
+        UPDATE cells 
+        SET report_count = ${report_count}
+        WHERE x = ${parseInt(x)} AND y = ${parseInt(y)}
+        RETURNING *
+      `;
+      return res.status(200).json(rows[0]);
     }
     
     return res.status(405).json({ error: 'Method not allowed' });
+    
   } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('API Error:', error);
+    return res.status(500).json({ 
+      error: error.message,
+      hint: 'Check POSTGRES_URL and table name'
+    });
   }
 }
