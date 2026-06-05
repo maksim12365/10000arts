@@ -160,17 +160,10 @@ async function saveDrawing() {
   };
   
   try {
-    const path = `/rest/v1/cells?select=*`;
-    const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
-    
-    const response = await fetch(url, {
+    // 🔥 НОВЫЙ ЗАПРОС К NEON
+    const response = await fetch('/api/cells', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Prefer': 'return=representation'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(cellData)
     });
     
@@ -179,7 +172,7 @@ async function saveDrawing() {
       localStorage.setItem('currentUserPosition', JSON.stringify(currentUserPosition));
       
       drawnPixels.add(`${x},${y}`);
-      cellsData[`${x},${y}`] = cellData;
+      cellsData[`${x},${cell.y}`] = cellData;
       
       updateCellVisual(x, y, imageData);
       updateCounter();
@@ -199,7 +192,6 @@ async function saveDrawing() {
     alert('Ошибка соединения: ' + error.message);
   }
 }
-
 // ============================================
 // ВИЗУАЛИЗАЦИЯ ЯЧЕЕК
 // ============================================
@@ -219,15 +211,8 @@ function updateCellVisual(x, y, imageData) {
 // ============================================
 async function loadGridData() {
   try {
-    const path = `/rest/v1/cells?select=*&status=eq.active&order=created_at.asc`;
-    const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    });
+    // 🔥 НОВЫЙ ЗАПРОС К NEON (через наш API)
+    const response = await fetch('/api/cells?status=active&order=created_at.asc');
     
     if (response.ok) {
       const cells = await response.json();
@@ -248,15 +233,7 @@ async function loadGridData() {
 // ============================================
 async function updateCounter() {
   try {
-    const path = `/rest/v1/cells?select=x,y&status=eq.active`;
-    const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    });
+    const response = await fetch('/api/cells?status=active');
     
     if (response.ok) {
       const data = await response.json();
@@ -560,47 +537,32 @@ function showReportModal(x, y) {
   
   if (btnClose) btnClose.onclick = handleClose;
   
-  if (btnReport) {
-    btnReport.onclick = async () => {
-      try {
-        const path = `/rest/v1/cells?select=report_count&x=eq.${x}&y=eq.${y}`;
-        const url = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(path)}`;
+if (btnReport) {
+  btnReport.onclick = async () => {
+    try {
+      // 1. Получаем текущий report_count
+      const response = await fetch(`/api/cells?x=${x}&y=${y}`);
+      const data = await response.json();
+      
+      if (data && data[0]) {
+        const newCount = (data[0].report_count || 0) + 1;
         
-        const response = await fetch(url, {
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
+        // 2. Обновляем через PATCH
+        await fetch(`/api/cells?x=${x}&y=${y}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ report_count: newCount })
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data[0]) {
-            const newCount = (data[0].report_count || 0) + 1;
-            
-            const updatePath = `/rest/v1/cells?x=eq.${x}&y=eq.${y}`;
-            const updateUrl = `${SUPABASE_URL}/api/proxy?path=${encodeURIComponent(updatePath)}`;
-            
-            await fetch(updateUrl, {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-              },
-              body: JSON.stringify({ report_count: newCount })
-            });
-            
-            alert('🚩 Жалоба отправлена!');
-          }
-        }
-      } catch (error) {
-        console.error('Report error:', error);
+        alert('🚩 Жалоба отправлена!');
       }
-      handleClose();
-    };
-  }
-  
+    } catch (error) {
+      console.error('Report error:', error);
+    }
+    handleClose();
+  };
+}
+
   modal.addEventListener('click', (e) => {
     if (e.target === modal) handleClose();
   });
