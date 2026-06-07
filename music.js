@@ -6,9 +6,9 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'Bad',
-  artist: 'Michael Jackson',
-  audioFile: 'https://archive.org/download/michael-jackson-bad-lyrics-online-audio-converter.com/Michael%20Jackson%20Bad%20%28Lyrics%29%20%28online-audio-converter.com%29.mp3',  // Файл в корне!
+  track: 'Спокойная ночь (Инструментал)',
+  artist: 'Виктор Цой',
+  audioFile: 'https://archive.org/download/20260607_20260607_1446/Спокойная-ночь.mp3',  // Файл в корне!
   week: 7
 };
 
