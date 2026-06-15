@@ -6,10 +6,10 @@ let audio = null;
 let isPlaying = false;
 
 const MUSIC_CONFIG = {
-  track: 'Спокойная ночь (Инструментал)',
-  artist: 'Виктор Цой',
-  audioFile: 'https://archive.org/download/20260607_20260607_1446/Спокойная-ночь.mp3',  // Файл в корне!
-  week: 7
+  track: 'Jerk',
+  artist: 'Oliver Tree | Rest in Peace',
+  audioFile: 'https://archive.org/download/oliver-tree-jerk-slowed-reverb_202606/Oliver-Tree-Jerk-_slowed-reverb_.mp3',  // Файл в корне!
+  week: 8
 };
 
 function initMusicWidget() {
